@@ -37,6 +37,7 @@ gem 'win32-window', '~> 0.2.0.pre'
 group :development do
   gem 'capistrano-rvm'
   gem 'capistrano', '~> 3.1'
+  gem 'net-ssh', '2.6.5'
   gem 'sshkit-sudo'
 end
 

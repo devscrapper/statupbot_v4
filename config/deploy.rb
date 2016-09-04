@@ -33,17 +33,16 @@
 # les liens du current vers les relaease
 #---------------------------------------------------------------------------------------------------------------------
 
-lock '3.4.0'
+lock '3.4.1'
 
-set :application, 'statupbot'
-set :version_commerciale, 'v4'
-set :repo_url, "https://github.com/devscrapper/#{fetch(:application)}_#{fetch(:version_commerciale)}.git/"
+set :application, 'statupbot_v4'
+set :repo_url, "https://github.com/devscrapper/#{fetch(:application)}.git/"
 set :github_access_token, '64c0b7864a901bc6a9d7cd851ab5fb431196299e'
 set :default, 'master'
 set :user, 'eric'
 set :pty, true
 set :use_sudo, false
-set :deploy_to, "/home/#{fetch(:user)}/apps/#{fetch(:application)}"
+set :deploy_to, "/home/#{fetch(:user)}/apps/statupbot"
 set :rvm_ruby_version, '2.2.3'
 set :server_list, []
 
