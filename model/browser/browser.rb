@@ -138,6 +138,8 @@ module Browsers
 
           #when "Safari"
           #TODO mettre en oeuvre Safari
+          when "Edge"
+            return Edge.new(Mim::Launcher.tools, browser_details)
 
           when "Opera"
             return Opera.new(Mim::Launcher.tools, browser_details)
