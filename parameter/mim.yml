@@ -10,19 +10,19 @@ development:
 
 test:
   :debugging:  true
-  :install_sahi_dir: ["d:", "Personnel", "sahi_pro_runner_631" ]
+  :install_sahi_dir: ["d:", "sahi_pro_runner_631" ]
   :launcher_runtime_dir: ["d:" , "statupbot", "tmp", "launcher"]
-  :java_runtime_path: ["c:", "Program Files", "Java", "jre6", "bin", "java.exe"]
-  :java_key_tool_path: ["C:", "Program Files", "Java", "jre6", "bin", "keytool.exe"]
+  :java_runtime_path: ["c:", "Program Files", "Java", "jre1.8.0_77", "bin", "java.exe"]
+  :java_key_tool_path: ["C:", "Program Files", "Java", "jre1.8.0_77", "bin", "keytool.exe"]
   :start_page_server_ip: "127.0.0.1"
   :start_page_server_port: 8080
 
 
 production:
   :debugging:  false
-  :install_sahi_dir: ["d:", "Personnel", "sahi_pro_runner_631" ]
+  :install_sahi_dir: ["d:", "sahi_pro_runner_631" ]
   :launcher_runtime_dir: ["d:" , "statupbot", "tmp", "launcher"]
-  :java_runtime_path: ["c:", "Program Files", "Java", "jre6", "bin", "java.exe"]
-  :java_key_tool_path: ["C:", "Program Files", "Java", "jre6", "bin", "keytool.exe"]
+  :java_runtime_path: ["c:", "Program Files", "Java", "jre1.8.0_77", "bin", "java.exe"]
+  :java_key_tool_path: ["C:", "Program Files", "Java", "jre1.8.0_77", "bin", "keytool.exe"]
   :start_page_server_ip: "127.0.0.1"
   :start_page_server_port: 8080

@@ -91,6 +91,7 @@ else
       periodicity_supervision.nil? or
       max_count_current_visit.nil? or
       max_time_to_live_visit.nil? or
+      proxy_ip_list.nil? or
       $debugging.nil? or
       $staging.nil?
     $stderr << "some parameters not define\n" << "\n"

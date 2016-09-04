@@ -42,7 +42,7 @@ set :default, 'master'
 set :user, 'eric'
 set :pty, true
 set :use_sudo, false
-set :deploy_to, "/home/#{fetch(:user)}/apps/statupbot"
+set :deploy_to, "/home/#{fetch(:user)}/apps/#{fetch(:application)}"
 set :rvm_ruby_version, '2.2.3'
 set :server_list, []
 
