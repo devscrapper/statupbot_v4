@@ -133,6 +133,9 @@ module Mim
       launcher_runtime_dir = parameters.launcher_runtime_dir
 
       @@logger.an_event.debug "parameter loaded"
+      @@logger.an_event.debug "install_sahi_dir <#{install_sahi_dir}>"
+      @@logger.an_event.debug "java_runtime_dir <#{java_runtime_dir}>"
+      @@logger.an_event.debug "launcher_runtime_dir <#{launcher_runtime_dir}>"
 
       #-----------------------------------------------------------------------------------------------------------
       # copie le contenu du repertoire d'installation de sahi vers le repertoire d'execution du launcher
