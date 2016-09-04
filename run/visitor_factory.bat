@@ -1,0 +1,1 @@
+..\localpath.cmd        && ruby -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift) D:\Personnel\referentiel\dev\statupbot.v4\run\visitor_factory_server.rb

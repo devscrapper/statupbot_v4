@@ -1,0 +1,9 @@
+/.idea/*
+/archive
+/doc
+/log/
+/test
+/tmp
+/visitors
+/Gemfile.lock
+/parameter/environment.yml

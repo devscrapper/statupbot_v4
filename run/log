@@ -1,0 +1,95 @@
+--------
+SAHI_HOME: d:/Personnel/sahi_pro_runner_browser_local_9999
+SAHI_USERDATA_DIR: d:/Personnel/sahi_pro_runner_browser_local_9999\userdata
+SAHI_EXT_CLASS_PATH: d:/Personnel/sahi_pro_runner_browser_local_9999/extlib/*
+SAHI_CLASS_PATH: d:/Personnel/sahi_pro_runner_browser_local_9999\lib\sahi.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\rhino\js.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\apc\commons-codec-1.3.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\db\h2.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\license\truelicense.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\license\truexml.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\poi\dom4j-1.6.1.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\poi\excelpoi.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\poi\poi-3.7-20101029.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\poi\poi-ooxml-3.7-20101029.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\poi\poi-ooxml-schemas-3.7-20101029.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\poi\xmlbeans-2.3.0.jar;;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\mail\mail.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\mail\activation.jar;;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\c3p0\c3p0-0.9.5-pre5.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\c3p0\mchange-commons-java-0.2.6.2.jar;;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\javassist\javassist.jar;d:/Personnel/sahi_pro_runner_browser_local_9999\extlib\sahi\sahiapplet.jar;;
+--------
+java version "1.6.0_23"
+Java(TM) SE Runtime Environment (build 1.6.0_23-b05)
+Java HotSpot(TM) 64-Bit Server VM (build 19.0-b09, mixed mode)
+Can't load log handler "java.util.logging.FileHandler"
+java.io.IOException: Couldn't get lock for ../logs/sahi%g.log
+java.io.IOException: Couldn't get lock for ../logs/sahi%g.log
+	at java.util.logging.FileHandler.openFiles(Unknown Source)
+	at java.util.logging.FileHandler.<init>(Unknown Source)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+	at java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at java.lang.Class.newInstance0(Unknown Source)
+	at java.lang.Class.newInstance(Unknown Source)
+	at java.util.logging.LogManager$3.run(Unknown Source)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.util.logging.LogManager.loadLoggerHandlers(Unknown Source)
+	at java.util.logging.LogManager.initializeGlobalHandlers(Unknown Source)
+	at java.util.logging.LogManager.access$900(Unknown Source)
+	at java.util.logging.LogManager$RootLogger.getHandlers(Unknown Source)
+	at java.util.logging.Logger.log(Unknown Source)
+	at java.util.logging.Logger.doLog(Unknown Source)
+	at java.util.logging.Logger.log(Unknown Source)
+	at java.util.logging.Logger.info(Unknown Source)
+	at net.sf.sahi.config.Configuration.reinitialize(Configuration.java:162)
+	at net.sf.sahi.config.Configuration.init(Configuration.java:136)
+	at net.sf.sahi.Proxy.main(Unknown Source)
+29 août 2016 16:45:47 net.sf.sahi.config.Configuration reinitialize
+INFO: Sahi properties file = D:\Personnel\sahi_pro_runner_browser_local_9999\config\sahi.properties
+29 août 2016 16:45:47 net.sf.sahi.config.Configuration reinitialize
+INFO: Sahi user properties file = D:\Personnel\sahi_pro_runner_browser_local_9999\userdata\config\userdata.properties
+29 août 2016 16:45:47 net.sf.sahi.Proxy main
+INFO: Added shutdown hook.
+29 août 2016 16:45:49 java.util.logging.LogManager$RootLogger log
+INFO: VALID LICENSE
+---------------
+Your Sahi Pro license will expire in 15 days.
+Please visit http://sahipro.com/ to buy your license.
+---------------
+Sahi Pro Trial License
+Licensed to: Trial User 30 days
+Issued date: 14 août 2016
+Expiry date: 13 sept. 2016
+---------------
+
+>>>> Sahi Pro Runner v6.3.1 started. Listening on port: 9996
+>>>> Configure your browser to use this server and port as its proxy
+29 août 2016 16:45:50 net.sf.sahi.util.BrowserTypesLoader loadAvailableBrowserTypes
+INFO: 
+-----
+Reading browser types from: D:\Personnel\sahi_pro_runner_browser_local_9999\userdata\config\browser_types.xml
+-----
+
+29 août 2016 16:45:50 net.sf.sahi.util.Utils setUrlConnectionFollowRedirectsInternal
+INFO: urlConnectionFollowRedirectsInternal = false
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB <clinit>
+INFO: Using Database:
+driverName=org.h2.Driver
+jdbcurl=jdbc:h2:D:/Personnel/sahi_pro_runner_browser_local_9999/userdata/database/db0;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;IGNORECASE=TRUE
+userName=sa
+Using Connection Pool
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB createTables
+INFO: Check tables version
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB createTables
+INFO: versionFromDB=2016-08-01 13:12:57
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB createTables
+INFO: version=2016-08-01 13:12:57
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB createTables
+INFO: At current version. No changes were done.
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB createTables
+INFO: {result: [["SAHIKEY","SAHIVALUE"],["dbVersion","83"],["versionNo","2016-08-01 13:12:57"]]}
+29 août 2016 16:45:50 in.co.sahi.datastore.SahiDB createTables
+INFO: Finished preparing report tables: 248ms
+29 août 2016 16:58:30 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://www.google.fr/
+29 août 2016 16:58:35 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://play.google.com/log?format=json&u=0
+29 août 2016 16:58:36 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://0.client-channel.google.com/client-channel/channel/cbp?ctype=hangouts&prop=gmail&appver=chat_frontend_20160823.11_p2&gsessionid=mEqSsvOD0NxdzWOy3AjY23pDzoNJTUqy&VER=8&MODE=init&zx=5si79e65zq29&t=1
+29 août 2016 16:58:41 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://www.google.com/images/cleardot.gif?zx=oh1cy4oe1pcy
+29 août 2016 17:01:31 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://play.google.com/log?format=json&u=0
+29 août 2016 17:04:32 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://0.client-channel.google.com/client-channel/gsid
+29 août 2016 17:04:32 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://0.client-channel.google.com/client-channel/channel/cbp?ctype=hangouts&prop=gmail&appver=chat_frontend_20160823.11_p2&gsessionid=mEqSsvOD0NxdzWOy3AjY23pDzoNJTUqy&VER=8&MODE=init&zx=l7ejhyv01zyu&t=1
+29 août 2016 17:04:34 net.sf.sahi.RemoteRequestProcessor processHttp
+ATTENTION: Returning CannotConnectResponse for: https://www.google.com/images/cleardot.gif?zx=g5opyygpu154

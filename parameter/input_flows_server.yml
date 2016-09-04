@@ -1,0 +1,22 @@
+
+development:
+  :listening_port: 9201
+  :periodicity_supervision: 15m  #(minute)
+  :debugging:  true
+
+
+test:
+  :listening_port: 9201
+  :periodicity_supervision: 15m  #(minute)
+  :debugging:  false
+  :archive: ["d:", "statupbot", "archive"]
+  :log: ["d:", "statupbot", "log"]
+  :tmp: ["d:", "statupbot", "tmp"]
+
+production:
+  :listening_port: 9201
+  :periodicity_supervision: 15m  #(minute)
+  :debugging:  false
+  :archive: ["d:", "statupbot", "archive"]
+  :log: ["d:", "statupbot", "log"]
+  :tmp: ["d:", "statupbot", "tmp"]

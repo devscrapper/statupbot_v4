@@ -1,0 +1,11 @@
+development:
+  :delay_periodic_load_geolocations: 60 #en minute
+  :debugging:  true
+
+test:
+  :delay_periodic_load_geolocations: 60 #en minute
+  :debugging:  true
+
+production:
+  :delay_periodic_load_geolocations: 60 #en minute
+  :debugging:  false

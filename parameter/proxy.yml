@@ -1,0 +1,14 @@
+development:
+  :saas_host: 127.0.0.1
+  :saas_port: 9254
+  :debugging:  true
+
+test:
+  :saas_host: 192.168.1.88
+  :saas_port: 9254
+  :debugging:  true
+
+production:
+  :saas_host: 192.168.1.88
+  :saas_port: 9254
+  :debugging:  false

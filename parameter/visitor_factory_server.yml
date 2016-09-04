@@ -1,0 +1,46 @@
+development:
+  :runtime_ruby: ["d:","personnel" ,"ruby223", "bin", "ruby.exe"]
+  :delay_periodic_scan: 60 #en seconde
+  :delay_periodic_pool_size_monitor: 1 #en minute
+  :delay_periodic_load_geolocations: 60 #en minute
+  :delay_out_of_time: 15 # en minute, delais max d'une visit depasse par rapport a son heure de demarrage, si =0 alors les visits ne sont jamais out of time
+  :periodicity_supervision: 15m  #(minute)
+  :max_count_current_visit: 5
+  :max_time_to_live_visit: 15 #en minute
+  :debugging:  true
+  :install_sahi_dir: ["d:", "Personnel", "sahi_pro_runner_browser_local_9999" ]
+  :proxy_ip_list: ["localhost"]
+
+test:
+  :runtime_ruby: ["d:", "ruby223", "bin", "ruby.exe"]
+  :delay_periodic_scan: 60  #en seconde
+  :delay_periodic_pool_size_monitor: 5 #en minute
+  :delay_periodic_load_geolocations: 60 #en minute
+  :delay_out_of_time: 0 # en minute, delais max d'une visit depasse par rapport a son heure de demarrage, si =0 alors les visits ne sont jamais out of time
+  :periodicity_supervision: 15m  #(minute)
+  :max_count_current_visit: 4
+  :max_time_to_live_visit: 45 #en minute
+  :debugging:  true
+  :archive: ["d:", "statupbot", "archive"]
+  :log: ["d:", "statupbot", "log"]
+  :tmp: ["d:", "statupbot", "tmp"]
+  :visitors: ["d:", "statupbot", "visitors"]
+  :install_sahi_dir: ["d:", "Personnel", "sahi_pro_runner_631" ]
+  :proxy_ip_list: ["localhost"]
+
+production:
+  :runtime_ruby: ["d:", "ruby223", "bin", "ruby.exe"]
+  :delay_periodic_scan: 60
+  :delay_periodic_pool_size_monitor: 5 #en minute
+  :delay_periodic_load_geolocations: 60 #en minute
+  :delay_out_of_time: 15 # en minute, delais max d'une visit depasse par rapport a son heure de demarrage, si =0 alors les visits ne sont jamais out of time
+  :periodicity_supervision: 15m  #(minute)
+  :max_count_current_visit: 1
+  :max_time_to_live_visit: 15 #en minute
+  :debugging:  false
+  :archive: ["d:", "statupbot", "archive"]
+  :log: ["d:", "statupbot", "log"]
+  :tmp: ["d:", "statupbot", "tmp"]
+  :visitors: ["d:", "statupbot", "visitors"]
+  :install_sahi_dir: ["d:", "Personnel", "sahi_pro_runner_631" ]
+  :proxy_ip_list: ["localhost"]
