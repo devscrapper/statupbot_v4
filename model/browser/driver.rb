@@ -406,7 +406,7 @@ module Sahi
 
       require 'csv'
       #TODO remplacer tasklist par ps pour linux
-      res = IO.popen('tasklist /V /FI "PID eq #{@browser_pid}" /FO CSV /NH').read
+      res = IO.popen('tasklist /V /FI "PID eq ' + @browser_pid + '" /FO CSV /NH').read
 
       @@logger.an_event.debug "tasklist for #{@browser_pid} : #{res}"
 
