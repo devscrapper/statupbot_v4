@@ -73,27 +73,9 @@ module Sahi
 
     def check_proxy_local
       begin
-        response("http://localhost:9999/_s_/spr/blank.htm")
+          response("http://localhost:9999/_s_/spr/blank.htm")
       rescue
         raise "Sahi proxy is not available. Please start the Sahi proxy."
-      end
-    end
-
-    def exec_command_local(cmd, qs={})
-      res = response("http://localhost:9999/_s_/dyn/Driver_" + cmd, {"sahisid" => @sahisid}.update(qs))
-      return res.force_encoding("UTF-8")
-    end
-
-    #
-    def quit
-      begin
-        exec_command_local("kill") # kill piloté par SAHI proxy
-
-      rescue Exception => e
-        raise Error.new(CLOSE_DRIVER_TIMEOUT, :error => e)
-
-      else
-
       end
     end
 
@@ -118,12 +100,38 @@ module Sahi
       fetch("window.location.href")
     end
 
-
     def display_start_page (url, window_parameters)
 
       fetch("window.open(\"#{url}\", \"_self\", \"#{window_parameters}\")")
 
     end
+
+    def domain(name)
+      win = Browser.new(@browser_type, @proxy_port)
+
+      win.proxy_host = @proxy_host
+      win.proxy_port = @proxy_port
+      win.sahisid = @sahisid
+      win.print_steps = @print_steps
+      win.popup_name = @popup_name
+      win.domain_name = name
+      win
+    end
+
+    def domain_exist?
+      windows = get_windows
+      exist = false
+      windows.each { |win| exist = exist || (win["domain"] == @domain_name) }
+      exist
+    end
+
+
+    #
+    def exec_command_local(cmd, qs={})
+      res = response("http://localhost:9999/_s_/dyn/Driver_" + cmd, {"sahisid" => @sahisid}.update(qs))
+      return res.force_encoding("UTF-8")
+    end
+
 
     # evaluates a javascript expression on the browser and fetches its value
     def fetch(expression)
@@ -145,25 +153,6 @@ module Sahi
         end
       }
       popup
-    end
-
-    def domain(name)
-      win = Browser.new(@browser_type, @proxy_port)
-
-      win.proxy_host = @proxy_host
-      win.proxy_port = @proxy_port
-      win.sahisid = @sahisid
-      win.print_steps = @print_steps
-      win.popup_name = @popup_name
-      win.domain_name = name
-      win
-    end
-
-    def domain_exist?
-      windows = get_windows
-      exist = false
-      windows.each { |win| exist = exist || (win["domain"] == @domain_name) }
-      exist
     end
 
 
@@ -263,6 +252,12 @@ module Sahi
 
     end
 
+    def new_popup_is_open? (url)
+      windows = get_windows
+      exist = false
+      windows.each { |win| exist = exist || (win["wasOpened"] == "1" && win["windowURL"] != url) }
+      exist
+    end
 
     #-----------------------------------------------------------------------------------------------------------------
     # open
@@ -281,7 +276,9 @@ module Sahi
       try_count = 3
       begin
 
-        check_proxy_local
+        wait(60) {
+          check_proxy_local
+        }
 
       rescue Exception => e
         try_count -= 1
@@ -299,8 +296,9 @@ module Sahi
 
       try_count = 3
       begin
-
-        check_proxy
+        wait(60) {
+          check_proxy
+        }
 
       rescue Exception => e
         try_count -= 1
@@ -325,7 +323,7 @@ module Sahi
         @@logger.an_event.debug "param #{param}"
 
         exec_command_local("launchPreconfiguredBrowser", param)
-        #exec_command("launchPreconfiguredBrowser", param)
+          #exec_command("launchPreconfiguredBrowser", param)
 
       rescue Exception => e
         @@logger.an_event.error "launchPreconfiguredBrowser : #{e.message}"
@@ -379,12 +377,18 @@ module Sahi
       win
     end
 
-    def new_popup_is_open? (url)
-      windows = get_windows
-      exist = false
-      windows.each { |win| exist = exist || (win["wasOpened"] == "1" && win["windowURL"] != url) }
-      exist
+    def quit
+      begin
+        exec_command_local("kill") # kill piloté par SAHI proxy
+
+      rescue Exception => e
+        raise Error.new(CLOSE_DRIVER_TIMEOUT, :error => e)
+
+      else
+
+      end
     end
+
 
     def reload
       fetch("location.reload(true)")
@@ -396,6 +400,23 @@ module Sahi
                                                         height)
       Window.from_handle(@browser_window_handle).move(0,
                                                       0)
+    end
+
+    def running?
+
+      require 'csv'
+      #TODO remplacer tasklist par ps pour linux
+      res = IO.popen('tasklist /V /FI "PID eq #{@browser_pid}" /FO CSV /NH').read
+
+      @@logger.an_event.debug "tasklist for #{@browser_pid} : #{res}"
+
+      CSV.parse(res) do |row|
+        return true if row[1].include?(@browser_pid.to_s)
+      end
+
+      false
+
+
     end
 
     def take_screenshot(to_absolute_path)
@@ -432,6 +453,8 @@ module Sahi
 
 
     private
+
+
     def get_pid_browser
       # retourn le pid du browser ; au cas où Sahi n'arrive pas à le tuer.
       count_try = 3

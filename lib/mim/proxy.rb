@@ -109,6 +109,12 @@ module Mim
           FileUtils.cp_r(File.join(File.dirname(__FILE__), 'user_extensions.js'), File.join(@userdata, 'config'))
 
           #-----------------------------------------------------------------------------------------------------------
+          # copie 5xx.htm qui contient le message d'erreur 5xx http dans
+          # /visitors/visitor_id/htdocs/spr
+          #-----------------------------------------------------------------------------------------------------------
+          FileUtils.cp_r(File.join(File.dirname(__FILE__), '5xx.htm'), File.join(@visitor_dir, 'htdocs', 'spr'))
+
+          #-----------------------------------------------------------------------------------------------------------
           # maj dans /visitors\visitor_id/userdata/config.userdata.properties
           #-----------------------------------------------------------------------------------------------------------
           userdata = DotProperties.load(File.join(@userdata, 'config', "userdata.properties"))
