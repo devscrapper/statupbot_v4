@@ -550,6 +550,7 @@ module Visitors
       #--------------------------------------------------------------------------------------------------------
       # read Page
       #--------------------------------------------------------------------------------------------------------
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Unmanage.new(@visit.advertising.advertiser.next_duration,
@@ -612,6 +613,7 @@ module Visitors
       #--------------------------------------------------------------------------------------------------------
       # read Page
       #--------------------------------------------------------------------------------------------------------
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Website.new(@visit, @browser)
@@ -751,6 +753,7 @@ module Visitors
       #--------------------------------------------------------------------------------------------------------
       # read Page
       #--------------------------------------------------------------------------------------------------------
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Unmanage.new(@visit.referrer.search_duration,
@@ -932,6 +935,7 @@ module Visitors
 
       end
 
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Results.new(@visit,
@@ -989,6 +993,7 @@ module Visitors
 
       end
 
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Results.new(@visit,
@@ -1048,6 +1053,7 @@ module Visitors
 
       end
 
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Unmanage.new(visit.referrer.duration, @browser)
@@ -1130,6 +1136,7 @@ module Visitors
 
       end
 
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
         # @current_page = @history[@history.size - 2][1].
         # on ne reutitilise pas la page dan sl'history car cela permet de prendre en compte des changement qui
@@ -1244,7 +1251,7 @@ module Visitors
 
       end
 
-
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::EngineSearch.new(@visit,
@@ -1304,7 +1311,7 @@ module Visitors
 
       end
 
-
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::EngineSearch.new(@visit,
@@ -1534,6 +1541,7 @@ module Visitors
 
       end
 
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
 
         @current_page = Pages::Results.new(@visit,
