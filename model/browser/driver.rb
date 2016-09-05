@@ -75,7 +75,7 @@ module Sahi
       begin
           response("http://localhost:9999/_s_/spr/blank.htm")
       rescue
-        raise "Sahi proxy is not available. Please start the Sahi proxy."
+        raise "Sahi proxy local is not available."
       end
     end
 
