@@ -206,14 +206,6 @@ module Mim
         @pid = nil
         @@logger.an_event.debug "taskkill for java.exe : <#{res}>"
 
-        #-----------------------------------------------------------------------------------------------------------
-        # supprime dir /visitors/visitor_id
-        #-----------------------------------------------------------------------------------------------------------
-        wait(10) {
-          FileUtils.rm_r(File.join(@visitor_dir)) if File.exist?(File.join(@visitor_dir))
-        }
-        @@logger.an_event.debug "delete dir visitor_id <#{@visitor_dir}>"
-
       rescue Exception => e
         @@logger.an_event.error "proxy stopped on machine #{@listening_ip_proxy} on port #{@listening_port_proxy} : #{e.message}"
         raise "proxy not stop : #{e.message}"

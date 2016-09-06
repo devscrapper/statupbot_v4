@@ -426,22 +426,20 @@ module Visitors
     def inhume
 
       begin
-
-        try_count = 3
-
-        @proxy.delete_config
-        FileUtils.rm_r(@home) if File.exist?(@home)
+        #-----------------------------------------------------------------------------------------------------------
+        # supprime dir /visitors/visitor_id
+        #-----------------------------------------------------------------------------------------------------------
+        wait(10) {
+          FileUtils.rm_r(File.join(@home)) if File.exist?(File.join(@home))
+        }
+        @@logger.an_event.debug "delete dir visitor_id <#{@home}>"
 
       rescue Exception => e
-        @@logger.an_event.warn "visitor inhume, try #{try_count}"
-        sleep (1)
-        try_count -=1
-        retry if try_count > 0
         @@logger.an_event.error "visitor  inhume : #{e.message}"
         raise Error.new(VISITOR_NOT_INHUME, :error => e)
+
       else
         @@logger.an_event.info "visitor  inhume"
-      ensure
 
       end
     end
@@ -1590,6 +1588,26 @@ module Visitors
     #-----------------------------------------------------------------------------------------------------------------
     def take_screenshot(index, action)
       @browser.take_screenshot(Flow.new(@home, index.to_s, action, Date.today, nil, ".png"))
+    end
+    def wait(timeout)
+      total = 0;
+      interval = 0.2;
+
+      if !block_given?
+        sleep(timeout)
+        return
+      end
+
+      while (total < timeout)
+        sleep(interval);
+        total += interval;
+        begin
+          return if yield
+        rescue Exception=>e
+          @@logger.an_event.error e.message
+
+        end
+      end
     end
   end
 end

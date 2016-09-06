@@ -73,7 +73,7 @@ module Sahi
 
     def check_proxy_local
       begin
-          response("http://localhost:9999/_s_/spr/blank.htm")
+        response("http://localhost:9999/_s_/spr/blank.htm")
       rescue
         raise "Sahi proxy local is not available."
       end
@@ -334,14 +334,18 @@ module Sahi
 
       end
 
+              #modifie le titre de la fenetre pour rechercher le pid du navigateur
+        execute_step("window.document.title =" + Utils.quoted(@sahisid.to_s))
+        @@logger.an_event.debug "set windows title browser #{@browser_type} with #{@sahisid.to_s}"
+        get_pid_browser
+        get_handle_window_browser
+
+=begin
       count_try = 3
       begin
-        i = 0
-        while (i < 50 and !is_ready?)
-          i+=1
-          # break if
-          sleep(1)
-        end
+        wait(60) {
+          is_ready?
+        }
 
         raise "browser type not ready" unless is_ready?
 
@@ -362,6 +366,7 @@ module Sahi
       ensure
 
       end
+=end
     end
 
     # represents a popup window. The name is either the window name or its title.
@@ -411,9 +416,16 @@ module Sahi
       @@logger.an_event.debug "tasklist for #{@browser_pid.to_s} : #{res}"
 
       CSV.parse(res) do |row|
-        return true if row[1].include?(@browser_pid.to_s)
-      end
+        if row[1].nil?
+          # res == Informationÿ: aucune tƒche en service ne correspond aux critŠres sp‚cifi‚s.
+          # donc le pid n'existe plus => le browser nest plus running
+          return false
+        else
+          return true if row[1].include?(@browser_pid.to_s)
 
+        end
+      end
+      #ne doit jamais arriver ici
       false
 
 
