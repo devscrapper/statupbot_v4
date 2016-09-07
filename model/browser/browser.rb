@@ -14,9 +14,8 @@ require_relative '../page/page'
 require_relative '../../lib/error'
 require_relative '../../lib/flow'
 #bilbiothèque interface avec sahi :
-require_relative '../../lib/mim/browser_type' #gestion des browser type
-require_relative '../../lib/mim/launcher' #gestion du lancement des browsers
-#require_relative '../../lib/mim/proxy'  #gestion du proxy
+require_relative '../mim/browser_type' #gestion des browser type
+
 
 module Browsers
   class Browser
@@ -114,12 +113,14 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     #         #Les navigateurs disponibles sont definis dans le fichier d:\sahi\userdata\config\browser_types.xml
     #----------------------------------------------------------------------------------------------------------------
-    def self.build(browser_details)
+    def self.build(visitor_dir, browser_details)
       @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
+      @@logger.an_event.debug "visitor_dir #{visitor_dir}"
       @@logger.an_event.debug "browser_details #{browser_details}"
 
       begin
+        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details.nil? or \
         browser_details[:name].nil? or \
         browser_details[:name] == ""
@@ -128,21 +129,21 @@ module Browsers
         # le browser name doit rester une chaine de car (et pas un symbol) car tout le param BrowserType utilise le format chaine de caractere
         case browser_name
           when "Firefox"
-            return Firefox.new(Mim::Launcher.profiles_ff, browser_details)
+            return Firefox.new(visitor_dir, browser_details)
 
           when "Internet Explorer"
-            return InternetExplorer.new(Mim::Launcher.tools, browser_details)
+            return InternetExplorer.new(visitor_dir, browser_details)
 
           when "Chrome"
-            return Chrome.new(browser_details)
+            return Chrome.new(visitor_dir, browser_details)
 
           #when "Safari"
           #TODO mettre en oeuvre Safari
           when "Edge"
-            return Edge.new(Mim::Launcher.tools, browser_details)
+            return Edge.new(visitor_dir, browser_details)
 
           when "Opera"
-            return Opera.new(Mim::Launcher.tools, browser_details)
+            return Opera.new(visitor_dir, browser_details)
 
           else
             raise Error.new(BROWSER_UNKNOWN, :values => {:browser => browser_name})
@@ -623,7 +624,7 @@ module Browsers
     #-----------------------------------------------------------------------------------------------------------------
     #
     #-----------------------------------------------------------------------------------------------------------------
-    def initialize(browser_details, browser_type, method_start_page)
+    def initialize(visitor_dir, browser_details, browser_type, method_start_page)
 
 
       begin
@@ -641,15 +642,14 @@ module Browsers
         @listening_ip_proxy = browser_details[:listening_ip_proxy]
         @width, @height = browser_details[:screen_resolution].split(/x/)
 
-        Mim::Launcher.known?(browser_type)
+        BrowserTypes.exist?([visitor_dir, "userdata", "config"], browser_type)
 
         @engine_search = EngineSearch.build(browser_details[:engine_search])
 
         @driver = Sahi::Browser.new(browser_type,
-                                    Mim::Launcher.process_name(browser_type),
+                                    BrowserTypes.process_name([visitor_dir, "userdata", "config"], browser_type),
                                     @listening_ip_proxy,
                                     @listening_port_proxy)
-
 
 
       rescue Exception => e

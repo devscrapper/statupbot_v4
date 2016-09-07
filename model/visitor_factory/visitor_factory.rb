@@ -295,6 +295,7 @@ class VisitorFactory
     ensure
       @@logger.an_event.info "stop visitor_bot with browser #{details[:pattern]} and visit file #{details[:visit_file]}"
       #TODO remplacer taskkill par kill pour linux
+      #TODO tester que le pid existe
       # kill du process qui contient ruby.exe, parfois il n'est pas tuer par windows qd visitor_bot s'arrete, prkoi ????
       # par sécurité => nettoyage.
       res = IO.popen("taskkill /PID #{visitor_bot_pid} /T /F").read

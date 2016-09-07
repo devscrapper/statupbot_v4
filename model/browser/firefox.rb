@@ -1,4 +1,3 @@
-
 require_relative '../../lib/error'
 module Browsers
   class Firefox < Browser
@@ -19,7 +18,7 @@ module Browsers
     #["browser_version", "16.0"]
     #["operating_system", "Windows"]
     #["operating_system_version", "7"]
-    def initialize(profiles_dir, browser_details)
+    def initialize(visitor_dir, browser_details)
       @@logger.an_event.debug "name #{browser_details[:name]}"
       @@logger.an_event.debug "version #{browser_details[:version]}"
 
@@ -27,12 +26,12 @@ module Browsers
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details[:name].nil? or browser_details[:name] == ""
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser version"}) if browser_details[:version].nil? or browser_details[:version] == ""
 
-        super(browser_details,
+        super(visitor_dir,
+              browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}_#{browser_details[:listening_ip_proxy]}_#{browser_details[:listening_port_proxy]}",
               DATA_URI)
 
 
-        customize_properties (profiles_dir)
       rescue Exception => e
         @@logger.an_event.error "#{name} initialize : #{e.message}"
         raise e
@@ -44,34 +43,7 @@ module Browsers
       end
     end
 
-    def customize_properties(profiles_dir)
-      @@logger.an_event.debug "profiles_dir #{profiles_dir}"
 
-      begin
-
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "profiles_dir"}) if profiles_dir.nil? or profiles_dir == ""
-
-        # userdata\proxy\config\ff_profile_template\prefs.js :
-        # le port d'ecoute du proxy pour firefox
-        prefs_js = File.join(profiles_dir + ["sahi_#{@listening_ip_proxy}_#{@listening_port_proxy}", "prefs.js"])
-        FileUtils.cp_r(File.join([File.dirname(__FILE__), "..", "..", "lib","mim", "prefs.js."]), prefs_js)
-
-        file_custom = File.read(prefs_js)
-        file_custom.gsub!(/listening_ip_proxy/, @listening_ip_proxy.to_s)
-        file_custom.gsub!(/listening_port_proxy/, @listening_port_proxy.to_s)
-        File.write(prefs_js, file_custom)
-
-      rescue Exception => e
-        @@logger.an_event.error "#{name} customize config file proxy sahi : #{e.message}"
-        raise Error.new(BROWSER_NOT_CUSTOM_FILE, :values => {:browser => name}, :error => e)
-
-      else
-        @@logger.an_event.debug "#{name} customize config file proxy sahi"
-
-      ensure
-
-      end
-    end
 
     #----------------------------------------------------------------------------------------------------------------
     # display_start_page

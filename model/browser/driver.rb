@@ -273,26 +273,6 @@ module Sahi
     #
     #-----------------------------------------------------------------------------------------------------------------
     def open
-      try_count = 3
-      begin
-
-        wait(60) {
-          check_proxy_local
-        }
-
-      rescue Exception => e
-        try_count -= 1
-        @@logger.an_event.debug "check proxy local launcher browser, try #{try_count} : #{e.message}"
-        sleep(3)
-        retry if try_count > 0
-
-        @@logger.an_event.error "check proxy local launcher browser : #{e.message}"
-        raise Error.new(SAHI_PROXY_NOT_FOUND, :values => {:where => "local launcher"}, :error => e)
-
-      else
-        @@logger.an_event.debug "check proxy local launcher browser"
-
-      end
 
       try_count = 3
       begin
@@ -302,15 +282,15 @@ module Sahi
 
       rescue Exception => e
         try_count -= 1
-        @@logger.an_event.debug "check proxy remote #{@proxy_host}:#{@proxy_port}, try #{try_count} : #{e.message}"
+        @@logger.an_event.debug "check proxy #{@proxy_host}:#{@proxy_port}, try #{try_count} : #{e.message}"
         sleep(3)
         retry if try_count > 0
 
-        @@logger.an_event.error "check proxy remote #{@proxy_host}:#{@proxy_port}: #{e.message}"
+        @@logger.an_event.error "check proxy  #{@proxy_host}:#{@proxy_port}: #{e.message}"
         raise Error.new(SAHI_PROXY_NOT_FOUND, :values => {:where => "remote"}, :error => e)
 
       else
-        @@logger.an_event.debug "check proxy remote #{@proxy_host}:#{@proxy_port}"
+        @@logger.an_event.debug "check proxy #{@proxy_host}:#{@proxy_port}"
 
       end
 
@@ -322,8 +302,7 @@ module Sahi
 
         @@logger.an_event.debug "param #{param}"
 
-        exec_command_local("launchPreconfiguredBrowser", param)
-          #exec_command("launchPreconfiguredBrowser", param)
+        exec_command("launchPreconfiguredBrowser", param)
 
       rescue Exception => e
         @@logger.an_event.error "launchPreconfiguredBrowser : #{e.message}"
@@ -334,13 +313,6 @@ module Sahi
 
       end
 
-              #modifie le titre de la fenetre pour rechercher le pid du navigateur
-        execute_step("window.document.title =" + Utils.quoted(@sahisid.to_s))
-        @@logger.an_event.debug "set windows title browser #{@browser_type} with #{@sahisid.to_s}"
-        get_pid_browser
-        get_handle_window_browser
-
-=begin
       count_try = 3
       begin
         wait(60) {
@@ -366,7 +338,6 @@ module Sahi
       ensure
 
       end
-=end
     end
 
     # represents a popup window. The name is either the window name or its title.

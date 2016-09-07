@@ -20,25 +20,21 @@ module Browsers
     #["browser_version", "16.0"]
     #["operating_system", "Windows"]
     #["operating_system_version", "7"]
-    def initialize(tools_dir, browser_details)
+    def initialize(visitor_dir, browser_details)
       @@logger.an_event.debug "name #{browser_details[:name]}"
       @@logger.an_event.debug "version #{browser_details[:version]}"
-      @@logger.an_event.debug "proxy system #{browser_details[:proxy_system]}"
-      @@logger.an_event.debug "tools_dir #{tools_dir}"
+      @@logger.an_event.debug "visitor_dir #{visitor_dir}"
 
       begin
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details[:name].nil? or browser_details[:name] == ""
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser version"}) if browser_details[:version].nil? or browser_details[:version] == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "tools_dir"}) if tools_dir.nil? or tools_dir == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "proxy_system"}) if browser_details[:proxy_system].nil? or browser_details[:proxy_system] == ""
+        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
 
 
-        super(browser_details,
-              "#{browser_details[:name].gsub(" ", "_")}_#{browser_details[:version]}" + (browser_details[:proxy_system] ? "" : "_#{@listening_port_proxy}"),
+        super(visitor_dir,
+              browser_details,
+              "#{browser_details[:name].gsub(" ", "_")}_#{browser_details[:version]}",
               DATA_URI)
-
-
-        customize_properties (tools_dir)
 
       rescue Exception => e
         @@logger.an_event.error "internet explorer #{@version} initialize : #{e.message}"
@@ -52,32 +48,7 @@ module Browsers
       end
     end
 
-    def customize_properties(tools_dir)
-      @@logger.an_event.debug "tools_dir #{tools_dir}"
 
-      begin
-
-        # \tools\proxy.properties :
-        # le port d'ecoute du proxy pour internet explorer
-        proxy_properties = File.join(tools_dir , 'proxy.properties')
-        FileUtils.cp_r(File.join([File.dirname(__FILE__), "..", "..", "lib","mim", "proxy.properties"]), proxy_properties)
-
-        file_custom = File.read(proxy_properties)
-        file_custom.gsub!(/listening_ip_proxy/, @listening_ip_proxy.to_s)
-        file_custom.gsub!(/listening_port_proxy/, @listening_port_proxy.to_s)
-        File.write(proxy_properties, file_custom)
-
-      rescue Exception => e
-        @@logger.an_event.error "internet explorer #{@version} customize config file proxy sahi : #{e.message}"
-        raise Error.new(BROWSER_NOT_CUSTOM_FILE, :values => {:browser => name}, :error => e)
-
-      else
-        @@logger.an_event.debug "internet explorer #{@version} customize config file proxy sahi"
-
-      ensure
-
-      end
-    end
 
     #----------------------------------------------------------------------------------------------------------------
     # display_start_page

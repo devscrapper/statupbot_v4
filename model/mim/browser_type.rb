@@ -1,5 +1,5 @@
-require_relative '../error'
-require_relative '../os'
+require_relative '../../lib/error'
+require_relative '../../lib/os'
 require 'yaml'
 
 module Mim
@@ -79,7 +79,7 @@ module Mim
     def self.exist?(browser_types_dir, browser_type)
 
       raise Error.new(BROWSER_TYPE_NOT_DEFINE,
-                      :values => {:path => browser_types_dir + BROWSER_TYPE_FILE_XML}) unless File.exist?(File.join(browser_types_dir + BROWSER_TYPE_FILE_XML))
+                      :values => {:path => browser_types_dir + BROWSER_TYPE_FILE_XML}) unless File.exist?(File.join(browser_types_dir, BROWSER_TYPE_FILE_XML))
 
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
@@ -231,7 +231,6 @@ module Mim
         _end_of_xml_
         data
 
-        #remplace les 4 fichiers
         f = File.new(File.join(browser_types_dir + BROWSER_TYPE_FILE_XML), "w+")
         f.write(data)
         f.close
@@ -325,7 +324,7 @@ module Mim
               raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
             end
             path = details["runtime_path"]
-            options = "-profile \"$userDir/browser/ff/profiles/sahi_#{ip}_#{port}\" -no-remote "
+            options = "-profile \"$userDir/browser/ff/profiles\" -no-remote "
             process_name = "firefox.exe"
 
             res += browser_type(name, display_name, icon, path, options, process_name, use_system_proxy)
@@ -349,7 +348,7 @@ module Mim
               raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
             end
             path = details["runtime_path"]
-            options = "--user-data-dir=$userDir\\browser\\chrome\\profiles\\sahi_#{port}
+            options = "--user-data-dir=$userDir\\browser\\chrome\\profiles
                 --proxy-server=#{ip}:#{port} --disable-popup-blocking --always-authorize-plugins --allow-outdated-plugins --incognito"
             process_name = "chrome.exe"
 

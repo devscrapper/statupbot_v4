@@ -19,7 +19,7 @@ module Browsers
     #["browser_version", "16.0"]
     #["operating_system", "Windows"]
     #["operating_system_version", "7"]
-    def initialize(browser_details)
+    def initialize(visitor_dir,browser_details)
       @@logger.an_event.debug "name #{browser_details[:name]}"
       @@logger.an_event.debug "version #{browser_details[:version]}"
 
@@ -30,7 +30,8 @@ module Browsers
 
 
 
-        super(browser_details,
+        super(visitor_dir,
+              browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}_#{browser_details[:listening_ip_proxy]}_#{browser_details[:listening_port_proxy]}",
               NO_REFERER)
       rescue Exception => e

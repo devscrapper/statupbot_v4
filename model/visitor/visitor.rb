@@ -5,7 +5,7 @@ require_relative '../visit/referrer/referrer'
 require_relative '../visit/advertising/advertising'
 require_relative '../../lib/monitoring'
 require_relative '../../lib/error'
-require_relative '../../lib/mim/proxy'
+require_relative '../../model/mim/proxy'
 require 'pathname'
 
 module Visitors
@@ -197,7 +197,8 @@ module Visitors
         # configure Browser
         #
         #------------------------------------------------------------------------------------------------------------
-        @browser = Browsers::Browser.build(visitor_details[:browser])
+        @browser = Browsers::Browser.build(@home,
+                                           visitor_details[:browser])
 
       rescue Exception => e
         @@logger.an_event.error "visitor create runtime directory, config proxy Sahi and browser : #{e.message}"

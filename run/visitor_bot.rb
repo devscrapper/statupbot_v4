@@ -59,7 +59,6 @@ Usage:
 where [options] are:
   EOS
   opt :visit_file_name, "Path and name of visit file to browse", :type => :string
-  opt :proxy_system, "browser use proxy system of windows (yes/no)", :type => :string, :default => "no"
   opt :listening_ip_sahi_proxy, "Listening ip of Sahi proxy", :type => :string, :default => "localhost"
   opt :listening_port_sahi_proxy, "Listening port of Sahi proxy", :type => :integer, :default => 9999
   opt :proxy_type, "Type of geolocation proxy use (none|http|https|socks)", :type => :string, :default => "none"
@@ -182,7 +181,6 @@ def visitor_execute_visit(opts, logger)
         #---------------------------------------------------------------------------------------------------------------------
         # Creation du visitor
         #---------------------------------------------------------------------------------------------------------------------
-        visitor_details[:browser][:proxy_system] = opts[:proxy_system] == "yes"
         visitor_details[:browser][:listening_ip_proxy] = opts[:listening_ip_sahi_proxy]
         visitor_details[:browser][:listening_port_proxy] = opts[:listening_port_sahi_proxy]
         visitor_details[:browser][:proxy_ip] = opts[:proxy_ip]
