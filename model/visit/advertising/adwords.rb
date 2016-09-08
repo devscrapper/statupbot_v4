@@ -53,7 +53,7 @@ module Visits
           @@logger.an_event.debug "link : #{link}"
 
         rescue Exception => e
-          @@logger.an_event.error e.message
+          @@logger.an_event.error "advertising #{self.class.name} found  : #{e.message}"
           raise Error.new(ADVERTISING_NOT_FOUND, :error => e, :values => {:advertising => self.class.name})
 
         else

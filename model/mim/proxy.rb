@@ -24,9 +24,9 @@ module Mim
 
 
     attr :pid,
-         :listening_port_proxy, #port d'écoute de Sahi_proxy
-         :listening_ip_proxy, #ip d'écoute de Sahi_proxy
-         :user_home, # répertoire de config du visitor (user)
+         :listening_port_proxy, #port d'ï¿½coute de Sahi_proxy
+         :listening_ip_proxy, #ip d'ï¿½coute de Sahi_proxy
+         :user_home, # rï¿½pertoire de config du visitor (user)
          :ip_geo_proxy,
          :port_geo_proxy,
          :user_geo_proxy,
@@ -38,7 +38,7 @@ module Mim
          :start_page_server_ip
 
 
-# controle que l'instance lancée est active.
+# controle que l'instance lancï¿½e est active.
 # utilise le pid
     def running?
       require 'csv'
@@ -83,7 +83,7 @@ module Mim
       @userdata = File.join(@visitor_dir, 'userdata')
       @@logger.an_event.debug "userdata #{@userdata}"
 
-      #charge les paramètres
+      #charge les paramï¿½tres
       parameters = load_parameters
       @install_sahi_dir = parameters.install_sahi_dir
       @java_runtime_dir = parameters.java_runtime_dir
@@ -104,7 +104,7 @@ module Mim
       FileUtils.cp_r(File.join(@install_sahi_dir, "."), File.join(@visitor_dir))
       @@logger.an_event.debug "copy sahi runtime to visitor runtime dir."
       #-----------------------------------------------------------------------------------------------------------
-      # copie user_extensions.js qui contient les fonctions spécifiques de recuperations des links dans
+      # copie user_extensions.js qui contient les fonctions spï¿½cifiques de recuperations des links dans
       # /visitors/visitor_id/userdata/config
       #-----------------------------------------------------------------------------------------------------------
       FileUtils.cp_r(File.join(File.dirname(__FILE__), 'user_extensions.js'), File.join(@userdata, 'config'))
@@ -119,7 +119,7 @@ module Mim
       # publie le repository des browsers (repository.csv) vers le fichier contenant les browser types
       #-----------------------------------------------------------------------------------------------------------
       bt = Mim::BrowserTypes::from_csv
-      bt.publish_to_sahi([@userdata, "config"], [@listening_port_proxy], [@listening_ip_proxy]) #TODO à reviser pas besoin du port ni ip ppouir le profil
+      bt.publish_to_sahi([@userdata, "config"], [@listening_port_proxy], [@listening_ip_proxy]) #TODO ï¿½ reviser pas besoin du port ni ip ppouir le profil
       @@logger.an_event.debug "repository browsers published to browser type file : #{@userdata + "config"}"
 
       #-----------------------------------------------------------------------------------------------------------
@@ -244,15 +244,17 @@ module Mim
     def stop
       begin
         #-----------------------------------------------------------------------------------------------------------
-        #stop proxy mim
-        # mettre le pid à nil.
+        # stop proxy mim
+        # mettre le pid ï¿½ nil.
         #-----------------------------------------------------------------------------------------------------------
-        cmd = @pid.nil? ? "/IM java.exe" : "/PID #{@pid}"
+        # cmd = @pid.nil? ? "/IM java.exe" : "/PID #{@pid}" trop dangereux risque de peter toutes les visites en cours
+        raise "pid proxy non define" if @pid.nil?
+        cmd = "/PID #{@pid}"
 
         #TODO remplacer tasklist par ps pour linux
         res = IO.popen("taskkill #{cmd} /T /F").read
         @pid = nil
-        @@logger.an_event.debug "taskkill for java.exe : <#{res}>"
+        @@logger.an_event.debug "taskkill for java.exe #{@pid}: <#{res}>"
 
       rescue Exception => e
         @@logger.an_event.error "proxy stopped on machine #{@listening_ip_proxy} on port #{@listening_port_proxy} : #{e.message}"

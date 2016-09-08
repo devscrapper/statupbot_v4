@@ -738,10 +738,10 @@ module Browsers
     # input : none
     # output : none
     # StandardError :
-    # si il n'a pas été possible de killer le browser automatiquement avec sahi
+    # si il n'a pas été possible de killer le browser
     #-----------------------------------------------------------------------------------------------------------------
     #   1-demande la fermeture du browser au driver
-    #   3-recupere le pid du browser
+    #   2-kill du browser si la demande d'arret a sahi à echouer
     #-----------------------------------------------------------------------------------------------------------------
     def quit
 
