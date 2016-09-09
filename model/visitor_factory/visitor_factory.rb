@@ -253,12 +253,20 @@ class VisitorFactory
       with_advertising = visit[:advert][:advertising] != :none
       with_google_engine = visitor[:browser][:engine_search] == :google && visit[:referrer][:medium] == :organic
 
+      #-v ../archive/Firefox-19.0_la-boite-immo_2016-8-18-16-33-0_1.yml
+      # -l localhost
+      # -i 9996
+      # -m 15
+      # -p http
+      # -r muz11-wbsswsg.ca-technologies.fr
+      # -o 8080
+      # -x et00752
+      # -y Bremb@17"
       cmd = "#{@@runtime_ruby} -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift)  \
       #{VISITOR_BOT} \
       -v #{details[:visit_file]} \
       -l #{details[:ip_proxy_sahi]} \
       -i #{details[:port_proxy_sahi].to_i} \
-      -p #{details[:use_proxy_system]} \
       -m #{@@max_time_to_live_visit}                   \
       #{geolocation(with_advertising, with_google_engine)}"
 
@@ -334,10 +342,15 @@ class VisitorFactory
       geo_to_s = ""
 
     else
+            # -p http
+      # -r muz11-wbsswsg.ca-technologies.fr
+      # -o 8080
+      # -x et00752
+      # -y Bremb@17"
 
-      geo_to_s = "-r #{geo.protocol} -o #{geo.ip} -x #{geo.port}"
-      geo_to_s += " -y #{geo.user}" unless geo.user.nil?
-      geo_to_s += " -w #{geo.password}" unless geo.password.nil?
+      geo_to_s = "-p #{geo.protocol} -r #{geo.ip} -o #{geo.port}"
+      geo_to_s += " -x #{geo.user}" unless geo.user.nil?
+      geo_to_s += " -y #{geo.password}" unless geo.password.nil?
 
     ensure
       @@logger.an_event.debug "geolocation is <#{geo_to_s}>"

@@ -9,7 +9,6 @@ require_relative '../lib/logging'
 require_relative '../lib/os'
 require_relative '../lib/parameter'
 require_relative '../lib/error'
-require_relative '../lib/mim/launcher'
 require_relative '../model/browser/browser'
 require_relative '../model/visitor_factory/visitor_factory'
 require_relative '../model/geolocation/geolocation_factory'
@@ -191,7 +190,7 @@ begin
 
         vf_mono = VisitorFactoryMonoInstanceExecution.new(proxy_ip_list)
 
-        bt =  Mim::Launcher.start(vf_mono.booked_port, proxy_ip_list)
+        bt = Mim::BrowserTypes.from_csv
 
         bt.browser.each { |name|
           bt.browser_version(name).each { |version|
@@ -217,7 +216,7 @@ begin
 
         vf_multi = VisitorFactoryMultiInstanceExecution.new(proxy_ip_list, max_count_current_visit - 1) # -1 car une occurence pour VisitorFactoryMonoInstanceExecution
 
-        bt =  Mim::Launcher.start(vf_multi.booked_port, proxy_ip_list)
+        bt = Mim::BrowserTypes.from_csv
 
         vf_mono = VisitorFactoryMonoInstanceExecution.new(proxy_ip_list)
 
@@ -262,7 +261,7 @@ rescue Exception => e
   retry
 end
 
-Mim::Launcher.stop
+
 logger.a_log.info "visitor factory server stopped"
 
 

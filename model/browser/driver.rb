@@ -126,13 +126,6 @@ module Sahi
     end
 
 
-    #
-    def exec_command_local(cmd, qs={})
-      res = response("http://localhost:9999/_s_/dyn/Driver_" + cmd, {"sahisid" => @sahisid}.update(qs))
-      return res.force_encoding("UTF-8")
-    end
-
-
     # evaluates a javascript expression on the browser and fetches its value
     def fetch(expression)
       key = "___lastValue___" + Time.now.getutc.to_s;
@@ -355,7 +348,7 @@ module Sahi
 
     def quit
       begin
-        exec_command_local("kill") # kill piloté par SAHI proxy
+        exec_command("kill") # kill piloté par SAHI proxy
 
       rescue Exception => e
         raise Error.new(CLOSE_DRIVER_TIMEOUT, :error => e)

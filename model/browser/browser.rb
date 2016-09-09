@@ -387,7 +387,7 @@ module Browsers
           end
 
         else
-          @driver.wait(10) { url_before == url }
+          @driver.wait(60) { url_before == url }
           raise "same url after click : #{url_before}" if url_before == url
 
         end
