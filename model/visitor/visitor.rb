@@ -1448,6 +1448,7 @@ module Visitors
       #--------------------------------------------------------------------------------------------------------
       # input keywords & submit search
       #--------------------------------------------------------------------------------------------------------
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
         @@logger.an_event.debug "action #{__method__}"
 
@@ -1463,6 +1464,20 @@ module Visitors
         @browser.submit(@current_page.submit_button)
 
       rescue Exception => e
+        if Pages::Captcha.is_a?(@browser)
+          #--------------------------------------------------------------------------------------------------------
+          # Page Captcha displayed
+          #--------------------------------------------------------------------------------------------------------
+          @@logger.an_event.info "visitor browsed captcha instead final search page: #{e.message}"
+
+          # leve les exception VISITOR_NOT_SUBMIT_CAPTCHA, VISITOR_TOO_MANY_CAPTCHA
+          # max_count_submiting_captcha est diminuer dans manage_captcha
+          max_count_submiting_captcha = manage_captcha(max_count_submiting_captcha)
+          @@logger.an_event.info "visitor managed captcha, and go to browse final search page"
+
+          retry
+
+        end
         @@logger.an_event.error "visitor submited final search <#{keywords}> : #{e.message}"
         raise Error.new(VISITOR_NOT_SUBMIT_FINAL_SEARCH, :error => e)
 
@@ -1517,6 +1532,7 @@ module Visitors
       #--------------------------------------------------------------------------------------------------------
       # input keywords & submit search
       #--------------------------------------------------------------------------------------------------------
+      max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
       begin
         @@logger.an_event.debug "action #{__method__}"
 
@@ -1532,6 +1548,21 @@ module Visitors
         @browser.submit(@current_page.submit_button)
 
       rescue Exception => e
+        if Pages::Captcha.is_a?(@browser)
+          #--------------------------------------------------------------------------------------------------------
+          # Page Captcha displayed
+          #--------------------------------------------------------------------------------------------------------
+          @@logger.an_event.info "visitor browsed captcha instead search page: #{e.message}"
+
+          # leve les exception VISITOR_NOT_SUBMIT_CAPTCHA, VISITOR_TOO_MANY_CAPTCHA
+          # max_count_submiting_captcha est diminuer dans manage_captcha
+          max_count_submiting_captcha = manage_captcha(max_count_submiting_captcha)
+          @@logger.an_event.info "visitor managed captcha, and go to browse search page"
+
+          retry
+
+        end
+
         @@logger.an_event.error "visitor submited search <#{keywords}> : #{e.message}"
         raise Error.new(VISITOR_NOT_SUBMIT_SEARCH, :error => e)
 
