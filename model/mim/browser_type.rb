@@ -411,7 +411,7 @@ module Mim
 
       a = <<-_end_of_xml_
   <browserType>
-      <name>edge</name>
+      <name>Edge</name>
       <displayName>MS Edge</displayName>
       <icon>edge.png</icon>
       <path>$userDir\\bin\\launch_edge.bat</path>
