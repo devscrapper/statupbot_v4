@@ -320,7 +320,7 @@ module Visitors
 
         script = @visit.script
 
-        count_actions = 0
+        count_finished_actions = 0
 
         for action in script
           @@logger.an_event.debug "script #{script}"
@@ -342,59 +342,65 @@ module Visitors
                 # le click sur le link du referral dans la page de results a échoué
                 # force l'accès au referral par un accès direct
                 act = "e"
-                script.insert(count_actions + 1, act)
+                script.insert(count_finished_actions + 1, act)
                 @@logger.an_event.info "visitor  make action <#{COMMANDS[act]}> instead of  <#{COMMANDS[action]}>"
-                count_actions +=1
-                Monitoring.page_browse(@visit.id, script)
 
               when VISITOR_NOT_READ_PAGE
                 # ajout dans le script d'action pour revenir à la page précédent pour refaire l'action qui a planté.
                 # ceci s'arretera quand il n'y aura plus de lien sur lesquel clickés ; lien choisi dans les 3 actions
-                script.insert(count_actions + 1, ["c", action]).flatten!
+                script.insert(count_finished_actions + 1, ["c", action]).flatten!
                 @@logger.an_event.info "visitor  go back to make action #{COMMANDS[action]} again"
-                count_actions +=1
-                Monitoring.page_browse(@visit.id, script)
-
+                
               when VISITOR_NOT_CLICK_ON_RESULT,
                   VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER,
                   VISITOR_NOT_CLICK_ON_LINK_ON_UNKNOWN,
                   VISITOR_NOT_CLICK_ON_LINK_ON_WEBSITE
                 # ajout dand le script d'une action pour choisir un autres results  ou un autre lien
                 #  ceci s'arretera quand il n'y aura plus de lien sur lesquels clickés
-                script.insert(count_actions + 1, action)
+                script.insert(count_finished_actions + 1, action)
                 @@logger.an_event.info "visitor  make action <#{COMMANDS[action]}> again"
-                count_actions +=1
-                Monitoring.page_browse(@visit.id, script)
-
+                
               when VISITOR_NOT_SUBMIT_CAPTCHA, VISITOR_TOO_MANY_CAPTCHA
                 # un captcha est survenu, il a été impossible de le gerer
-                # ajout de l'action '3' dans le script pour tracer la console qu'un captcha est survenu
                 # monitoring vers la console du script
                 # arret de l'execution du script et donc de la visit
-                script.insert(count_actions + 1, "3")
                 @@logger.an_event.info "visitor stop visit because captcha"
-                count_actions +=1
-                Monitoring.page_browse(@visit.id, script)
+                screenshot_path = take_screenshot(count_finished_actions, action)
+                Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
                 raise e #stop la visite
 
               else
                 @@logger.an_event.error "visitor  make action  <#{COMMANDS[action]}> : #{e.message}"
+                screenshot_path = take_screenshot(count_finished_actions, action)
+                Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
                 raise e #stop la visite
             end
-
-
+              
           rescue Exception => e
             @@logger.an_event.error "visitor  make action <#{COMMANDS[action]}> : #{e.message}"
+            screenshot_path = take_screenshot(count_finished_actions, action)
+            MMonitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
             raise e #stop la visit
 
           else
             @@logger.an_event.info "visitor  executed action <#{COMMANDS[action]}>."
-            Monitoring.page_browse(@visit.id, script)
-            count_actions +=1
+
 
           ensure
-            take_screenshot(count_actions, action)
-            @@logger.an_event.info "visitor  executed #{count_actions}/#{script.size}(#{(count_actions * 100 /script.size).round(0)}%) actions."
+            # les Error : 
+            # VISITOR_NOT_CLICK_ON_REFERRAL
+            # VISITOR_NOT_READ_PAGE
+            # VISITOR_NOT_CLICK_ON_RESULT,
+            # VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER,
+            # VISITOR_NOT_CLICK_ON_LINK_ON_UNKNOWN,
+            # VISITOR_NOT_CLICK_ON_LINK_ON_WEBSITE
+            # passent par ENSURE 
+            # les autres levent une exception dans le RESCUE donc ne passent pas par là. Elle seront captées par
+            # les RESCUE qui englobele FOR
+            screenshot_path = take_screenshot(count_finished_actions, action)
+            Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
+            @@logger.an_event.info "visitor  executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
+            count_finished_actions +=1
 
           end
 

@@ -70,7 +70,8 @@ module Monitoring
     end
   end
 
-  def page_browse(visit_id, actions)
+  def page_browse(visit_id, actions, screenshot_path, count_finished_actions)
+
     # les actions sont optionnelles
     begin
       load_parameter()
@@ -87,6 +88,30 @@ module Monitoring
     else
 
     ensure
+
+    end
+
+    begin
+      resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/pages")
+
+      if File.exist?(screenshot_path)
+        image = File.open(screenshot_path)
+
+        response = resource.post(:image => image,
+                                 :visit_id => visit_id,
+                                 :index => count_finished_actions)
+      else
+        response = resource.post(:visit_id => visit_id,
+                                 :action => action,
+                                 :index => count_finished_actions)
+      end
+   #   JSON.parse(response)
+      raise response.content if response.code != 201
+
+    rescue Exception => e
+      $stderr << "cannot create browsed page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+
+    else
 
     end
   end

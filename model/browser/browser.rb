@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'uuid'
 require 'uri'
 require 'json'
@@ -176,20 +175,12 @@ module Browsers
     def all_links
 
       links = []
-      count = 5
-      i = 0
+
       begin
-
-        results_str = @driver.links
-
-        raise "_sahi.links() return none link of page" if results_str == "" or results_str.nil?
-
-        results_hsh = JSON.parse(results_str)
-
+        results_hsh = JSON.parse(@driver.links)
         @@logger.an_event.debug "results_hsh #{results_hsh}"
+
         links_str = results_hsh["links"]
-
-
         @@logger.an_event.debug "links_str String ? #{links_str.is_a?(String)}"
         @@logger.an_event.debug "links_str Array ? #{links_str.is_a?(Array)}"
 
@@ -211,11 +202,7 @@ module Browsers
         @@logger.an_event.debug "links #{links}"
 
       rescue Exception => e
-        i += 1
-        @@logger.an_event.warn e.message
-        sleep 3
-        retry if i < count
-        @@logger.an_event.fatal e.message
+        @@logger.an_event.error e.message
         raise Error.new(BROWSER_NOT_FOUND_ALL_LINK, :values => {:browser => name}, :error => e)
 
       else
@@ -224,6 +211,8 @@ module Browsers
 
       end
     end
+
+
 
     #----------------------------------------------------------------------------------------------------------------
     # body
@@ -237,28 +226,17 @@ module Browsers
     # si parsing html du source echoue
     #----------------------------------------------------------------------------------------------------------------
     def body
-      count_retry = 0
-      src = ""
-
       begin
-        src = ""
 
+        src = ""
         src = @driver.body
 
-        if src.empty?
-          @@logger.an_event.warn "empty body current page : #{url}"
-          raise "body #{url} is empty"
-        end
-
       rescue Exception => e
-        @@logger.an_event.warn e.message
-        count_retry += 1
-        sleep 1
-        retry if count_retry < 20
-        @@logger.an_event.error "browser #{e.message}"
+        @@logger.an_event.error "browser get html page : #{e.message}"
         raise Error.new(BROWSER_NOT_FOUND_BODY, :values => {:browser => name}, :error => e)
 
       else
+        @@logger.an_event.debug "browser get html page"
 
       end
 
@@ -266,14 +244,13 @@ module Browsers
 
         body = Nokogiri::HTML(src)
 
-
       rescue Exception => e
-        @@logger.an_event.error e.message
+        @@logger.an_event.error "browser parse html page : #{e.message}"
         raise Error.new(BROWSER_NOT_FOUND_BODY, :values => {:browser => name}, :error => e)
 
       else
 
-        @@logger.an_event.debug "browser #{name} get body"
+        @@logger.an_event.debug "browser parse html page"
         body
 
       end
@@ -387,8 +364,8 @@ module Browsers
           end
 
         else
-          @driver.wait(60) { url_before == url }
-          raise "same url after click : #{url_before}" if url_before == url
+          @driver.wait(60) { url_before != url }
+          #raise "same url after click : #{url_before}" if url_before == url
 
         end
 
@@ -432,8 +409,8 @@ module Browsers
       begin
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url_start_page"}) if url_start_page.nil? or url_start_page == ""
 
-        old_page_title = @driver.title
-        @@logger.an_event.debug "old_page_title : #{old_page_title}"
+        #old_page_title = @driver.title
+        #@@logger.an_event.debug "old_page_title : #{old_page_title}"
 
         @driver.display_start_page(url_start_page, window_parameters)
 
@@ -445,10 +422,10 @@ module Browsers
         #pb de connection reseau par exemple
         raise Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => hostname}) if @driver.div("error_connect").exists?
 
-        new_page_title = @driver.title
-        @@logger.an_event.debug "new_page_title : #{new_page_title}"
-        #erreur sahi...on est tj sur la page initiale de sahi
-        raise Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
+        # new_page_title = @driver.title
+        # @@logger.an_event.debug "new_page_title : #{new_page_title}"
+        # #erreur sahi...on est tj sur la page initiale de sahi
+        # raise Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} display start page : #{e.message}"
@@ -987,17 +964,16 @@ module Browsers
         @driver.take_screenshot(output_file.absolute_path)
 
       rescue Exception => e
-        @@logger.an_event.error e.message
+        @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"
         @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
 
       else
-
         @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
 
-      ensure
 
       end
 
+      output_file.absolute_path
     end
 
     #-----------------------------------------------------------------------------------------------------------------
@@ -1083,24 +1059,21 @@ module Browsers
     #
     #-----------------------------------------------------------------------------------------------------------------
     def url
-      count = 0
+
       begin
-        url = nil
         url = @driver.current_url
-        raise "url empty" if url.empty? or url.nil?
 
       rescue Exception => e
-        @@logger.an_event.warn "try #{count} : #{e.message}"
-        count += 1
-        sleep 1
-        retry if count < 5
-        @@logger.an_event.error e.message
+        @@logger.an_event.error "get current url : #{e.message}"
         raise Error.new(BROWSER_NOT_FOUND_URL, :values => {:browser => name}, :error => e)
 
       else
+        @@logger.an_event.debug "get current url : #{url}"
         url
       end
     end
+
+
   end
 end
 require_relative 'firefox'

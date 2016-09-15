@@ -8,7 +8,7 @@ module Visits
       include Errors
 
       def initialize(fqdns, advertiser)
-
+        @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
         @@logger.an_event.debug "fqdns #{fqdns}"
         @@logger.an_event.debug "advertiser #{advertiser}"
 
@@ -24,10 +24,22 @@ module Visits
         link = nil
 
         begin
-          adwords = browser.engine_search.adverts(browser.body)
+          #url = browser.url
+          adwords = []
+          #parfois, browser body ne recupere pas le contenu de la page Google contenant les resulats et les adword
+          # alors que la page est affichée dans le navigateur : blurps !!!
+          # par sécurité on attend et test à concurrence de 60s, jusqu'à ce que la liste ne soit pas vide.
+          # en desespoir de cause, si le pb persiste alors elle sera vide.
+          # ou bien il ny a vraimenet pas d'awords sur la page Google.
+          browser.driver.wait(60) {
+            body = browser.body
+            @@logger.an_event.debug "body : #{body}"
+            adwords = browser.engine_search.adverts(body)
+            !adwords.empty?
+          }
           adwords.each { |adword| @@logger.an_event.debug "adword : #{adword}" }
 
-          #TODO remplacer @fqdns par @fqdns
+          #TODO remplacer @fqdns par @fqdn
           @fqdns.each { |fqdn| @@logger.an_event.debug "fqdns : #{fqdn}" }
           tmp_fqdns = @fqdns.dup
 
@@ -39,7 +51,7 @@ module Visits
             }
           }
 
-          raise "none fqdns advertisings #{@fqdns} found in adwords list #{adwords}" if href_adwords.empty?
+          raise "none fqdn advertising #{@fqdns} found in adwords list #{adwords}" if href_adwords.empty?
 
           links = href_adwords.map { |href| browser.driver.link("#{href}") }
           @@logger.an_event.debug "links : #{links}"
@@ -53,7 +65,7 @@ module Visits
           @@logger.an_event.debug "link : #{link}"
 
         rescue Exception => e
-          @@logger.an_event.error "advertising #{self.class.name} found  : #{e.message}"
+          @@logger.an_event.error "advertising #{self.class.name} found #{link} : #{e.message}"
           raise Error.new(ADVERTISING_NOT_FOUND, :error => e, :values => {:advertising => self.class.name})
 
         else

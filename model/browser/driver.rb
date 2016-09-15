@@ -61,13 +61,19 @@ module Sahi
     #----------------------------------------------------------------------------------------------------------------
 
     def back
-      #fetch("_sahi.go_back()")
       fetch("window.history.go(-1)")
 
     end
 
     def body
-      fetch("window.document.body.innerHTML")
+      body = nil
+      wait(60) {
+        body = fetch("window.document.body.innerHTML")
+        !body.nil? and !body.empty?
+      }
+      raise "window.document.body.innerHTML return none body page" if body == "" or body.nil?
+      body
+
     end
 
 
@@ -97,7 +103,13 @@ module Sahi
     end
 
     def current_url
-      fetch("window.location.href")
+      url = nil
+      wait(60) {
+        url = fetch("window.location.href")
+        !url.nil? and !url.empty?
+      }
+      raise "window.location.href return none url" if url.empty? or url.nil?
+      url
     end
 
     def display_start_page (url, window_parameters)
@@ -240,9 +252,13 @@ module Sahi
     end
 
     def links
-
-      fetch("_sahi.links()")
-
+      links = nil
+      wait(60) {
+        links = fetch("_sahi.links()")
+        !links.nil?
+      }
+      raise "_sahi.links() return none link of page" if links == "" or links.nil?
+      links
     end
 
     def new_popup_is_open? (url)
@@ -267,19 +283,13 @@ module Sahi
     #-----------------------------------------------------------------------------------------------------------------
     def open
 
-      try_count = 3
       begin
         wait(60) {
           check_proxy
         }
 
       rescue Exception => e
-        try_count -= 1
-        @@logger.an_event.debug "check proxy #{@proxy_host}:#{@proxy_port}, try #{try_count} : #{e.message}"
-        sleep(3)
-        retry if try_count > 0
-
-        @@logger.an_event.error "check proxy  #{@proxy_host}:#{@proxy_port}: #{e.message}"
+        @@logger.an_event.error "driver open : #{e.message}"
         raise Error.new(SAHI_PROXY_NOT_FOUND, :values => {:where => "remote"}, :error => e)
 
       else
@@ -298,7 +308,7 @@ module Sahi
         exec_command("launchPreconfiguredBrowser", param)
 
       rescue Exception => e
-        @@logger.an_event.error "launchPreconfiguredBrowser : #{e.message}"
+        @@logger.an_event.error "driver open, launchPreconfiguredBrowser : #{e.message}"
         raise Error.new(OPEN_DRIVER_FAILED, :error => e)
 
       else
@@ -306,7 +316,7 @@ module Sahi
 
       end
 
-      count_try = 3
+
       begin
         wait(60) {
           is_ready?
@@ -315,10 +325,7 @@ module Sahi
         raise "browser type not ready" unless is_ready?
 
       rescue Exception => e
-        @@logger.an_event.warn "try #{count_try}, #{e.message}"
-        count_try-= 1
-        retry if count_try >= 0
-        @@logger.an_event.error "driver ready : #{e.message}"
+        @@logger.an_event.error "driver open : #{e.message}"
         raise Error.new(OPEN_DRIVER_FAILED, :error => e)
 
       else
@@ -328,7 +335,6 @@ module Sahi
         @@logger.an_event.debug "set windows title browser #{@browser_type} with #{@sahisid.to_s}"
         get_pid_browser
         get_handle_window_browser
-      ensure
 
       end
     end
@@ -424,7 +430,14 @@ module Sahi
     end
 
     def title
-      fetch("window.document.title")
+      title = nil
+      wait(60) {
+        title = fetch("_sahi._title()")
+        !title.nil? and !title.empty?
+      }
+      raise "window.document.title return none title page" if title == "" or title.nil?
+      title
+
     end
 
 
