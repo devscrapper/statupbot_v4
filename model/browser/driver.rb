@@ -410,16 +410,20 @@ module Sahi
 
     end
 
+    def takescreenshot (to_absolute_path=nil)
+      window_action("focus")
+      execute_step("_sahi._takePageScreenShot(null, " + Utils.quoted(to_absolute_path) + " , true, {format:'png', delay:50, trim:true, resizePercentage:100})")
 
+    end
 
     def take_screenshot(to_absolute_path)
       #TODO update for linux
       begin
-        #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+        Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
 
-
-        Win32::Screenshot::Take.of(:window,
-                                  hwnd: @browser_window_handle).write!(to_absolute_path)
+        # screenshot avec le handle => KO
+        # Win32::Screenshot::Take.of(:window,
+        #                           hwnd: @browser_window_handle).write!(to_absolute_path)
       rescue Exception => e
         Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
       else
