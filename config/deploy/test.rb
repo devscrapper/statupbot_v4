@@ -57,8 +57,9 @@ server fetch(:server),
   roles: %w{web app},
   ssh_options: {
     user: fetch(:user), # overrides user setting above
-    forward_agent: false,
-   password: 'Brembo01'  ,
-auth_methods: %w(Brembo01)
+    keys: %w(/home/eric/.ssh/id_rsa),
+    forward_agent: true,
+    auth_methods: %w(publickey password) ,
+    password: 'Brembo01'
   }
 

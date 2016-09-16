@@ -110,14 +110,6 @@ namespace :deploy do
   end
 
   task :environment do
-    on roles(:app) do
-      within release_path do
-        execute("echo 'staging: test' >  #{File.join(current_path, 'parameter', 'environment.yml')}")
-      end
-    end
-  end
-
-  task :environment do
       on roles(:app) do
         within release_path do
           # permet d'ecrire la tranformation de reposirory en win32.xml, win64.xml linu.xml mac.xml
