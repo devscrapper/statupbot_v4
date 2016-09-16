@@ -412,6 +412,7 @@ module Browsers
         #old_page_title = @driver.title
         #@@logger.an_event.debug "old_page_title : #{old_page_title}"
 
+
         @driver.display_start_page(url_start_page, window_parameters)
 
         begin
@@ -440,6 +441,9 @@ module Browsers
 
       end
     end
+
+
+
 
 
     #----------------------------------------------------------------------------------------------------------------

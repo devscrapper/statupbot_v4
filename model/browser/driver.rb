@@ -370,9 +370,18 @@ module Sahi
     end
 
     def resize (width, height)
-      #TODO update for linux
-      Window.from_handle(@browser_window_handle).resize(width,
-                                                        height)
+      action = "resize"
+      title = fetch("window.top.document.title")
+      title = prepare_window_action(title)
+      exec_command("windowAction",
+                   {"action" => action,
+                    "title" => title,
+                    "width" => width,
+                    "height" => height})
+
+      # si screenshot est prix avec sahi etpeut prendre un element graphique et pas une page ou destop alors on peut
+      # eviter de deplacer à l'origine du repere pour fiabiliser la prise de photo du captcha.
+      #TODO move to linux
       Window.from_handle(@browser_window_handle).move(0,
                                                       0)
     end
@@ -401,14 +410,16 @@ module Sahi
 
     end
 
+
+
     def take_screenshot(to_absolute_path)
       #TODO update for linux
       begin
-        Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+        #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
 
 
-#        Win32::Screenshot::Take.of(:window,
-#                                  hwnd: @browser_window_handle).write!(to_absolute_path)
+        Win32::Screenshot::Take.of(:window,
+                                  hwnd: @browser_window_handle).write!(to_absolute_path)
       rescue Exception => e
         Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
       else
