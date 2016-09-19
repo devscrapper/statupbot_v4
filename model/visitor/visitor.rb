@@ -85,7 +85,7 @@ module Visitors
                 "1" => "sb_final_search",
                 "3" => "manage_captcha"}
 
-    MAX_COUNT_SUBMITING_CAPTCHA = 3 # nombre max de submission de captcha
+    MAX_COUNT_SUBMITING_CAPTCHA = 10 # nombre max de submission de captcha
     #----------------------------------------------------------------------------------------------------------------
     # variable de class
     #----------------------------------------------------------------------------------------------------------------
@@ -1416,7 +1416,7 @@ module Visitors
         #le nouveau screenshot est dans un nouveau volume du flow.
         #le captcha précédent peut être déclaré comme bad aupres de de-capcher.
         #TODO Captchas::bad_string(id_visitor)
-
+        #TODO Monitoring::submit_captcha
         raise Error.new(VISITOR_TOO_MANY_CAPTCHA, :error => e) if max_count_submiting_captcha == 0
 
         max_count_submiting_captcha

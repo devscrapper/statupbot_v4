@@ -160,6 +160,11 @@ module Sahi
       popup
     end
 
+    def height
+      fetch("window.innerHeight \
+      || document.documentElement.clientHeight   \
+      || document.body.clientHeight")
+    end
 
     #-----------------------------------------------------------------------------------------------------------------
     # initialize
@@ -379,7 +384,7 @@ module Sahi
                     "width" => width,
                     "height" => height})
 
-      # si screenshot est prix avec sahi etpeut prendre un element graphique et pas une page ou destop alors on peut
+      # si screenshot est pris avec sahi et peut prendre un element graphique et pas une page ou destop alors on peut
       # eviter de deplacer à l'origine du repere pour fiabiliser la prise de photo du captcha.
       #TODO move to linux
       Window.from_handle(@browser_window_handle).move(0,
@@ -410,21 +415,20 @@ module Sahi
 
     end
 
-    def takescreenshot (to_absolute_path=nil)
-      window_action("focus")
-      execute_step("_sahi._takePageScreenShot(null, " + Utils.quoted(to_absolute_path) + " , true, {format:'png', delay:50, trim:true, resizePercentage:100})")
-
-    end
 
     def take_screenshot(to_absolute_path)
-      #TODO update for linux
-      begin
-        Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
 
-        # screenshot avec le handle => KO
-        # Win32::Screenshot::Take.of(:window,
-        #                           hwnd: @browser_window_handle).write!(to_absolute_path)
+      begin
+        window_action("focus")
+        #TODO update for linux
+        #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+
+        #screenshot avec le handle => KO
+        #TODO update for linux
+        Win32::Screenshot::Take.of(:window,
+                                   hwnd: @browser_window_handle).write!(to_absolute_path)
       rescue Exception => e
+        #TODO update for linux
         Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
       else
       end
@@ -455,6 +459,15 @@ module Sahi
 
     end
 
+    def window_action(action)
+      @@logger.an_event.debug "action #{action}"
+      title = fetch("window.top.document.title")
+      @@logger.an_event.debug "title #{title}"
+      title = prepare_window_action(title)
+      @@logger.an_event.debug "title #{title}"
+
+      exec_command("windowAction", {"action" => action, "title" => title})
+    end
 
     private
 
