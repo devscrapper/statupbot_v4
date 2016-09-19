@@ -1,5 +1,6 @@
 require_relative '../../lib/os'
 require_relative '../../lib/error'
+
 require 'win32/window'
 require 'rexml/document'
 require 'sahi'
@@ -44,6 +45,8 @@ module Sahi
     # variable de class
     #----------------------------------------------------------------------------------------------------------------
     @@logger = nil
+    @@sem_screenshot = nil # protège la prise d'image pour assurer que se qui est photographie est bien celui du navigateur
+    # quand plusieurs exécution son réalisées en //
     #----------------------------------------------------------------------------------------------------------------
     # attribut
     #----------------------------------------------------------------------------------------------------------------
@@ -193,6 +196,7 @@ module Sahi
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => browser_process_name}) if browser_process_name.nil? or browser_process_name == ""
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => listening_port_sahi}) if listening_port_sahi.nil? or listening_port_sahi.nil? == ""
 
+        @@sem_screenshot = Mutex.new
         # les requetes (check_proxy_local, launchPreconfiguredBrowser, quit) vers le proxy local sont exécutées avec localhst:9999
         @proxy_host = listening_ip_sahi # est utilisé pour le proxy remote
         @proxy_port = listening_port_sahi # est utilisé pour le proxy remote
@@ -340,7 +344,7 @@ module Sahi
         @@logger.an_event.debug "set windows title browser #{@browser_type} with #{@sahisid.to_s}"
         get_pid_browser
         get_handle_window_browser
-
+        RAutomation::Window.new(:hwnd => @browser_window_handle).minimize
       end
     end
 
@@ -417,21 +421,33 @@ module Sahi
 
 
     def take_screenshot(to_absolute_path)
+      @@sem_screenshot.synchronize {
+        begin
+          # affiche le navigateur en premier plan
+          #TODO update for linux
+          window = RAutomation::Window.new(:hwnd => @browser_window_handle)
+          window.restore if window.minimized?
+          window.activate
+          window.wait_until_exists
+          window.wait_until_present
 
-      begin
-        window_action("focus")
-        #TODO update for linux
-        #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+          #TODO update for linux
+          #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
 
-        #screenshot avec le handle => KO
-        #TODO update for linux
-        Win32::Screenshot::Take.of(:window,
-                                   hwnd: @browser_window_handle).write!(to_absolute_path)
-      rescue Exception => e
-        #TODO update for linux
-        Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
-      else
-      end
+          #screenshot avec le handle => KO
+          #TODO update for linux
+          Win32::Screenshot::Take.of(:window,
+                                     hwnd: @browser_window_handle).write!(to_absolute_path)
+        rescue Exception => e
+          #TODO update for linux
+          Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+        else
+
+        ensure
+          window.minimize
+
+        end
+      }
     end
 
 
@@ -510,7 +526,8 @@ module Sahi
 
     def get_handle_window_browser
       begin
-        windows_lst = Window.find(:title => /#{@sahisid.to_s}/, :pid => @browser_pid)
+        windows_lst = Window.find(:title => /#{@sahisid.to_s}/)
+
         @@logger.an_event.debug "list windows #{windows_lst}"
 
         window = windows_lst.first

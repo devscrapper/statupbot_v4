@@ -1,6 +1,6 @@
 #referentiels
 source "http://rubygems.org"
-
+gem 'rautomation'
 gem 'dot-properties', '~> 0.1.3' #parsing de fichier properties java
 gem 'mini_magick' #, '~> 4.5', '>= 4.5.1' W32Screenshot utilise la version mini_magick (~> 4.3.0) x86-mingw32
 gem "eventmachine", '1.0.8'
@@ -18,7 +18,7 @@ gem 'pony', '1.11'
 #gem 'os'
 gem 'win32-taskscheduler'
 gem 'win32-process', '~> 0.7.4'
-gem 'ffi', '1.9.0'
+gem 'ffi', '1.9.10'
 gem 'win32screenshot', '~> 2.1'
 gem 'selenium-webdriver', '2.43.0'
 gem 'nokogiri', '1.6.0'
