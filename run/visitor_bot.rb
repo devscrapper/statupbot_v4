@@ -167,11 +167,8 @@ def visitor_execute_visit(opts, logger)
             website_details,
             visitor_details = Visit.load(opts[:visit_file_name])
 
-        change_visit_state(visit_details[:id], Monitoring::PUBLISHED, logger)
-
         context = ["visit=#{visit_details[:id]}"]
         logger.ndc context
-
 
         #---------------------------------------------------------------------------------------------------------------------
         # Creation de la visit
@@ -190,6 +187,7 @@ def visitor_execute_visit(opts, logger)
 
         visitor = Visitor.new(visitor_details)
 
+        visit_started(visit, visitor, logger)
         #---------------------------------------------------------------------------------------------------------------------
         # Naissance du Visitor
         #---------------------------------------------------------------------------------------------------------------------
@@ -203,9 +201,8 @@ def visitor_execute_visit(opts, logger)
         #---------------------------------------------------------------------------------------------------------------------
         # Visitor execute visit
         #---------------------------------------------------------------------------------------------------------------------
-        visit_started(visit, visitor, logger)
-
         visitor.execute(visit)
+
         #---------------------------------------------------------------------------------------------------------------------
         # Visitor close browser
         #---------------------------------------------------------------------------------------------------------------------

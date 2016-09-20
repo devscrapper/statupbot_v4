@@ -5,6 +5,7 @@ require_relative '../../lib/error'
 require 'em-http-server'
 require 'em/deferrable'
 require_relative '../../lib/flow'
+require_relative '../../lib/monitoring'
 
 module Input_flows
   class Connection < EM::HttpServer::Server
@@ -217,9 +218,17 @@ module Input_flows
       tmp_visit.write(visit_details.to_yaml)
       tmp_visit.close
 
+      begin
+         Monitoring.change_state_visit(visit_details[:visit][:id], Monitoring::PUBLISHED)
+
+       rescue Exception => e
+         @logger.an_event.warn e.message
+
+      end
 
       tmp_visit
     end
+
 
   end
 
