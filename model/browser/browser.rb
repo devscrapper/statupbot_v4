@@ -965,7 +965,7 @@ module Browsers
 
         end
 
-        @driver.take_screenshot(output_file.absolute_path)
+        @driver.take_screenshot(output_file, @height.to_i)
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"

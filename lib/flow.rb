@@ -202,7 +202,7 @@ class Flow
 
   def basename
     basename = @type_flow + SEPARATOR + @label + SEPARATOR + @date
-    basename += SEPARATOR + @vol unless @vol.nil?
+    basename += SEPARATOR + @vol if !@vol.nil? and !@vol.empty?
     basename += @ext
     basename
   end

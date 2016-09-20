@@ -4,7 +4,7 @@ require_relative '../../lib/error'
 require 'win32/window'
 require 'rexml/document'
 require 'sahi'
-
+require 'mini_magick'
 
 #----------------------------------------------------------------------------------------------------------------
 # enrichissment, surcharge pour personnaliser ou corriger le gem Sahi standard
@@ -163,10 +163,12 @@ module Sahi
       popup
     end
 
+
     def height
-      fetch("window.innerHeight \
-      || document.documentElement.clientHeight   \
-      || document.body.clientHeight")
+
+      fetch("Math.max(window.innerHeight || 0, \
+            document.documentElement.clientHeight || 0,
+      document.body.clientHeight || 0)").to_i
     end
 
     #-----------------------------------------------------------------------------------------------------------------
@@ -420,9 +422,18 @@ module Sahi
     end
 
 
-    def take_screenshot(to_absolute_path)
+    def take_screenshot(to_absolute_path, brw_height)
       @@sem_screenshot.synchronize {
+
         begin
+          @@logger.an_event.debug "browser height #{brw_height}"
+
+          body_height = height
+          @@logger.an_event.debug "body height #{body_height}"
+
+          page_count = body_height.divmod(brw_height)[1] == 0 ? body_height.divmod(brw_height)[0] : body_height.divmod(brw_height)[0] + 1
+          @@logger.an_event.debug "page count #{page_count}"
+
           # affiche le navigateur en premier plan
           #TODO update for linux
           window = RAutomation::Window.new(:hwnd => @browser_window_handle)
@@ -430,22 +441,91 @@ module Sahi
           window.activate
           window.wait_until_exists
           window.wait_until_present
+          @@logger.an_event.debug "restore de la fenetre du browser"
 
           #TODO update for linux
           #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
 
           #screenshot avec le handle => KO
           #TODO update for linux
-          Win32::Screenshot::Take.of(:window,
-                                     hwnd: @browser_window_handle).write!(to_absolute_path)
+          fetch("document.body.scrollTop=0")
+          @@logger.an_event.debug "positionnement en haut de la fenetre"
+
+          page_count.times { |page_index|
+
+            to_absolute_path.vol = page_index + 1
+            @@logger.an_event.debug "volume de la page du screenshot #{to_absolute_path.vol}"
+
+            Win32::Screenshot::Take.of(:window,
+                                       hwnd: @browser_window_handle).write!(to_absolute_path.absolute_path)
+
+            @@logger.an_event.debug "prise du screenshot #{to_absolute_path.basename}"
+            # attend que l'image ait été enresitrée pour ne pas en perdre
+            wait(60) { to_absolute_path.exist? }
+            @@logger.an_event.debug "Le volume du screenshot #{to_absolute_path.basename} existe"
+
+            #si pas derniere page alors on passe à la page suivante
+            if to_absolute_path.vol.to_i <= page_count
+              fetch("document.body.scrollTop=#{(brw_height * (page_index + 1)) + 1}")
+              @@logger.an_event.debug "positionnement sur la page suivante #{(brw_height * (page_index + 1)) + 1}"
+            end
+          }
+
         rescue Exception => e
           #TODO update for linux
-          Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+          fetch("document.body.scrollTop=0")
+          @@logger.an_event.debug "positionnement en haut de la fenetre"
+
+          page_count.times { |page_index|
+
+            to_absolute_path.vol = page_index + 1
+            @@logger.an_event.debug "volume de la page du screenshot #{to_absolute_path.vol}"
+            Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+            @@logger.an_event.debug "prise du screenshot"
+            #si pas derniere page alors on passe à la page suivante
+            if to_absolute_path.vol.to_i <= page_count
+              fetch("document.body.scrollTop=#{(brw_height * (page_index + 1)) + 1}")
+              @@logger.an_event.debug "positionnement sur la page suivante #{(brw_height * (page_index + 1)) + 1}"
+            end
+          }
+
         else
 
         ensure
+          # minize la fenetre du browser
           window.minimize
 
+          #fusion  des screen dans un fichier image
+          if page_count > 1
+            @@logger.an_event.debug "merging des screenshots"
+            MiniMagick.cli = :imagemagick
+            MiniMagick.cli_path = $image_magick_path
+            MiniMagick.debug = true if $debugging
+
+
+            MiniMagick::Tool::Montage.new do |builder|
+              builder.background << '#000000'
+              builder.geometry << "+1+1"
+              page_count.times { |page_index|
+                to_absolute_path.vol = page_index + 1
+                @@logger.an_event.debug "ajout du screenshot #{to_absolute_path.basename}"
+                builder << to_absolute_path.absolute_path if to_absolute_path.vol.to_i <= page_count
+              }
+              to_absolute_path.vol = nil
+              builder << to_absolute_path.absolute_path
+            end
+
+            @@logger.an_event.debug "merging termine des screenshots #{to_absolute_path.basename}"
+
+            #delete screenshots
+            page_count.times { |page_index|
+              to_absolute_path.vol = page_index + 1
+              if to_absolute_path.vol.to_i <= page_count
+                to_absolute_path.delete
+                @@logger.an_event.debug "suppression du screenshot #{to_absolute_path.basename}"
+              end
+            }
+          end
         end
       }
     end

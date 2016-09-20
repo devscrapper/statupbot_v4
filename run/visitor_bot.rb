@@ -371,6 +371,7 @@ else
   $debugging = parameters.debugging
   $java_runtime_path = parameters.java_runtime_path.join(File::SEPARATOR)
   $java_key_tool_path = parameters.java_key_tool_path.join(File::SEPARATOR)
+  $image_magick_path = parameters.image_magick_path.join(File::SEPARATOR)
   $start_page_server_ip = parameters.start_page_server_ip
   $start_page_server_port = parameters.start_page_server_port
   $dir_archive = parameters.archive
@@ -384,6 +385,7 @@ else
   logger.an_event.debug "File Parameters begin------------------------------------------------------------------------------"
   logger.a_log.info "java runtime path : #{$java_runtime_path}"
   logger.a_log.info "java key tool path : #{$java_key_tool_path}"
+  logger.a_log.info "image magick path : #{$image_magick_path}"
   logger.a_log.info "start page server ip : #{$start_page_server_ip}"
   logger.a_log.info "start page server port: #{$start_page_server_port}"
   logger.a_log.info "debugging : #{$debugging}"
@@ -401,6 +403,7 @@ else
       $java_key_tool_path.nil? or
       $start_page_server_ip.nil? or
       $start_page_server_port.nil? or
+      $image_magick_path.nil? or
       $debugging.nil? or
       $staging.nil?
     $stderr << "some parameters not define" << "\n"
