@@ -102,7 +102,6 @@ module Monitoring
                                  :index => count_finished_actions)
       else
         response = resource.post(:visit_id => visit_id,
-                                 :action => action,
                                  :index => count_finished_actions)
       end
    #   JSON.parse(response)

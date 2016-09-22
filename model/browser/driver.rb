@@ -164,7 +164,7 @@ module Sahi
     end
 
 
-    def height
+    def get_body_height
 
       fetch("Math.max(window.innerHeight || 0, \
             document.documentElement.clientHeight || 0,
@@ -422,19 +422,13 @@ module Sahi
     end
 
 
-    def take_screenshot(to_absolute_path, brw_height)
+    def take_screenshot(screenshot_flow, brw_height)
       @@sem_screenshot.synchronize {
 
         begin
-          @@logger.an_event.debug "browser height #{brw_height}"
-
-          body_height = height
-          @@logger.an_event.debug "body height #{body_height}"
-
-          page_count = body_height.divmod(brw_height)[1] == 0 ? body_height.divmod(brw_height)[0] : body_height.divmod(brw_height)[0] + 1
-          @@logger.an_event.debug "page count #{page_count}"
-
-          # affiche le navigateur en premier plan
+          #-------------------------------------------------------------------------------------------------------------
+          # affiche le browser en premier plan
+          #-------------------------------------------------------------------------------------------------------------
           #TODO update for linux
           window = RAutomation::Window.new(:hwnd => @browser_window_handle)
           window.restore if window.minimized?
@@ -443,105 +437,49 @@ module Sahi
           window.wait_until_present
           @@logger.an_event.debug "restore de la fenetre du browser"
 
-          #TODO update for linux
-          #Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
+          #-------------------------------------------------------------------------------------------------------------
+          # prise du screenshot
+          #-------------------------------------------------------------------------------------------------------------
+          # recuperation de la hauteur du body de la page courante
+          body_height = get_body_height
+          @@logger.an_event.debug "body height #{body_height}"
 
-          #screenshot avec le handle => KO
-          #TODO update for linux
-          fetch("document.body.scrollTop=0")
-          @@logger.an_event.debug "positionnement en haut de la fenetre"
+          # calcul du nombre de page en fonction de la hauteur du browser
+          page_count = body_height.divmod(brw_height)[1] == 0 ?
+              body_height.divmod(brw_height)[0] :
+              body_height.divmod(brw_height)[0] + 1
 
-          page_count.times { |page_index|
+          if page_count == 1
+            # une page dans le screenshot
+            screenshot(screenshot_flow)
 
-            to_absolute_path.vol = page_index + 1
-            @@logger.an_event.debug "volume de la page du screenshot #{to_absolute_path.vol}"
+          else
+            # plusieurs pages dans le screenshot
+            screenshots(screenshot_flow, page_count, brw_height)
 
-            Win32::Screenshot::Take.of(:window,
-                                       hwnd: @browser_window_handle).write!(to_absolute_path.absolute_path)
-
-            @@logger.an_event.debug "prise du screenshot #{to_absolute_path.basename}"
-            # attend que l'image ait été enresitrée pour ne pas en perdre
-            wait(60) { to_absolute_path.exist? }
-            @@logger.an_event.debug "Le volume du screenshot #{to_absolute_path.basename} existe"
-
-            #si pas derniere page alors on passe à la page suivante
-            if to_absolute_path.vol.to_i <= page_count
-              fetch("document.body.scrollTop=#{(brw_height * (page_index + 1)) + 1}")
-              @@logger.an_event.debug "positionnement sur la page suivante #{(brw_height * (page_index + 1)) + 1}"
-            end
-          }
+          end
 
         rescue Exception => e
-          #TODO update for linux
-          fetch("document.body.scrollTop=0")
-          @@logger.an_event.debug "positionnement en haut de la fenetre"
-
-          page_count.times { |page_index|
-
-            to_absolute_path.vol = page_index + 1
-            @@logger.an_event.debug "volume de la page du screenshot #{to_absolute_path.vol}"
-            Win32::Screenshot::Take.of(:desktop).write!(to_absolute_path)
-            @@logger.an_event.debug "prise du screenshot"
-            #si pas derniere page alors on passe à la page suivante
-            if to_absolute_path.vol.to_i <= page_count
-              fetch("document.body.scrollTop=#{(brw_height * (page_index + 1)) + 1}")
-              @@logger.an_event.debug "positionnement sur la page suivante #{(brw_height * (page_index + 1)) + 1}"
-            end
-          }
+          @@logger.an_event.error "take screenshot #{screenshot_flow.basename} : #{e.message}"
 
         else
+          @@logger.an_event.debug "take screenshot #{screenshot_flow.basename}"
 
         ensure
-          # minize la fenetre du browser
+          #-------------------------------------------------------------------------------------------------------------
+          # cache le browser
+          #-------------------------------------------------------------------------------------------------------------
           window.minimize
 
-          #fusion  des screen dans un fichier image
-          if page_count > 1
-            @@logger.an_event.debug "merging des screenshots"
-            MiniMagick.cli = :imagemagick
-            MiniMagick.cli_path = $image_magick_path
-            MiniMagick.debug = true if $debugging
-
-
-            MiniMagick::Tool::Montage.new do |builder|
-              builder.background << '#000000'
-              builder.geometry << "+1+1"
-              page_count.times { |page_index|
-                to_absolute_path.vol = page_index + 1
-                @@logger.an_event.debug "ajout du screenshot #{to_absolute_path.basename}"
-                builder << to_absolute_path.absolute_path if to_absolute_path.vol.to_i <= page_count
-              }
-              to_absolute_path.vol = nil
-              builder << to_absolute_path.absolute_path
-            end
-
-            @@logger.an_event.debug "merging termine des screenshots #{to_absolute_path.basename}"
-
-            #delete screenshots
-            page_count.times { |page_index|
-              to_absolute_path.vol = page_index + 1
-              if to_absolute_path.vol.to_i <= page_count
-                to_absolute_path.delete
-                @@logger.an_event.debug "suppression du screenshot #{to_absolute_path.basename}"
-              end
-            }
-          end
         end
       }
     end
 
 
-    def take_area_screenshot(to_absolute_path, coord)
-      #TODO update for linux
-      begin
-        Win32::Screenshot::Take.of(:desktop, area: coord).write!(to_absolute_path)
-
-          #      Win32::Screenshot::Take.of(:window,
-          #                                hwnd: @browser_window_handle, area: coord).write!(to_absolute_path)
-      rescue Exception => e
-        Win32::Screenshot::Take.of(:desktop, area: coord).write!(to_absolute_path)
-      else
-      end
+    def take_area_screenshot(screenshot_flow, coord)
+      @@sem_screenshot.synchronize {
+        screenshot(screenshot_flow, coord)
+      }
     end
 
     def title
@@ -623,6 +561,104 @@ module Sahi
 
       end
       @browser_window_handle
+    end
+
+    # est capable de screener :
+    # soit le desktop
+    # soit la fenetre
+    # soit une zone de la page
+    # en premiere intention on screen la fenetre.
+    # si win32 n'arrive pas à trouevr la fenetre alors on screen le desktop
+    def screenshot(screenshot_flow, coord=nil)
+      begin
+        #TODO update for linux
+        # screen la fenetre
+        if coord.nil?
+          Win32::Screenshot::Take.of(:window,
+                                     hwnd: @browser_window_handle).write!(screenshot_flow.absolute_path)
+        else
+          Win32::Screenshot::Take.of(:window,
+                                     hwnd: @browser_window_handle,
+                                     area: coord).write!(screenshot_flow.absolute_path)
+        end
+      rescue Exception => e
+        #si le screen de la fenetre echoue, on screen le desktop
+        @@logger.an_event.warn "prise du screenshot #{screenshot_flow.basename} : #{e.message}"
+        #TODO update for linux
+        if coord.nil?
+          Win32::Screenshot::Take.of(:desktop).write!(screenshot_flow.absolute_path)
+
+        else
+          Win32::Screenshot::Take.of(:desktop,
+                                     area: coord).write!(screenshot_flow.absolute_path)
+
+        end
+      end
+    end
+
+    # screen toutes les page d'un body dont la hauteur est supérieure à la hauteur du browser afin tout recuperer.
+    def screenshots(screenshot_flow, page_count, page_height)
+      # comme les objets sont passés par référence alors l'objet Flow screenshot_flow et que on modifie le volume
+      # on travaille sur une duplication d'un objet pour ne pas trouver un Flow avec un volume different de nil ou empty/
+      screenshot_tmp = screenshot_flow.dup
+
+      @@logger.an_event.debug "page count #{page_count}"
+      @@logger.an_event.debug "page height #{page_height}"
+      #-------------------------------------------------------------------------------------------------------------
+      # screen des pages du body html
+      #-------------------------------------------------------------------------------------------------------------
+      fetch("document.body.scrollTop=0")
+      @@logger.an_event.debug "positionnement en haut de la fenetre"
+
+      page_count.times { |page_index|
+
+        screenshot_tmp.vol = page_index + 1
+        @@logger.an_event.debug "page #{screenshot_tmp.vol} du screenshot #{screenshot_tmp.basename}"
+
+        screenshot(screenshot_tmp)
+
+        # attend que l'image ait été enregistrée pour ne pas en perdre
+        wait(60) { screenshot_tmp.exist? }
+        @@logger.an_event.debug "page #{screenshot_tmp.vol} du screenshot #{screenshot_tmp.basename} existe"
+
+        #si pas derniere page alors on passe à la page suivante
+        if screenshot_tmp.vol.to_i <= page_count
+          scrolling = (page_height * (page_index + 1)) + 1
+          fetch("document.body.scrollTop=#{scrolling}")
+          @@logger.an_event.debug "scrolling #{scrolling}"
+        end
+      }
+
+      #-------------------------------------------------------------------------------------------------------------
+      # fusion  des screens dans un fichier image
+      #-------------------------------------------------------------------------------------------------------------
+      @@logger.an_event.debug "merge les #{page_count} screenshots"
+      MiniMagick.cli = :imagemagick
+      MiniMagick.cli_path = $image_magick_path
+      MiniMagick.debug = true if $debugging
+
+      MiniMagick::Tool::Montage.new do |builder|
+        builder.background << '#000000'
+        builder.geometry << "+1+1"
+        page_count.times { |page_index|
+          screenshot_tmp.vol = page_index + 1
+          @@logger.an_event.debug "ajout du screenshot #{screenshot_tmp.basename}"
+          builder << screenshot_tmp.absolute_path if screenshot_tmp.vol.to_i <= page_count
+        }
+        screenshot_tmp.vol = nil
+        builder << screenshot_tmp.absolute_path
+      end
+
+      @@logger.an_event.debug "merge des screenshots #{screenshot_tmp.basename} over"
+
+      #-------------------------------------------------------------------------------------------------------------
+      # delete screenshots de page
+      #-------------------------------------------------------------------------------------------------------------
+      page_count.times { |page_index|
+        screenshot_tmp.vol = page_index + 1
+        screenshot_tmp.delete
+        @@logger.an_event.debug "suppression du screenshot #{screenshot_tmp.basename}"
+      }
     end
   end # Browser
 

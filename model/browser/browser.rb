@@ -994,7 +994,7 @@ module Browsers
 
       begin
 
-        @driver.take_area_screenshot(output_file.absolute_path, coord_captcha)
+        @driver.take_area_screenshot(output_file, coord_captcha)
 
       rescue Exception => e
         @@logger.an_event.fatal "take captcha : #{e.message}"
