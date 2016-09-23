@@ -62,12 +62,12 @@ module Pages
     #
     #----------------------------------------------------------------------------------------------------------------
 
-    def initialize(browser, id_visitor, home_visitor)
+    def initialize(browser, id_visit, home_visitor)
       count_try = 3
       sleep 5
       begin
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id_visitor"}) if id_visitor.nil?
+        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id_visit"}) if id_visit.nil?
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "home_visitor"}) if home_visitor.nil?
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search"}) if browser.engine_search.nil?
         raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.id_captcha"}) if browser.engine_search.id_captcha.nil? or browser.engine_search.id_captcha.empty?
@@ -95,22 +95,23 @@ module Pages
               0)
 
         i = 0
-        while (screenshot_file = Flow.new(home_visitor, "screenshot", id_visitor, Date.today, i = i + 1, ".png")).exist?
+        while (screenshot_file = Flow.new(home_visitor, "screenshot", id_visit, Date.today, i = i + 1, ".png")).exist?
         end
         @@logger.an_event.debug "screenshot file #{screenshot_file}"
 
         browser.take_screenshot(screenshot_file)
 
         i = 0
-        while (captcha_file = Flow.new(home_visitor, "captcha", id_visitor, Date.today, i = i + 1, ".png")).exist?
+        while (captcha_file = Flow.new(home_visitor, "captcha", id_visit, Date.today, i = i + 1, ".png")).exist?
         end
         @@logger.an_event.debug "captcha file #{captcha_file}"
 
         browser.take_captcha(captcha_file, browser.engine_search.coord_captcha)
+        @image = captcha_file
 
         @text = Captchas::convert_to_text(:screenshot => screenshot_file.absolute_path,
                                           :captcha => captcha_file.absolute_path,
-                                          :id_visitor => id_visitor)
+                                          :id_visit => id_visit)
 
         @@logger.an_event.debug "captcha converted to string : #{@text}"
 
@@ -136,11 +137,12 @@ module Pages
 
       else
         # i = 0
-        # while (screenshot_file = Flow.new(home_visitor, "screenshot", id_visitor, Date.today, i = i + 1, ".png")).exist?
+        # while (screenshot_file = Flow.new(home_visitor, "screenshot", id_visit, Date.today, i = i + 1, ".png")).exist?
         #   screenshot_file.delete
         # end
         # les screenshot ou les captcha seront supprimé par la suppression du repertoire d"execution du visitor lors de l'hinume"
         @@logger.an_event.info "captcha converted to string : #{@text}"
+
 
       ensure
 

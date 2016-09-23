@@ -104,11 +104,39 @@ module Monitoring
         response = resource.post(:visit_id => visit_id,
                                  :index => count_finished_actions)
       end
-   #   JSON.parse(response)
+      #   JSON.parse(response)
       raise response.content if response.code != 201
 
     rescue Exception => e
       $stderr << "cannot create browsed page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+
+    else
+
+    end
+  end
+
+  def captcha_browse(visit_id, captcha_path, index, text=nil)
+    #text est la value du captcha
+    begin
+      resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/captchas")
+
+      if File.exist?(captcha_path)
+        image = File.open(captcha_path)
+
+        response = resource.post(:image => image,
+                                 :visit_id => visit_id,
+                                 :index => index,
+                                 :text => text)
+      else
+        response = resource.post(:visit_id => visit_id,
+                                 :index => index,
+                                 :text => text)
+      end
+      #   JSON.parse(response)
+      raise response.content if response.code != 201
+
+    rescue Exception => e
+      $stderr << "cannot create browsed captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
 
@@ -135,6 +163,7 @@ module Monitoring
   module_function :visit_started
   module_function :change_state_visit
   module_function :page_browse
+  module_function :captcha_browse
   module_function :load_parameter
 
 

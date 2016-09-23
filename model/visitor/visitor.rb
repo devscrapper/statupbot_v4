@@ -379,7 +379,7 @@ module Visitors
           rescue Exception => e
             @@logger.an_event.error "visitor  make action <#{COMMANDS[action]}> : #{e.message}"
             screenshot_path = take_screenshot(count_finished_actions, action)
-            MMonitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
+            Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
             raise e #stop la visit
 
           else
@@ -1399,7 +1399,7 @@ module Visitors
         #--------------------------------------------------------------------------------------------------------
         # captcha page replace a page : EngineSearch, Results, Unmanage
         #--------------------------------------------------------------------------------------------------------
-        captcha_page = Pages::Captcha.new(@browser, @id, @home)
+        captcha_page = Pages::Captcha.new(@browser, @visit.id, @home)
 
         @browser.set_input_captcha(captcha_page.type, captcha_page.input, captcha_page.text)
 
@@ -1412,11 +1412,16 @@ module Visitors
       else
         @@logger.an_event.info "visitor managed captcha"
         max_count_submiting_captcha -= 1
+
         #si la soumission du text du captcha a échoué alors, google en affiche un nouveau.
         #le nouveau screenshot est dans un nouveau volume du flow.
         #le captcha précédent peut être déclaré comme bad aupres de de-capcher.
         #TODO Captchas::bad_string(id_visitor)
-        #TODO Monitoring::submit_captcha
+        Monitoring::captcha_browse(@visit.id,
+                                   captcha_page.image.absolute_path,
+                                   MAX_COUNT_SUBMITING_CAPTCHA - max_count_submiting_captcha + 1,
+                                   captcha_page.text)
+
         raise Error.new(VISITOR_TOO_MANY_CAPTCHA, :error => e) if max_count_submiting_captcha == 0
 
         max_count_submiting_captcha

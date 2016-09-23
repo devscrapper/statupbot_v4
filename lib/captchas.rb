@@ -58,7 +58,7 @@ module Captchas
     begin
       screenshot_file = params[:screenshot]
       captcha_file = params[:captcha]
-      visitor_id = params[:visitor_id]
+      visit_id = params[:visit_id]
       captcha_value = nil
 
       if !screenshot_file.nil? and !captcha_file.nil?
@@ -67,12 +67,12 @@ module Captchas
 
         begin
           # si le calcul automatique du text du captcha a fonctionné alors captcha_value contient le text
-          captcha_value = auto_convert_to_text(captcha_file, visitor_id, saas_host, saas_port)
+          captcha_value = auto_convert_to_text(captcha_file, visit_id, saas_host, saas_port)
 
         rescue Exception => e
           # sinon alors la résolution est realisé manuellement au moyen d'un evoie de mail
           # dans ce cas, regulierement saas_rails/captcha est interrogé pour recuperer le text
-          captcha_value = manual_convert_to_text_manual(screenshot_file, visitor_id, saas_host, saas_port)
+          captcha_value = manual_convert_to_text_manual(screenshot_file, visit_id, saas_host, saas_port)
 
         else
 
@@ -80,7 +80,7 @@ module Captchas
       elsif !screenshot_file.nil?
         raise "screenshot file not found #{screenshot_file}" unless File.exist?(screenshot_file)
         begin
-          captcha_value = manual_convert_to_text_manual(screenshot_file, visitor_id, saas_host, saas_port)
+          captcha_value = manual_convert_to_text_manual(screenshot_file, visit_id, saas_host, saas_port)
 
         rescue Exception => e
 
@@ -89,7 +89,7 @@ module Captchas
       elsif !captcha_file.nil?
         raise "captcha file not found #{captcha_file}" unless File.exist?(captcha_file)
         begin
-          captcha_value = auto_convert_to_text(captcha_file, visitor_id, saas_host, saas_port)
+          captcha_value = auto_convert_to_text(captcha_file, visit_id, saas_host, saas_port)
 
         rescue Exception => e
 
@@ -118,10 +118,10 @@ module Captchas
   end
 
 
-  def auto_convert_to_text(captcha_file, visitor_id, saas_host, saas_port)
+  def auto_convert_to_text(captcha_file, visit_id, saas_host, saas_port)
     image = File.open(captcha_file)
 
-    captcha = send_image(image, visitor_id, saas_host, saas_port, :auto)
+    captcha = send_image(image, visit_id, saas_host, saas_port, :auto)
 
     response = RestClient.delete "http://#{saas_host}:#{saas_port}/captchas/#{captcha['id']}",
                                  :content_type => :json,
@@ -130,10 +130,10 @@ module Captchas
     captcha['value']
   end
 
-  def manual_convert_to_text_manual(screenshot_file, visitor_id, saas_host, saas_port)
+  def manual_convert_to_text_manual(screenshot_file, visit_id, saas_host, saas_port)
     image = File.open(screenshot_file)
 
-    captcha = send_image(image, visitor_id, saas_host, saas_port, :manual)
+    captcha = send_image(image, visit_id, saas_host, saas_port, :manual)
 
     captcha_value = nil
 
@@ -159,9 +159,9 @@ module Captchas
   end
 
 
-  def send_image(image, visitor_id, saas_host, saas_port, mode)
+  def send_image(image, visit_id, saas_host, saas_port, mode)
     resource = RestClient::Resource.new("http://#{saas_host}:#{saas_port}/captchas")
-    response = resource.post(:image => image, :visitor_id => visitor_id, :mode => mode)
+    response = resource.post(:image => image, :visit_id => visit_id, :mode => mode)
 
     JSON.parse(response)
   end

@@ -7,7 +7,9 @@ require 'sahi'
 require 'mini_magick'
 
 #----------------------------------------------------------------------------------------------------------------
-# enrichissment, surcharge pour personnaliser ou corriger le gem Sahi standard
+#
+# Enrichissment, surcharge pour personnaliser ou corriger le gem Sahi standard
+#
 #----------------------------------------------------------------------------------------------------------------
 
 module Sahi
@@ -20,16 +22,16 @@ module Sahi
     #----------------------------------------------------------------------------------------------------------------
     # message exception
     #----------------------------------------------------------------------------------------------------------------
-    ARGUMENT_UNDEFINE = 200 # à remonter en code retour de statupbot
-    DRIVER_NOT_CREATE = 201 # à remonter en code retour de statupbot
-    SAHI_PROXY_NOT_FOUND = 202 # à remonter en code retour de statupbot
-    BROWSER_TYPE_NOT_EXIST = 203 # à remonter en code retour de statupbot
-    OPEN_DRIVER_FAILED = 204 # à remonter en code retour de statupbot
-    CLOSE_DRIVER_TIMEOUT = 205 # à remonter en code retour de statupbot
-    CLOSE_DRIVER_FAILED = 206 # à remonter en code retour de statupbot
-    CATCH_PROPERTIES_PAGE_FAILED = 207 # à remonter en code retour de statupbot
-    DRIVER_SEARCH_FAILED = 208 # à remonter en code retour de statupbot
-    BROWSER_TYPE_FILE_NOT_FOUND = 209 # à remonter en code retour de statupbot
+    ARGUMENT_UNDEFINE = 200
+    DRIVER_NOT_CREATE = 201
+    SAHI_PROXY_NOT_FOUND = 202
+    BROWSER_TYPE_NOT_EXIST = 203
+    OPEN_DRIVER_FAILED = 204
+    CLOSE_DRIVER_TIMEOUT = 205
+    CLOSE_DRIVER_FAILED = 206
+    CATCH_PROPERTIES_PAGE_FAILED = 207
+    DRIVER_SEARCH_FAILED = 208
+    BROWSER_TYPE_FILE_NOT_FOUND = 209
     DRIVER_NOT_ACCESS_URL = 210
     TEXTBOX_SEARCH_NOT_FOUND = 211
     SUBMIT_SEARCH_NOT_FOUND = 212
@@ -79,14 +81,6 @@ module Sahi
 
     end
 
-
-    def check_proxy_local
-      begin
-        response("http://localhost:9999/_s_/spr/blank.htm")
-      rescue
-        raise "Sahi proxy local is not available."
-      end
-    end
 
     def close_popups
       windows = get_windows
@@ -627,6 +621,10 @@ module Sahi
       # comme les objets sont passés par référence alors l'objet Flow screenshot_flow et que on modifie le volume
       # on travaille sur une duplication d'un objet pour ne pas trouver un Flow avec un volume different de nil ou empty/
       screenshot_tmp = screenshot_flow.dup
+
+      a = fetch("Math.max(window.innerHeight")
+            b = fetch("document.documentElement.clientHeight")
+      c = fetch("document.body.clientHeight")
 
       @@logger.an_event.debug "page count #{page_count}"
       @@logger.an_event.debug "page height #{page_height}"

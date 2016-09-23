@@ -1,5 +1,5 @@
 staging;os;os_version;browser;browser_version;runtime_path;proxy_system
-development;windows;seven;Edge;;;true
+development;windows;seven;Edge;none;;true
 development;windows;seven;Chrome;39.0.2139.3;C:\Program Files (x86)\Google\Chrome\Application\chrome.exe;false
 development;windows;seven;Chrome;23.0.1271.97;C:\Program Files (x86)\Google\Chrome\Application\chrome.exe;false
 development;windows;seven;Firefox;24.0;C:\Program Files (x86)\Mozilla Firefox\firefox.exe;false
@@ -19,4 +19,4 @@ test;windows;seven;Chrome;23.0.1271.97;D:\GoogleChromePortable\37.0.2062.124\Goo
 test;windows;seven;Firefox;24.0;C:\Program Files\Mozilla Firefox\31\firefox.exe;false
 test;windows;seven;Firefox;19.0;C:\Program Files\Mozilla Firefox\31\firefox.exe;false
 test;windows;seven;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
-test;windows;seven;Edge;;;true
+test;windows;seven;Edge;none;;true
