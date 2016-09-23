@@ -574,9 +574,9 @@ module Sahi
         #TODO update for linux
         # screen la fenetre
         if coord.nil?
-          Win32::Screenshot::Take.of(:foreground).write!(screenshot_flow.absolute_path)
+          Win32::Screenshot::Take.of(:desktop).write!(screenshot_flow.absolute_path)
         else
-          Win32::Screenshot::Take.of(:foreground,
+          Win32::Screenshot::Take.of(:desktop,
                                      area: coord).write!(screenshot_flow.absolute_path)
         end
       rescue Exception => e
