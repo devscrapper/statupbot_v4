@@ -32,12 +32,14 @@ module Monitoring
     begin
       load_parameter()
 
-      response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}",
-                                  JSON.generate(reason.nil? ? {:state => state} :
-                                                    {:state => state, :reason => reason}),
-                                  :content_type => :json,
-                                  :accept => :json
-      raise response.content if response.code != 201
+      wait(60, true, 5) {
+        response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}",
+                                    JSON.generate(reason.nil? ? {:state => state} :
+                                                      {:state => state, :reason => reason}),
+                                    :content_type => :json,
+                                    :accept => :json
+        raise response.content if response.code != 201
+      }
 
     rescue Exception => e
       $stderr << "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
@@ -53,13 +55,14 @@ module Monitoring
     begin
       load_parameter()
 
-      response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/started",
-                                  JSON.generate({:actions => actions,
-                                                 :ip_geo_proxy => ip_geo_proxy}),
-                                  :content_type => :json,
-                                  :accept => :json
-      raise response.content if response.code != 201
-
+      wait(60, true, 5) {
+        response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/started",
+                                    JSON.generate({:actions => actions,
+                                                   :ip_geo_proxy => ip_geo_proxy}),
+                                    :content_type => :json,
+                                    :accept => :json
+        raise response.content if response.code != 201
+      }
     rescue Exception => e
       $stderr << "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
@@ -76,12 +79,13 @@ module Monitoring
     begin
       load_parameter()
 
-      response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/browsed_page",
-                                  JSON.generate({:actions => actions}),
-                                  :content_type => :json,
-                                  :accept => :json
-      raise response.content if response.code != 201
-
+      wait(60, true, 5) {
+        response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/browsed_page",
+                                    JSON.generate({:actions => actions}),
+                                    :content_type => :json,
+                                    :accept => :json
+        raise response.content if response.code != 201
+      }
     rescue Exception => e
       $stderr << "cannot change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
@@ -94,19 +98,20 @@ module Monitoring
     begin
       resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/pages")
 
-      if File.exist?(screenshot_path)
-        image = File.open(screenshot_path)
+      wait(60, true, 5) {
+        if File.exist?(screenshot_path)
+          image = File.open(screenshot_path)
 
-        response = resource.post(:image => image,
-                                 :visit_id => visit_id,
-                                 :index => count_finished_actions)
-      else
-        response = resource.post(:visit_id => visit_id,
-                                 :index => count_finished_actions)
-      end
-      #   JSON.parse(response)
-      raise response.content if response.code != 201
-
+          response = resource.post(:image => image,
+                                   :visit_id => visit_id,
+                                   :index => count_finished_actions)
+        else
+          response = resource.post(:visit_id => visit_id,
+                                   :index => count_finished_actions)
+        end
+        #   JSON.parse(response)
+        raise response.content if response.code != 201
+      }
     rescue Exception => e
       $stderr << "cannot create browsed page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
@@ -120,20 +125,21 @@ module Monitoring
     begin
       resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/captchas")
 
-      if File.exist?(captcha_path)
-        image = File.open(captcha_path)
+      wait(60, true, 5) {
+        if File.exist?(captcha_path)
 
-        response = resource.post(:image => image,
-                                 :visit_id => visit_id,
-                                 :index => index,
-                                 :text => text)
-      else
-        response = resource.post(:visit_id => visit_id,
-                                 :index => index,
-                                 :text => text)
-      end
-      #   JSON.parse(response)
-      raise response.content if response.code != 201
+          response = resource.post(:image => File.open(captcha_path),
+                                   :visit_id => visit_id,
+                                   :index => index,
+                                   :text => text)
+        else
+          response = resource.post(:visit_id => visit_id,
+                                   :index => index,
+                                   :text => text)
+        end
+        #   JSON.parse(response)
+        raise response.content if response.code != 201
+      }
 
     rescue Exception => e
       $stderr << "cannot create browsed captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
@@ -160,11 +166,38 @@ module Monitoring
 
   end
 
+  # wait pour une duree passé en paramètre si pas de bloc passé
+  # si un bloc est passé alors evalue le bloc. Si le resultates est true alors return
+  # sinon si false ou exception alors reessaie apres un intervale (par defaut 0.2).
+  # qd durée dépassé alors on s'arrete. une exception est levée si exception == true.
+  def wait(timeout, exception = false, interval=0.2)
+
+    if !block_given?
+      sleep(timeout)
+      return
+    end
+
+    begin
+
+      return if yield
+
+    rescue Exception => e
+      $stderr << e.message
+      sleep(interval)
+      timeout -= interval
+      retry if (0 < timeout)
+    end
+
+    raise e if exception
+
+
+  end
+
   module_function :visit_started
   module_function :change_state_visit
   module_function :page_browse
   module_function :captcha_browse
   module_function :load_parameter
-
+  module_function :wait
 
 end
