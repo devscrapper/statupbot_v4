@@ -470,6 +470,7 @@ module Sahi
           # cache le browser
           #-------------------------------------------------------------------------------------------------------------
           window.minimize
+          @@logger.an_event.debug "minimize de la fenetre du browser"
 
         end
       }
@@ -478,7 +479,34 @@ module Sahi
 
     def take_area_screenshot(screenshot_flow, coord)
       @@sem_screenshot.synchronize {
-        screenshot(screenshot_flow, coord)
+        begin
+          #-------------------------------------------------------------------------------------------------------------
+          # affiche le browser en premier plan
+          #-------------------------------------------------------------------------------------------------------------
+          #TODO update for linux
+          window = RAutomation::Window.new(:hwnd => @browser_window_handle)
+          window.restore if window.minimized?
+          window.activate
+          window.wait_until_exists
+          window.wait_until_present
+          @@logger.an_event.debug "restore de la fenetre du browser"
+
+          screenshot(screenshot_flow, coord)
+
+        rescue Exception => e
+          @@logger.an_event.error "take screenshot area #{screenshot_flow.basename} : #{e.message}"
+
+        else
+          @@logger.an_event.debug "take screenshot area #{screenshot_flow.basename}"
+
+        ensure
+          #-------------------------------------------------------------------------------------------------------------
+          # cache le browser
+          #-------------------------------------------------------------------------------------------------------------
+          window.minimize
+          @@logger.an_event.debug "minimize de la fenetre du browser"
+
+        end
       }
     end
 
