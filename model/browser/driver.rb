@@ -434,6 +434,13 @@ module Sahi
           #-------------------------------------------------------------------------------------------------------------
           # prise du screenshot
           #-------------------------------------------------------------------------------------------------------------
+          window_innerHeight =  fetch("window.innerHeight")
+          @@logger.an_event.debug "window_innerHeight : #{window_innerHeight}"
+          document_documentElement_clientHeight = fetch("document.documentElement.clientHeight")
+          @@logger.an_event.debug "document_documentElement_clientHeight : #{document_documentElement_clientHeight}"
+          document_body_clientHeight = fetch("document.body.clientHeight")
+          @@logger.an_event.debug "document_body_clientHeight : #{document_body_clientHeight}"
+
           # recuperation de la hauteur du body de la page courante
           body_height = get_body_height
           @@logger.an_event.debug "body height #{body_height}"
@@ -621,10 +628,6 @@ module Sahi
       # comme les objets sont passés par référence alors l'objet Flow screenshot_flow et que on modifie le volume
       # on travaille sur une duplication d'un objet pour ne pas trouver un Flow avec un volume different de nil ou empty/
       screenshot_tmp = screenshot_flow.dup
-
-      a = fetch("Math.max(window.innerHeight")
-            b = fetch("document.documentElement.clientHeight")
-      c = fetch("document.body.clientHeight")
 
       @@logger.an_event.debug "page count #{page_count}"
       @@logger.an_event.debug "page height #{page_height}"
