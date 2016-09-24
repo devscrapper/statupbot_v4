@@ -376,9 +376,9 @@ else
   $dir_tmp = parameters.tmp
   $dir_visitors = parameters.visitors
 
-  visitor_id = YAML::load(File.read(opts[:visit_file_name]))[:visitor][:id]
+  visit_id = YAML::load(File.read(opts[:visit_file_name]))[:visit][:id]
 
-  logger = Logging::Log.new(self, :staging => $staging, :id_file => File.join("#{File.basename(__FILE__, ".rb")}_#{visitor_id}"), :debugging => $debugging)
+  logger = Logging::Log.new(self, :staging => $staging, :id_file => File.join("#{File.basename(__FILE__, ".rb")}_#{visit_id}"), :debugging => $debugging)
   logger.an_event.debug "File Parameters begin------------------------------------------------------------------------------"
   logger.a_log.info "java runtime path : #{$java_runtime_path}"
   logger.a_log.info "java key tool path : #{$java_key_tool_path}"
