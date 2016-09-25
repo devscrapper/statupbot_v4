@@ -38,7 +38,7 @@ module Monitoring
                                                       {:state => state, :reason => reason}),
                                     :content_type => :json,
                                     :accept => :json
-        raise response.content if response.code != 201
+        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
       }
 
     rescue Exception => e
@@ -61,7 +61,7 @@ module Monitoring
                                                    :ip_geo_proxy => ip_geo_proxy}),
                                     :content_type => :json,
                                     :accept => :json
-        raise response.content if response.code != 201
+        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
       }
     rescue Exception => e
       $stderr << "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
@@ -84,7 +84,7 @@ module Monitoring
                                     JSON.generate({:actions => actions}),
                                     :content_type => :json,
                                     :accept => :json
-        raise response.content if response.code != 201
+        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
       }
     rescue Exception => e
       $stderr << "cannot change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
@@ -110,7 +110,7 @@ module Monitoring
                                    :index => count_finished_actions)
         end
         #   JSON.parse(response)
-        raise response.content if response.code != 201
+        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
       }
     rescue Exception => e
       $stderr << "cannot create browsed page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
@@ -138,7 +138,7 @@ module Monitoring
                                    :text => text)
         end
         #   JSON.parse(response)
-        raise response.content if response.code != 201
+        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
       }
 
     rescue Exception => e
@@ -166,10 +166,10 @@ module Monitoring
 
   end
 
-  # wait pour une duree passé en paramètre si pas de bloc passé
-  # si un bloc est passé alors evalue le bloc. Si le resultates est true alors return
-  # sinon si false ou exception alors reessaie apres un intervale (par defaut 0.2).
-  # qd durée dépassé alors on s'arrete. une exception est levée si exception == true.
+  # si pas de bloc passé => wait pour une duree passé en paramètre
+  # si un bloc est passé => evalue le bloc tant que le bloc return false, leve une exception, ou que le timeout n'est pas atteind
+  # qd le timeout est atteint, si exception == true alors propage l'exception hors du wait
+
   def wait(timeout, exception = false, interval=0.2)
 
     if !block_given?
@@ -177,20 +177,24 @@ module Monitoring
       return
     end
 
-    begin
-
-      return if yield
-
-    rescue Exception => e
-      $stderr << e.message
+    while (timeout > 0)
       sleep(interval)
       timeout -= interval
-      retry if (0 < timeout)
+      begin
+        return if yield
+      rescue Exception => e
+        p "try again : #{e.message}"
+      else
+        p "try again."
+      end
     end
 
-    raise e if exception
-
-
+    if exception == true
+      p "raise exception : #{e.message}"
+      raise e
+    else
+      p "no exception"
+    end
   end
 
   module_function :visit_started
