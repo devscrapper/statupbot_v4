@@ -47,16 +47,12 @@ module Sahi
     # variable de class
     #----------------------------------------------------------------------------------------------------------------
     @@logger = nil
-    @@sem_screenshot = nil # protège la prise d'image pour assurer que se qui est photographie est bien celui du navigateur
-    # quand plusieurs exécution son réalisées en //
     #----------------------------------------------------------------------------------------------------------------
     # attribut
     #----------------------------------------------------------------------------------------------------------------
 
     attr_reader :browser_type,
-                :browser_pid,
-                :browser_process_name,
-                :browser_window_handle
+                :browser_process_name
 
     #----------------------------------------------------------------------------------------------------------------
     # class methods
@@ -202,7 +198,6 @@ module Sahi
         @domain_name = nil
         @sahisid = nil
         @print_steps = false
-        @browser_pid = nil
         @browser_type = browser_type.gsub(" ", "_")
 
       rescue Exception => e
@@ -217,44 +212,6 @@ module Sahi
 
     end
 
-
-    def kill
-      unless @browser_pid.nil?
-        count_try = 3
-
-        @@logger.an_event.debug "going to kill pid #{@browser_pid} browser #{@browser_type}"
-        begin
-          #TODO remplacer taskkill par kill pour linux
-          res = IO.popen("taskkill /PID #{@browser_pid} /T /F").read
-
-          @@logger.an_event.debug "taskkill for #{@browser_type} pid #{@browser_pid} : #{res}"
-
-        rescue Exception => e
-          count_try -= 1
-
-          if count_try > 0
-            @@logger.an_event.debug "try #{count_try},kill browser type #{@browser_type} pid #{@browser_pid}: #{e.message}"
-            sleep (1)
-            retry
-
-          else
-            @@logger.an_event.error "failed to kill pid #{@browser_pid} browser #{@browser_type} : #{e.message}"
-            raise Error.new(CLOSE_DRIVER_FAILED, :error => e)
-
-          end
-        else
-          @@logger.an_event.debug "kill pid #{@browser_pid} browser #{@browser_type}"
-
-        ensure
-
-        end
-
-      else
-        @@logger.an_event.error "failed to kill browser #{@browser_type} because no pid"
-        raise Error.new(CLOSE_DRIVER_FAILED, :error => e)
-
-      end
-    end
 
     def links
       links = nil
@@ -302,7 +259,6 @@ module Sahi
 
       end
 
-
       begin
         @sahisid = Time.now.to_f
         start_url = "http://sahi.example.com/_s_/dyn/Driver_initialized"
@@ -321,7 +277,6 @@ module Sahi
 
       end
 
-
       begin
         wait(60) {
           is_ready?
@@ -335,12 +290,7 @@ module Sahi
 
       else
         @@logger.an_event.debug "driver ready"
-        #modifie le titre de la fenetre pour rechercher le pid du navigateur
-        execute_step("window.document.title =" + Utils.quoted(@sahisid.to_s))
-        @@logger.an_event.debug "set windows title browser #{@browser_type} with #{@sahisid.to_s}"
-        get_pid_browser
-        get_handle_window_browser
-        RAutomation::Window.new(:hwnd => @browser_window_handle).minimize
+
       end
     end
 
@@ -364,8 +314,6 @@ module Sahi
       rescue Exception => e
         raise Error.new(CLOSE_DRIVER_TIMEOUT, :error => e)
 
-      else
-
       end
     end
 
@@ -384,57 +332,16 @@ module Sahi
                     "width" => width,
                     "height" => height})
 
-      # si screenshot est pris avec sahi et peut prendre un element graphique et pas une page ou destop alors on peut
-      # eviter de deplacer à l'origine du repere pour fiabiliser la prise de photo du captcha.
-      #TODO move to linux
-      Window.from_handle(@browser_window_handle).move(0,
-                                                      0)
-    end
-
-    def running?
-
-      require 'csv'
-      #TODO remplacer tasklist par ps pour linux
-      res = IO.popen('tasklist /V /FI "PID eq ' + @browser_pid.to_s + '" /FO CSV /NH').read
-
-      @@logger.an_event.debug "tasklist for #{@browser_pid.to_s} : #{res}"
-
-      CSV.parse(res) do |row|
-        if row[1].nil?
-          # res == Informationÿ: aucune tƒche en service ne correspond aux critŠres sp‚cifi‚s.
-          # donc le pid n'existe plus => le browser nest plus running
-          return false
-        else
-          return true if row[1].include?(@browser_pid.to_s)
-
-        end
-      end
-      #ne doit jamais arriver ici
-      false
-
 
     end
 
 
     def take_screenshot(screenshot_flow, brw_height)
-      @@sem_screenshot.synchronize {
-
         begin
-          #-------------------------------------------------------------------------------------------------------------
-          # affiche le browser en premier plan
-          #-------------------------------------------------------------------------------------------------------------
-          #TODO update for linux
-          window = RAutomation::Window.new(:hwnd => @browser_window_handle)
-          window.restore if window.minimized?
-          window.activate
-          window.wait_until_exists
-          window.wait_until_present
-          @@logger.an_event.debug "restore de la fenetre du browser"
-
           #-------------------------------------------------------------------------------------------------------------
           # prise du screenshot
           #-------------------------------------------------------------------------------------------------------------
-          window_innerHeight =  fetch("window.innerHeight")
+          window_innerHeight = fetch("window.innerHeight")
           @@logger.an_event.debug "window_innerHeight : #{window_innerHeight}"
           document_documentElement_clientHeight = fetch("document.documentElement.clientHeight")
           @@logger.an_event.debug "document_documentElement_clientHeight : #{document_documentElement_clientHeight}"
@@ -467,50 +374,35 @@ module Sahi
           @@logger.an_event.debug "take screenshot #{screenshot_flow.basename}"
 
         ensure
-          #-------------------------------------------------------------------------------------------------------------
-          # cache le browser
-          #-------------------------------------------------------------------------------------------------------------
-          window.minimize
-          @@logger.an_event.debug "minimize de la fenetre du browser"
 
         end
-      }
+
     end
 
 
     def take_area_screenshot(screenshot_flow, coord)
-      @@sem_screenshot.synchronize {
-        begin
-          #-------------------------------------------------------------------------------------------------------------
-          # affiche le browser en premier plan
-          #-------------------------------------------------------------------------------------------------------------
-          #TODO update for linux
-          window = RAutomation::Window.new(:hwnd => @browser_window_handle)
-          window.restore if window.minimized?
-          window.activate
-          window.wait_until_exists
-          window.wait_until_present
-          @@logger.an_event.debug "restore de la fenetre du browser"
 
-          screenshot(screenshot_flow, coord)
+      begin
 
-        rescue Exception => e
-          @@logger.an_event.error "take screenshot area #{screenshot_flow.basename} : #{e.message}"
 
-        else
-          @@logger.an_event.debug "take screenshot area #{screenshot_flow.basename}"
+        screenshot(screenshot_flow, coord)
 
-        ensure
-          #-------------------------------------------------------------------------------------------------------------
-          # cache le browser
-          #-------------------------------------------------------------------------------------------------------------
-          window.minimize
-          @@logger.an_event.debug "minimize de la fenetre du browser"
+      rescue Exception => e
+        @@logger.an_event.error "take screenshot area #{screenshot_flow.basename} : #{e.message}"
 
-        end
-      }
+      else
+        @@logger.an_event.debug "take screenshot area #{screenshot_flow.basename}"
+
+      ensure
+
+
+      end
+
     end
 
+    def set_title(title)
+      execute_step("window.document.title =" + Utils.quoted(title.to_s))
+    end
     def title
       title = nil
       wait(60) {
@@ -534,63 +426,6 @@ module Sahi
 
     private
 
-
-    def get_pid_browser
-      # retourn le pid du browser ; au cas où Sahi n'arrive pas à le tuer.
-      count_try = 3
-      begin
-        require 'csv'
-        #TODO remplacer tasklist par ps pour linux
-        res = IO.popen('tasklist /V /FI "IMAGENAME eq ' + @browser_process_name + '" /FO CSV /NH').read
-
-        @@logger.an_event.debug "tasklist for #{@browser_process_name} : #{res}"
-
-        CSV.parse(res) do |row|
-          if row[8].include?(@sahisid.to_s)
-            @browser_pid = row[1].to_i
-            break
-
-          end
-        end
-
-        raise "sahiid not found in title browser in tasklist " if @browser_pid.nil?
-
-      rescue Exception => e
-        if count_try > 0
-          @@logger.an_event.debug "try #{count_try}, browser type #{@browser_type} has no pid : #{e.message}"
-          sleep (1)
-          retry
-        else
-          raise "browser type #{@browser_type} has no pid : #{e.message}"
-
-        end
-
-      else
-        @@logger.an_event.debug "browser type #{@browser_type} has pid #{@browser_pid}"
-
-      end
-    end
-
-    def get_handle_window_browser
-      begin
-        windows_lst = Window.find(:title => /#{@sahisid.to_s}/)
-
-        @@logger.an_event.debug "list windows #{windows_lst}"
-
-        window = windows_lst.first
-        @@logger.an_event.debug "choose first window #{window}"
-
-        @browser_window_handle = window.handle
-
-      rescue Exception => e
-        @@logger.an_event.error "browser windows handle #{e.message}"
-
-      else
-        @@logger.an_event.debug "browser windows handle #{@browser_window_handle}"
-
-      end
-      @browser_window_handle
-    end
 
     # est capable de screener :
     # soit le desktop

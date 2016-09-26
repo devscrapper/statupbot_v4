@@ -153,6 +153,8 @@ module Pages
     end
 
     def self.is_a?(browser)
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
+
       current_url = browser.url
       bool = browser.engine_search.is_captcha_page?(current_url)
       if bool

@@ -49,7 +49,6 @@ module Browsers
     end
 
 
-
     #----------------------------------------------------------------------------------------------------------------
     # display_start_page
     #----------------------------------------------------------------------------------------------------------------
@@ -87,8 +86,8 @@ module Browsers
       @@logger.an_event.debug "start_url : #{start_url}"
       @@logger.an_event.debug "visitor_id : #{visitor_id}"
       begin
-        raise BrowserError.new(ARGUMENT_UNDEFINE), "start_url undefine" if start_url.nil? or start_url ==""
-        raise BrowserError.new(ARGUMENT_UNDEFINE), "visitor_id undefine" if visitor_id.nil? or visitor_id == ""
+        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url ==""
+        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
 
 
         window_parameters = "channelmode=0,fullscreen=0,left=0,menubar=1,resizable=1,scrollbars=1,status=1,titlebar=1,toolbar=1"
@@ -115,82 +114,62 @@ module Browsers
       end
     end
 
+    def get_pid
+      get_pid_by_process_name
+    end
+
+    def kill
+      kill_by_process_name
+    end
+
     #-----------------------------------------------------------------------------------------------------------------
-    # get_pid
+    # open
     #-----------------------------------------------------------------------------------------------------------------
-    # input : id_browser
-    # output : tableau contenant les pids du browser
+    # input : none
+    # output : none
     # exception :
     # StandardError :
-    # si id_browser n'est pas défini
-    # si aucun pid n'a pu être associé à l'id_browser
+    # si il n'a pas été possible de lancer le browser  au moyen de sahi
+    # si le titre de la fenetre du browser n'a pas pu être initialisé avec ld_browser
+    # si le pid du browser n'a pas pu être recuperé
     #-----------------------------------------------------------------------------------------------------------------
-    # est utilisé pour recuperer le pid, pour tuer le browser si Sahi n'a pas réussi
+    #   1-kill tous les process edge existants par securité car il nepeut y avoir qu'une instance de edge à la fois car
+    #   il utilise le proxy systeme
+    #   2-ouvre le browser
+    #   3-recupere le pid du browser
+    #   4-reupere le handle de la fenetre du browser
     #-----------------------------------------------------------------------------------------------------------------
+    def open
+      #TODO suivre les cookies du browser : s'assurer qu'il sont vide et alimenté quand il faut hahahahaha
 
-=begin
-      def get_pid(id_browser)
-        @@logger.an_event.debug "begin get_pid"
-        raise FunctionalException, "id browser is not defined" if id_browser.nil?
-        pid_arr = nil
-        pids_name_file = File.join(TMP_DIR, "#{id_browser}_pids.csv")
-        begin
-          File.delete(pids_name_file) if File.exist?(pids_name_file)
-          cmd = 'powershell -NoLogo -NoProfile "get-process |  where-object {$_.mainWindowTitle -like \"' + "#{id_browser}*" + '\"} | Export-Csv -notype ' + pids_name_file + '; exit $LASTEXITCODE" < NUL'
-          @@logger.an_event.debug "command powershell : #{cmd}"
-          @pid = Process.spawn(cmd)
-          Process.waitpid(@pid)
-          if File.exist?(pids_name_file)
-            pid_arr = CSV.table(pids_name_file).by_col[:id]
-            @@logger.an_event.debug "pids catch : #{pid_arr}"
-            File.delete(pids_name_file)
-          else
-            raise StandardError, "file #{pids_name_file} not found"
-          end
-        rescue Exception => e
-          @@logger.an_event.debug e.message
-          raise "cannot get pid of #{id_browser}"
-        ensure
-          @@logger.an_event.debug "end get_pid"
-        end
-        pid_arr
+      begin
+        #par securité on fait du nettoyage. On peut le faire car il y a qu'une seule instance du navigateur à la fois
+        kill if running?
+
+        @driver.open
+
+        get_pid
+
+        get_handle
+
+      rescue Exception => e
+        @@logger.an_event.error "browser #{name} open : #{e.message}"
+        raise Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
+
+      else
+        @@logger.an_event.debug "browser #{name} open"
+
+      ensure
+
       end
 
-        #-----------------------------------------------------------------------------------------------------------------
-      # kill
-      #-----------------------------------------------------------------------------------------------------------------
-      # input : tableau de pids
-      # output : none
-      # exception :
-      # StandardError :
-      # si aucune pid n'est passé à la fonction
-      # StandardError :
-      # si il n'a pas été possible de tuer le browser
-      #-----------------------------------------------------------------------------------------------------------------
-      # est utilisé pour recuperer le pid, pour tuer le browser si Sahi n'a pas réussi
-      #-----------------------------------------------------------------------------------------------------------------
+    end
 
-      def kill(pid_arr)
-        @@logger.an_event.debug "begin kill"
 
-        raise StandardError, "no pid" if pid_arr == []
+    def running?
+      running_by_process_name?
+    end
 
-        pid_arr.each { |pid|
-          begin
-            cmd = 'powershell -NoLogo -NoProfile "Stop-Process ' + pid.to_s + '; exit $LASTEXITCODE" < NUL'
-            @@logger.an_event.debug "command powershell : #{cmd}"
-            ps_pid = Process.spawn(cmd)
-            Process.waitpid(ps_pid)
-          rescue Exception => e
-            @@logger.an_event.debug e.message
-            raise StandardError, "cannot kill pid #{pid}"
-          ensure
-            @@logger.an_event.debug "end kill"
-          end
-        }
-      end
-
-=end
 
     #----------------------------------------------------------------------------------------------------------------
     # set_input_search

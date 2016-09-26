@@ -6,7 +6,8 @@ require 'pathname'
 require 'nokogiri'
 require 'addressable/uri'
 require 'win32/screenshot'
-
+require 'win32/window'
+require 'win32/mutex'
 require_relative '../engine_search/engine_search'
 require_relative '../page/link'
 require_relative '../page/page'
@@ -76,13 +77,15 @@ module Browsers
                   :listening_port_proxy # port d'ecoute du proxy Sahi
 
 
-    attr_reader :id, #id du browser
+    attr_reader :pid, # du processu du browser
+                :id, #id du browser
                 :height, :width, #dimension de la fenetre du browser
                 :current_page, #page/onglet visible du navigateur
                 :method_start_page, # pour cacher le referrer aux yeux de GA, on utiliser 2 methodes choisies en focntion
                 # du type de browser.
                 :version, # la version du browser
-                :engine_search #moteur de recherche associé par defaut au navigateur
+                :engine_search, #moteur de recherche associé par defaut au navigateur
+                :handle_window # handle de la fentre du navigateur
 
     #----------------------------------------------------------------------------------------------------------------
     # class methods
@@ -211,7 +214,6 @@ module Browsers
 
       end
     end
-
 
 
     #----------------------------------------------------------------------------------------------------------------
@@ -423,10 +425,10 @@ module Browsers
         #pb de connection reseau par exemple
         raise Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => hostname}) if @driver.div("error_connect").exists?
 
-        # new_page_title = @driver.title
-        # @@logger.an_event.debug "new_page_title : #{new_page_title}"
-        # #erreur sahi...on est tj sur la page initiale de sahi
-        # raise Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
+          # new_page_title = @driver.title
+          # @@logger.an_event.debug "new_page_title : #{new_page_title}"
+          # #erreur sahi...on est tj sur la page initiale de sahi
+          # raise Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} display start page : #{e.message}"
@@ -441,9 +443,6 @@ module Browsers
 
       end
     end
-
-
-
 
 
     #----------------------------------------------------------------------------------------------------------------
@@ -528,6 +527,102 @@ module Browsers
         @@logger.an_event.debug "browser #{name} found link"
 
       ensure
+
+      end
+    end
+
+    def get_handle
+
+      begin
+        windows_lst = Window.find(:pid => @pid)
+
+        @@logger.an_event.debug "list windows #{windows_lst}"
+
+        window = windows_lst.first
+        @@logger.an_event.debug "choose first window #{window}"
+
+        @handle_window = window.handle
+
+      rescue Exception => e
+        @@logger.an_event.error "browser windows handle #{e.message}"
+
+      else
+        @@logger.an_event.debug "browser windows handle #{@browser_window_handle}"
+
+      end
+
+    end
+
+    def get_pid_by_process_name
+
+      # retourn le pid du browser ; au cas où Sahi n'arrive pas à le tuer.
+      count_try = 3
+      begin
+        require 'csv'
+        #TODO remplacer tasklist par ps pour linux
+        res = IO.popen('tasklist /V /FI "IMAGENAME eq ' + @driver.browser_process_name + '" /FO CSV /NH').read
+
+        @@logger.an_event.debug "result tasklist : #{res}"
+
+        CSV.parse(res) do |row|
+          @pid = row[1].to_i
+          break
+        end
+
+        raise "sahiid not found in title browser in tasklist " if @pid.nil?
+
+      rescue Exception => e
+        if count_try > 0
+          @@logger.an_event.debug "try #{count_try}, browser has no pid : #{e.message}"
+          sleep (1)
+          retry
+        else
+          raise "browser type has no pid : #{e.message}"
+
+        end
+
+      else
+        @@logger.an_event.debug "browser has pid #{@pid}"
+
+      end
+    end
+
+    def get_pid_by_title
+      #modifie le titre de la fenetre pour rechercher le handle de la fenetre
+      @driver.set_title(@driver.sahisid)
+      @@logger.an_event.debug "set windows title browser with #{@driver.sahisid.to_s}"
+
+      # retourn le pid du browser ; au cas où Sahi n'arrive pas à le tuer.
+      count_try = 3
+      begin
+        require 'csv'
+        #TODO remplacer tasklist par ps pour linux
+        res = IO.popen('tasklist /V /FI "IMAGENAME eq ' + @driver.browser_process_name + '" /FO CSV /NH').read
+
+        @@logger.an_event.debug "result tasklist : #{res}"
+
+        CSV.parse(res) do |row|
+          if row[8].include?(@driver.sahisid.to_s)
+            @pid = row[1].to_i
+            break
+
+          end
+        end
+
+        raise "sahiid not found in title browser in tasklist " if @pid.nil?
+
+      rescue Exception => e
+        if count_try > 0
+          @@logger.an_event.debug "try #{count_try}, browser has no pid : #{e.message}"
+          sleep (1)
+          retry
+        else
+          raise "browser type has no pid : #{e.message}"
+
+        end
+
+      else
+        @@logger.an_event.debug "browser has pid #{@pid}"
 
       end
     end
@@ -666,6 +761,82 @@ module Browsers
       bool
     end
 
+    #-----------------------------------------------------------------------------------------------------------------
+    # kill_by_pid
+    #-----------------------------------------------------------------------------------------------------------------
+    # input : none
+    # output : none
+    # exception :
+    # StandardError :
+    #-----------------------------------------------------------------------------------------------------------------
+    #   1-kill du  process avec son pid
+    #-----------------------------------------------------------------------------------------------------------------
+
+    def kill_by_pid
+      count_try = 3
+
+      @@logger.an_event.debug "going to kill browser with process name #{@driver.browser_process_name}"
+      begin
+        #TODO remplacer taskkill par kill pour linux
+        res = IO.popen("taskkill /PID #{@pid} /T /F").read
+
+        @@logger.an_event.debug "result taskkill : #{res}"
+
+      rescue Exception => e
+        if count_try > 0
+          @@logger.an_event.debug "try #{count_try}, kill pid #{@pid} : #{e.message}"
+          count_try -= 1
+          sleep (1)
+          retry
+        end
+
+        @@logger.an_event.error "kill browser with pid #{@pid} : #{e.message}"
+        raise Error.new(CLOSE_DRIVER_FAILED, :error => e)
+
+      else
+        @@logger.an_event.debug "kill browser with pid #{@pid}"
+
+      end
+    end
+
+    #-----------------------------------------------------------------------------------------------------------------
+    # kill_by_process_name
+    #-----------------------------------------------------------------------------------------------------------------
+    # input : none
+    # output : none
+    # exception :
+    # StandardError :
+    #-----------------------------------------------------------------------------------------------------------------
+    #   1-kill tous les process avec leur nom de processus
+    #-----------------------------------------------------------------------------------------------------------------
+
+    def kill_by_process_name
+      count_try = 3
+
+      @@logger.an_event.debug "going to kill browser with process name #{@driver.browser_process_name}"
+      begin
+        #TODO remplacer taskkill par kill pour linux
+        res = IO.popen("taskkill /IM #{@driver.browser_process_name}* /T /F").read
+
+        @@logger.an_event.debug "result taskkill : #{res}"
+
+      rescue Exception => e
+        if count_try > 0
+          @@logger.an_event.debug "try #{count_try},kill process name #{@driver.browser_process_name} : #{e.message}"
+          count_try -= 1
+          sleep (1)
+          retry
+        end
+
+        @@logger.an_event.error "kill browser with process name #{@driver.browser_process_name} : #{e.message}"
+        raise Error.new(CLOSE_DRIVER_FAILED, :error => e)
+
+      else
+        @@logger.an_event.debug "kill browser with process name #{@driver.browser_process_name}"
+
+      end
+    end
+
     #----------------------------------------------------------------------------------------------------------------
     # name
     #----------------------------------------------------------------------------------------------------------------
@@ -676,40 +847,6 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     def name
       @driver.browser_type
-    end
-
-    #-----------------------------------------------------------------------------------------------------------------
-    # open
-    #-----------------------------------------------------------------------------------------------------------------
-    # input : none
-    # output : none
-    # exception :
-    # StandardError :
-    # si il n'a pas été possible de lancer le browser  au moyen de sahi
-    # si le titre de la fenetre du browser n'a pas pu être initialisé avec ld_browser
-    # si le pid du browser n'a pas pu être recuperé
-    #-----------------------------------------------------------------------------------------------------------------
-    #   1-ouvre le browser
-    #   2-affecte le titre du browser avec l'id_browser
-    #   3-recupere le pid du browser
-    #-----------------------------------------------------------------------------------------------------------------
-    def open
-      #TODO suivre les cookies du browser : s'assurer qu'il sont vide et alimenté quand il faut hahahahaha
-
-      begin
-        @driver.open
-
-      rescue Exception => e
-        @@logger.an_event.error "browser #{name} open : #{e.message}"
-        raise Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
-
-      else
-        @@logger.an_event.debug "browser #{name} open"
-
-      ensure
-
-      end
-
     end
 
 
@@ -739,7 +876,7 @@ module Browsers
       end
 
       begin
-        @driver.kill if @driver.running?
+        kill if running?
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} kill : #{e.message}"
@@ -777,6 +914,54 @@ module Browsers
       end
     end
 
+
+    def running_by_pid?
+
+      require 'csv'
+      #TODO remplacer tasklist par ps pour linux
+      res = IO.popen('tasklist /V /FI "PID eq ' + @pid.to_s + '" /FO CSV /NH').read
+
+      @@logger.an_event.debug "tasklist for #{@pid.to_s} : #{res}"
+
+      CSV.parse(res) do |row|
+        if row[1].nil?
+          # res == Informationÿ: aucune tƒche en service ne correspond aux critŠres sp‚cifi‚s.
+          # donc le pid n'existe plus => le browser nest plus running
+          return false
+        else
+          return true if row[1].include?(@pid.to_s)
+
+        end
+      end
+      #ne doit jamais arriver ici
+      false
+
+    end
+
+
+    def running_by_process_name?
+
+      require 'csv'
+      #TODO remplacer tasklist par ps pour linux
+      res = IO.popen('tasklist /V /FI "IMAGENAME eq ' + @driver.browser_process_name + '" /FO CSV /NH').read
+
+      @@logger.an_event.debug "result tasklist : #{res}"
+
+      CSV.parse(res) do |row|
+        if row[0].nil?
+          # res == Informationÿ: aucune tƒche en service ne correspond aux critŠres sp‚cifi‚s.
+          # donc le pid n'existe plus => le browser nest plus running
+          return false
+        else
+          return true if row[0].include?(@driver.browser_process_name.to_s)
+
+        end
+      end
+      #ne doit jamais arriver ici
+      false
+
+    end
+
     #-----------------------------------------------------------------------------------------------------------------
     # resize
     #-----------------------------------------------------------------------------------------------------------------
@@ -790,6 +975,15 @@ module Browsers
       begin
 
         @driver.resize(@width.to_i, @height.to_i)
+
+        # si screenshot est pris avec sahi et peut prendre un element graphique et pas une page ou destop alors on peut
+        # eviter de deplacer à l'origine du repere pour fiabiliser la prise de photo du captcha.
+        #TODO move to linux
+        Window.from_handle(@handle_window).move(0,
+                                                0)
+
+        #cache la fenetre du navigateur
+        Window.from_handle(@handle_window).minimize
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} resize : #{e.message}"
@@ -964,6 +1158,16 @@ module Browsers
                                  ".png")
 
         end
+        #-------------------------------------------------------------------------------------------------------------
+        # affiche le browser en premier plan
+        #-------------------------------------------------------------------------------------------------------------
+        #TODO update for linux
+        window = RAutomation::Window.new(:hwnd => @handle_window)
+        window.restore if window.minimized?
+        window.activate
+        window.wait_until_exists
+        window.wait_until_present
+        @@logger.an_event.debug "restore de la fenetre du browser"
 
         @driver.take_screenshot(output_file, @height.to_i)
 
@@ -974,7 +1178,12 @@ module Browsers
       else
         @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
 
-
+      ensure
+        #-------------------------------------------------------------------------------------------------------------
+        # cache le browser
+        #-------------------------------------------------------------------------------------------------------------
+        window.minimize
+        @@logger.an_event.debug "minimize de la fenetre du browser"
       end
 
       output_file.absolute_path
@@ -993,6 +1202,16 @@ module Browsers
     def take_captcha(output_file, coord_captcha)
 
       begin
+        #-------------------------------------------------------------------------------------------------------------
+        # affiche le browser en premier plan
+        #-------------------------------------------------------------------------------------------------------------
+        #TODO update for linux
+        window = RAutomation::Window.new(:hwnd => @handle_window)
+        window.restore if window.minimized?
+        window.activate
+        window.wait_until_exists
+        window.wait_until_present
+        @@logger.an_event.debug "restore de la fenetre du browser"
 
         @driver.take_area_screenshot(output_file, coord_captcha)
 
@@ -1005,6 +1224,11 @@ module Browsers
         @@logger.an_event.info "browser #{name} take captcha"
 
       ensure
+        #-------------------------------------------------------------------------------------------------------------
+        # cache le browser
+        #-------------------------------------------------------------------------------------------------------------
+        window.minimize
+        @@logger.an_event.debug "minimize de la fenetre du browser"
 
       end
 

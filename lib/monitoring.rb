@@ -177,7 +177,7 @@ module Monitoring
       return
     end
 
-    while (timeout > 0)
+    while (timeout > 0 and $staging != "development")
       sleep(interval)
       timeout -= interval
       begin
@@ -189,11 +189,11 @@ module Monitoring
       end
     end
 
-    if exception == true
-      p "raise exception : #{e.message}"
+    if exception == true  and $staging != "development"
+
       raise e
     else
-      p "no exception"
+
     end
   end
 

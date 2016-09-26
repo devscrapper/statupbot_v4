@@ -31,7 +31,7 @@ module Browsers
 
         super(visitor_dir,
               browser_details,
-              "#{browser_details[:name]}_#{browser_details[:version]}" ,
+              "#{browser_details[:name]}_#{browser_details[:version]}",
               DATA_URI)
 
 
@@ -46,8 +46,6 @@ module Browsers
 
       end
     end
-
-
 
 
     #----------------------------------------------------------------------------------------------------------------
@@ -100,6 +98,61 @@ module Browsers
 
       end
 
+    end
+
+    def get_pid
+      get_pid_by_process_name
+    end
+    def kill
+      kill_by_process_name
+    end
+    #-----------------------------------------------------------------------------------------------------------------
+    # open
+    #-----------------------------------------------------------------------------------------------------------------
+    # input : none
+    # output : none
+    # exception :
+    # StandardError :
+    # si il n'a pas été possible de lancer le browser  au moyen de sahi
+    # si le titre de la fenetre du browser n'a pas pu être initialisé avec ld_browser
+    # si le pid du browser n'a pas pu être recuperé
+    #-----------------------------------------------------------------------------------------------------------------
+    #   1-kill tous les process edge existants par securité car il nepeut y avoir qu'une instance de edge à la fois car
+    #   il utilise le proxy systeme
+    #   2-ouvre le browser
+    #   3-recupere le pid du browser
+    #   4-reupere le handle de la fenetre du browser
+    #-----------------------------------------------------------------------------------------------------------------
+    def open
+      #TODO suivre les cookies du browser : s'assurer qu'il sont vide et alimenté quand il faut hahahahaha
+
+      begin
+        #par securité on fait du nettoyage. On peut le faire car il y a qu'une seule instance du navigateur à la fois
+        kill if running?
+
+        @driver.open
+
+        get_pid
+
+        get_handle
+
+      rescue Exception => e
+        @@logger.an_event.error "browser #{name} open : #{e.message}"
+        raise Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
+
+      else
+        @@logger.an_event.debug "browser #{name} open"
+
+      ensure
+
+      end
+
+    end
+
+
+
+    def running?
+      running_by_process_name?
     end
 
     #----------------------------------------------------------------------------------------------------------------

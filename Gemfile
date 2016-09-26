@@ -28,6 +28,7 @@ gem 'hpricot'
 gem 'regexp-examples'
 gem 'rest-client', '~> 1.6.7'
 gem 'win32-service', '~> 0.8.7'
+gem 'win32-mutex', '~> 0.4.3'
 gem 'addressable', '~> 2.3.6'
 gem 'win32-window', '~> 0.2.0.pre'
 
