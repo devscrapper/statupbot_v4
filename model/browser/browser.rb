@@ -1138,46 +1138,50 @@ module Browsers
 
 
     def take_screenshot(output_file=nil)
+      #creation d'une section critique
+      File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+        f.flock(File::LOCK_EX)
 
-      begin
-        if output_file.nil?
+        begin
+          if output_file.nil?
 
-          title = @driver.title
-          @@logger.an_event.debug title
-          output_file = Flow.new(DIR_TMP,
-                                 @driver.name.gsub(" ", "-"),
-                                 title[0..32],
-                                 Date.today,
-                                 Time.parse(Tim.now).hour * 3600 + Time.parse(Time.now).min * 60,
-                                 ".png")
+            title = @driver.title
+            @@logger.an_event.debug title
+            output_file = Flow.new(DIR_TMP,
+                                   @driver.name.gsub(" ", "-"),
+                                   title[0..32],
+                                   Date.today,
+                                   Time.parse(Tim.now).hour * 3600 + Time.parse(Time.now).min * 60,
+                                   ".png")
 
+          end
+          #-------------------------------------------------------------------------------------------------------------
+          # affiche le browser en premier plan
+          #-------------------------------------------------------------------------------------------------------------
+          #TODO update for linux
+          @window.restore if @window.minimized?
+          @window.activate
+          @@logger.an_event.debug "restore de la fenetre du browser"
+
+          @driver.take_screenshot(output_file, @height.to_i)
+
+        rescue Exception => e
+          @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"
+          @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
+
+        else
+          @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
+
+        ensure
+          #-------------------------------------------------------------------------------------------------------------
+          # cache le browser
+          #-------------------------------------------------------------------------------------------------------------
+          @window.minimize
+          @@logger.an_event.debug "minimize de la fenetre du browser"
         end
-        #-------------------------------------------------------------------------------------------------------------
-        # affiche le browser en premier plan
-        #-------------------------------------------------------------------------------------------------------------
-        #TODO update for linux
-        @window.restore if @window.minimized?
-        @window.activate
-        @@logger.an_event.debug "restore de la fenetre du browser"
 
-        @driver.take_screenshot(output_file, @height.to_i)
-
-      rescue Exception => e
-        @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"
-        @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
-
-      else
-        @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
-
-      ensure
-        #-------------------------------------------------------------------------------------------------------------
-        # cache le browser
-        #-------------------------------------------------------------------------------------------------------------
-        @window.minimize
-        @@logger.an_event.debug "minimize de la fenetre du browser"
-      end
-
-      output_file.absolute_path
+        output_file.absolute_path
+      }
     end
 
     #-----------------------------------------------------------------------------------------------------------------
@@ -1191,35 +1195,37 @@ module Browsers
 
 
     def take_captcha(output_file, coord_captcha)
+      #creation d'une section critique
+      File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+        f.flock(File::LOCK_EX)
+        begin
+          #-------------------------------------------------------------------------------------------------------------
+          # affiche le browser en premier plan
+          #-------------------------------------------------------------------------------------------------------------
+          #TODO update for linux
+          @window.restore if window.minimized?
+          @window.activate
+          @@logger.an_event.debug "restore de la fenetre du browser"
 
-      begin
-        #-------------------------------------------------------------------------------------------------------------
-        # affiche le browser en premier plan
-        #-------------------------------------------------------------------------------------------------------------
-        #TODO update for linux
-        @window.restore if window.minimized?
-        @window.activate
-        @@logger.an_event.debug "restore de la fenetre du browser"
+          @driver.take_area_screenshot(output_file, coord_captcha)
 
-        @driver.take_area_screenshot(output_file, coord_captcha)
+        rescue Exception => e
+          @@logger.an_event.fatal "take captcha : #{e.message}"
+          raise Error.new(BROWSER_NOT_TAKE_SCREENSHOT, :values => {:browser => name, :title => title}, :error => e)
 
-      rescue Exception => e
-        @@logger.an_event.fatal "take captcha : #{e.message}"
-        raise Error.new(BROWSER_NOT_TAKE_SCREENSHOT, :values => {:browser => name, :title => title}, :error => e)
+        else
 
-      else
+          @@logger.an_event.info "browser #{name} take captcha"
 
-        @@logger.an_event.info "browser #{name} take captcha"
+        ensure
+          #-------------------------------------------------------------------------------------------------------------
+          # cache le browser
+          #-------------------------------------------------------------------------------------------------------------
+          @window.minimize
+          @@logger.an_event.debug "minimize de la fenetre du browser"
 
-      ensure
-        #-------------------------------------------------------------------------------------------------------------
-        # cache le browser
-        #-------------------------------------------------------------------------------------------------------------
-        @window.minimize
-        @@logger.an_event.debug "minimize de la fenetre du browser"
-
-      end
-
+        end
+      }
     end
 
     #----------------------------------------------------------------------------------------------------------------

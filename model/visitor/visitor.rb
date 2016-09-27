@@ -350,7 +350,7 @@ module Visitors
                 # ceci s'arretera quand il n'y aura plus de lien sur lesquel clickés ; lien choisi dans les 3 actions
                 script.insert(count_finished_actions + 1, ["c", action]).flatten!
                 @@logger.an_event.info "visitor  go back to make action #{COMMANDS[action]} again"
-                
+
               when VISITOR_NOT_CLICK_ON_RESULT,
                   VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER,
                   VISITOR_NOT_CLICK_ON_LINK_ON_UNKNOWN,
@@ -359,7 +359,7 @@ module Visitors
                 #  ceci s'arretera quand il n'y aura plus de lien sur lesquels clickés
                 script.insert(count_finished_actions + 1, action)
                 @@logger.an_event.info "visitor  make action <#{COMMANDS[action]}> again"
-                
+
               when VISITOR_NOT_SUBMIT_CAPTCHA, VISITOR_TOO_MANY_CAPTCHA
                 # un captcha est survenu, il a été impossible de le gerer
                 # monitoring vers la console du script
@@ -375,7 +375,7 @@ module Visitors
                 Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
                 raise e #stop la visite
             end
-              
+
           rescue Exception => e
             @@logger.an_event.error "visitor  make action <#{COMMANDS[action]}> : #{e.message}"
             screenshot_path = take_screenshot(count_finished_actions, action)
@@ -465,21 +465,24 @@ module Visitors
     #
     #----------------------------------------------------------------------------------------------------------------
     def open_browser
-      begin
+      #creation d'une section critique
+      File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+        f.flock(File::LOCK_EX)
+        begin
 
-        @browser.open
-        @browser.resize
+          @browser.open
+          @browser.resize
 
-      rescue Exception => e
-        @@logger.an_event.error "visitor  open and resize browser : #{e.message}"
-        raise Error.new(VISITOR_NOT_OPEN, :error => e)
+        rescue Exception => e
+          @@logger.an_event.error "visitor  open and resize browser : #{e.message}"
+          raise Error.new(VISITOR_NOT_OPEN, :error => e)
 
-      else
-        @@logger.an_event.info "visitor  open and resize browser"
+        else
+          @@logger.an_event.info "visitor  open and resize browser"
 
-      ensure
 
-      end
+        end
+      }
     end
 
     private
@@ -1707,6 +1710,7 @@ module Visitors
     def take_screenshot(index, action)
       @browser.take_screenshot(Flow.new(@home, index.to_s, action, Date.today, nil, ".png"))
     end
+
     def wait(timeout)
       total = 0;
       interval = 0.2;
@@ -1721,7 +1725,7 @@ module Visitors
         total += interval;
         begin
           return if yield
-        rescue Exception=>e
+        rescue Exception => e
           @@logger.an_event.error e.message
 
         end
