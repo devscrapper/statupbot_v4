@@ -146,7 +146,7 @@ module Browsers
 
         get_pid
 
-        get_handle
+        get_window_by_pid
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} open : #{e.message}"

@@ -85,7 +85,7 @@ module Browsers
                 # du type de browser.
                 :version, # la version du browser
                 :engine_search, #moteur de recherche associé par defaut au navigateur
-                :handle_window # handle de la fentre du navigateur
+                :window #object windows contenant les proprietes
 
     #----------------------------------------------------------------------------------------------------------------
     # class methods
@@ -531,27 +531,21 @@ module Browsers
       end
     end
 
-    def get_handle
+    def get_window_by_pid
 
       begin
-        windows_lst = Window.find(:pid => @pid)
-
-        @@logger.an_event.debug "list windows #{windows_lst}"
-
-        window = windows_lst.first
-        @@logger.an_event.debug "choose first window #{window}"
-
-        @handle_window = window.handle
+        @window = RAutomation::Window.new(:pid => @pid)
 
       rescue Exception => e
-        @@logger.an_event.error "browser windows handle #{e.message}"
+        @@logger.an_event.error "browser get window by pid #{e.message}"
 
       else
-        @@logger.an_event.debug "browser windows handle #{@browser_window_handle}"
+        @@logger.an_event.debug "browser get window by pid"
 
       end
 
     end
+
 
     def get_pid_by_process_name
 
@@ -973,17 +967,17 @@ module Browsers
     #-----------------------------------------------------------------------------------------------------------------
     def resize
       begin
-
+        #Rautomation ne sait pas resizé
         @driver.resize(@width.to_i, @height.to_i)
 
         # si screenshot est pris avec sahi et peut prendre un element graphique et pas une page ou destop alors on peut
         # eviter de deplacer à l'origine du repere pour fiabiliser la prise de photo du captcha.
         #TODO move to linux
-        Window.from_handle(@handle_window).move(0,
-                                                0)
+        # move n'existe pas dans Rautomation
+        #@window.move(0, 0)
 
         #cache la fenetre du navigateur
-        Window.from_handle(@handle_window).minimize
+        @window.minimize
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} resize : #{e.message}"
@@ -1162,11 +1156,8 @@ module Browsers
         # affiche le browser en premier plan
         #-------------------------------------------------------------------------------------------------------------
         #TODO update for linux
-        window = RAutomation::Window.new(:hwnd => @handle_window)
-        window.restore if window.minimized?
-        window.activate
-        window.wait_until_exists
-        window.wait_until_present
+        @window.restore if @window.minimized?
+        @window.activate
         @@logger.an_event.debug "restore de la fenetre du browser"
 
         @driver.take_screenshot(output_file, @height.to_i)
@@ -1182,7 +1173,7 @@ module Browsers
         #-------------------------------------------------------------------------------------------------------------
         # cache le browser
         #-------------------------------------------------------------------------------------------------------------
-        window.minimize
+        @window.minimize
         @@logger.an_event.debug "minimize de la fenetre du browser"
       end
 
@@ -1206,11 +1197,8 @@ module Browsers
         # affiche le browser en premier plan
         #-------------------------------------------------------------------------------------------------------------
         #TODO update for linux
-        window = RAutomation::Window.new(:hwnd => @handle_window)
-        window.restore if window.minimized?
-        window.activate
-        window.wait_until_exists
-        window.wait_until_present
+        @window.restore if window.minimized?
+        @window.activate
         @@logger.an_event.debug "restore de la fenetre du browser"
 
         @driver.take_area_screenshot(output_file, coord_captcha)
@@ -1227,7 +1215,7 @@ module Browsers
         #-------------------------------------------------------------------------------------------------------------
         # cache le browser
         #-------------------------------------------------------------------------------------------------------------
-        window.minimize
+        @window.minimize
         @@logger.an_event.debug "minimize de la fenetre du browser"
 
       end

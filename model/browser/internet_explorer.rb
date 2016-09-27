@@ -118,6 +118,11 @@ module Browsers
       get_pid_by_process_name
     end
 
+    def get_window
+      get_window_by_title
+    end
+
+
     def kill
       kill_by_process_name
     end
@@ -150,7 +155,7 @@ module Browsers
 
         get_pid
 
-        get_handle
+        get_window_by_pid
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} open : #{e.message}"

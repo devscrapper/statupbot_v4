@@ -138,7 +138,7 @@ module Browsers
         get_pid
 
         #recuperation du handle de la fenetre du navigateur
-        get_handle
+        get_window_by_pid
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} open : #{e.message}"
