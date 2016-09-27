@@ -54,7 +54,7 @@
 500:  "argument not define"
 501:  "page not create"
 502:  "around [around] unknown"
-503:  "page not found url"
+503:  "cannot connect to url [url]"
 504:  "page [url] none link"
 505:  "page [url] found none link by around [around]"
 506:  "page found none link by url"

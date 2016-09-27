@@ -562,6 +562,11 @@ module Visitors
                                             @browser)
 
       rescue Errors::Error => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -624,6 +629,11 @@ module Visitors
         @current_page = Pages::Website.new(@visit, @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -703,6 +713,11 @@ module Visitors
                                             @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         @@logger.an_event.error "visitor browsed unmanage page : #{e.message}"
         raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
@@ -765,6 +780,11 @@ module Visitors
                                             @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -841,6 +861,11 @@ module Visitors
                                             @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         @@logger.an_event.error "visitor browsed unmanage page : #{e.message}"
         raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
@@ -903,6 +928,11 @@ module Visitors
         @current_page = Pages::Website.new(@visit, @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         @@logger.an_event.error "visitor browsed website page : #{e.message}"
         raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
@@ -947,6 +977,11 @@ module Visitors
                                            @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -1005,6 +1040,11 @@ module Visitors
                                            @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -1064,6 +1104,11 @@ module Visitors
         @current_page = Pages::Unmanage.new(visit.referrer.duration, @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -1156,6 +1201,11 @@ module Visitors
         @current_page = Pages::Unmanage.new(before_last_page.duration,
                                             @browser) if before_last_page.is_a?(Pages::Unmanage)
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -1197,6 +1247,11 @@ module Visitors
         @current_page = Pages::Website.new(@visit, @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         @@logger.an_event.error "visitor browsed landing page : #{e.message}"
         raise Error.new(VISITOR_NOT_GO_TO_LANDING, :error => e)
 
@@ -1222,6 +1277,11 @@ module Visitors
 
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         @@logger.an_event.error "visitor browsed referral page : #{e.message}"
         raise Error.new(VISITOR_NOT_GO_TO_REFERRAL, :error => e)
 
@@ -1263,6 +1323,11 @@ module Visitors
                                                 @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -1323,6 +1388,11 @@ module Visitors
                                                 @browser)
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
           # Page Captcha displayed
@@ -1365,6 +1435,11 @@ module Visitors
 
 
       rescue Exception => e
+        if Pages::Error.is_a?(@browser)
+          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+
+        end
+
         @@logger.an_event.error "visitor browsed website page : #{e.message}"
         raise Error.new(VISITOR_NOT_START_LANDING, :error => e)
 
