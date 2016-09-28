@@ -38,7 +38,7 @@ module Monitoring
                                                       {:state => state, :reason => reason}),
                                     :content_type => :json,
                                     :accept => :json
-        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
+
       }
 
     rescue Exception => e
@@ -61,12 +61,13 @@ module Monitoring
                                                    :ip_geo_proxy => ip_geo_proxy}),
                                     :content_type => :json,
                                     :accept => :json
-        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
+
       }
     rescue Exception => e
       $stderr << "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
+      p "started state to visit #{visit_id}"
 
     ensure
 
@@ -84,12 +85,13 @@ module Monitoring
                                     JSON.generate({:actions => actions}),
                                     :content_type => :json,
                                     :accept => :json
-        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
+
       }
     rescue Exception => e
       $stderr << "cannot change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
+       p "set count browsed page of visit #{visit_id}"
 
     ensure
 
@@ -109,14 +111,14 @@ module Monitoring
           response = resource.post(:visit_id => visit_id,
                                    :index => count_finished_actions)
         end
-        #   JSON.parse(response)
-        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
+
+
       }
     rescue Exception => e
-      $stderr << "cannot create browsed page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      $stderr << "cannot send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-
+       p "send screenshot of visit #{visit_id}"
     end
   end
 
@@ -137,14 +139,15 @@ module Monitoring
                                    :index => index,
                                    :text => text)
         end
-        #   JSON.parse(response)
-        raise response.content unless [200,201,202,203,204,205,206].include?(response.code)
+
+
       }
 
     rescue Exception => e
       $stderr << "cannot create browsed captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
+      p "send captcha of visit #{visit_id}"
 
     end
   end
@@ -177,7 +180,7 @@ module Monitoring
       return
     end
 
-    while (timeout > 0 and $staging != "development")
+    while timeout > 0 and $staging != "development"
       sleep(interval)
       timeout -= interval
       begin
@@ -189,12 +192,8 @@ module Monitoring
       end
     end
 
-    if exception == true  and $staging != "development"
+    raise e if !e.nil? and exception == true  and $staging != "development"
 
-      raise e
-    else
-
-    end
   end
 
   module_function :visit_started

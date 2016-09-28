@@ -66,7 +66,7 @@ module Supervisor
     rescue Exception => e
       $stderr << "not send activity #{activity} to statupweb #{statupweb_server_ip}:#{statupweb_server_port}=> #{e.message}"
     else
-      $stdout << "send activity #{activity} to statupweb #{statupweb_server_ip}:#{statupweb_server_port}" if $staging == "development"
+      p "send activity #{activity} to statupweb #{statupweb_server_ip}:#{statupweb_server_port}" if $staging == "development"
     end
   end
 
