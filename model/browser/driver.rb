@@ -154,13 +154,6 @@ module Sahi
     end
 
 
-    def get_body_height
-
-      fetch("Math.max(window.innerHeight || 0, \
-            document.documentElement.clientHeight || 0,
-      document.body.clientHeight || 0)").to_i
-    end
-
     #-----------------------------------------------------------------------------------------------------------------
     # initialize
     #-----------------------------------------------------------------------------------------------------------------
@@ -337,45 +330,39 @@ module Sahi
 
 
     def take_screenshot(screenshot_flow, brw_height)
-        begin
-          #-------------------------------------------------------------------------------------------------------------
-          # prise du screenshot
-          #-------------------------------------------------------------------------------------------------------------
-          window_innerHeight = fetch("window.innerHeight")
-          @@logger.an_event.debug "window_innerHeight : #{window_innerHeight}"
-          document_documentElement_clientHeight = fetch("document.documentElement.clientHeight")
-          @@logger.an_event.debug "document_documentElement_clientHeight : #{document_documentElement_clientHeight}"
-          document_body_clientHeight = fetch("document.body.clientHeight")
-          @@logger.an_event.debug "document_body_clientHeight : #{document_body_clientHeight}"
+      begin
+        #-------------------------------------------------------------------------------------------------------------
+        # prise du screenshot
+        #-------------------------------------------------------------------------------------------------------------
 
-          # recuperation de la hauteur du body de la page courante
-          body_height = get_body_height
-          @@logger.an_event.debug "body height #{body_height}"
+        # recuperation de la hauteur du body de la page courante
+        body_height = get_body_height
+        @@logger.an_event.debug "body height #{body_height}"
 
-          # calcul du nombre de page en fonction de la hauteur du browser
-          page_count = body_height.divmod(brw_height)[1] == 0 ?
-              body_height.divmod(brw_height)[0] :
-              body_height.divmod(brw_height)[0] + 1
+        # calcul du nombre de page en fonction de la hauteur du browser
+        page_count = body_height.divmod(brw_height)[1] == 0 ?
+            body_height.divmod(brw_height)[0] :
+            body_height.divmod(brw_height)[0] + 1
 
-          if page_count == 1
-            # une page dans le screenshot
-            screenshot(screenshot_flow)
-
-          else
-            # plusieurs pages dans le screenshot
-            screenshots(screenshot_flow, page_count, brw_height)
-
-          end
-
-        rescue Exception => e
-          @@logger.an_event.error "take screenshot #{screenshot_flow.basename} : #{e.message}"
+        if page_count == 1
+          # une page dans le screenshot
+          screenshot(screenshot_flow)
 
         else
-          @@logger.an_event.debug "take screenshot #{screenshot_flow.basename}"
-
-        ensure
+          # plusieurs pages dans le screenshot
+          screenshots(screenshot_flow, page_count, brw_height)
 
         end
+
+      rescue Exception => e
+        @@logger.an_event.error "take screenshot #{screenshot_flow.basename} : #{e.message}"
+
+      else
+        @@logger.an_event.debug "take screenshot #{screenshot_flow.basename}"
+
+      ensure
+
+      end
 
     end
 
@@ -403,6 +390,7 @@ module Sahi
     def set_title(title)
       execute_step("window.document.title =" + Utils.quoted(title.to_s))
     end
+
     def title
       title = nil
       wait(60) {
@@ -425,7 +413,26 @@ module Sahi
     end
 
     private
+    def get_body_height
+      window_innerHeight = fetch("window.innerHeight").to_i || 0
+      @@logger.an_event.debug "window_innerHeight : #{window_innerHeight}"
 
+      document_documentElement_clientHeight = fetch("document.documentElement.clientHeight").to_i || 0
+      @@logger.an_event.debug "document_documentElement_clientHeight : #{document_documentElement_clientHeight}"
+
+      document_body_clientHeight = fetch("document.body.clientHeight").to_i || 0
+      @@logger.an_event.debug "document_body_clientHeight : #{document_body_clientHeight}"
+
+      document_documentElement_scrollHeight = fetch("document.documentElement.scrollHeight").to_i || 0
+      @@logger.an_event.debug "document.documentElement.scrollHeight : #{document_documentElement_scrollHeight}"
+
+
+      [window_innerHeight,
+       document_documentElement_clientHeight,
+       document_body_clientHeight,
+       document_documentElement_scrollHeight].max
+
+    end
 
     # est capable de screener :
     # soit le desktop
@@ -486,8 +493,15 @@ module Sahi
         #si pas derniere page alors on passe à la page suivante
         if screenshot_tmp.vol.to_i <= page_count
           scrolling = (page_height * (page_index + 1)) + 1
-          fetch("document.body.scrollTop=#{scrolling}")
           @@logger.an_event.debug "scrolling #{scrolling}"
+
+          if chrome? || safari? || opera?
+            fetch("document.body.scrollTop=#{scrolling}")
+          end
+          if ie? || firefox?
+            fetch("document.documentElement.scrollTop=#{scrolling}")
+          end
+          @@logger.an_event.debug "scrolling down to #{scrolling}"
         end
       }
 
