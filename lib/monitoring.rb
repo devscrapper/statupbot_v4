@@ -51,16 +51,44 @@ module Monitoring
     end
   end
 
+  def visit_failed(visit_id, reason, log_path)
+    begin
+      change_state_visit(visit_id, FAIL, reason)
+
+      load_parameter()
+
+      resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/logs")
+
+      wait(60, true, 5) {
+        if File.exist?(log_path)
+          resource.post(:file => File.open(log_path),
+                        :visit_id => visit_id)
+        else
+          resource.post(:visit_id => visit_id)
+
+        end
+      }
+    rescue Exception => e
+      $stderr << "cannot send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+
+    else
+      p "send log file of visit #{visit_id}"
+
+    ensure
+
+    end
+  end
+
   def visit_started(visit_id, actions, ip_geo_proxy)
     begin
       load_parameter()
 
       wait(60, true, 5) {
-        response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/started",
-                                    JSON.generate({:actions => actions,
-                                                   :ip_geo_proxy => ip_geo_proxy}),
-                                    :content_type => :json,
-                                    :accept => :json
+        RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/started",
+                         JSON.generate({:actions => actions,
+                                        :ip_geo_proxy => ip_geo_proxy}),
+                         :content_type => :json,
+                         :accept => :json
 
       }
     rescue Exception => e
@@ -91,7 +119,7 @@ module Monitoring
       $stderr << "cannot change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-       p "set count browsed page of visit #{visit_id}"
+      p "set count browsed page of visit #{visit_id}"
 
     ensure
 
@@ -102,9 +130,8 @@ module Monitoring
 
       wait(60, true, 5) {
         if File.exist?(screenshot_path)
-          image = File.open(screenshot_path)
 
-          response = resource.post(:image => image,
+          response = resource.post(:image => File.open(screenshot_path),
                                    :visit_id => visit_id,
                                    :index => count_finished_actions)
         else
@@ -118,7 +145,7 @@ module Monitoring
       $stderr << "cannot send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-       p "send screenshot of visit #{visit_id}"
+      p "send screenshot of visit #{visit_id}"
     end
   end
 
@@ -180,7 +207,9 @@ module Monitoring
       return
     end
 
-    while timeout > 0 and $staging != "development"
+    timeout = interval if $staging == "development" # on execute une fois
+
+    while (timeout > 0)
       sleep(interval)
       timeout -= interval
       begin
@@ -192,11 +221,12 @@ module Monitoring
       end
     end
 
-    raise e if !e.nil? and exception == true  and $staging != "development"
+    raise e if !e.nil? and exception == true
 
   end
 
   module_function :visit_started
+  module_function :visit_failed
   module_function :change_state_visit
   module_function :page_browse
   module_function :captcha_browse

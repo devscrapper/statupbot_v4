@@ -140,6 +140,16 @@ module Logging
       )
     end
 
+    def basename
+      unless @debugging
+        "#{@id_file}.log"
+
+      else
+        "#{@id_file}.deb"
+
+      end
+    end
+
     def syslog()
       #TODO mettre en oeuvre sur le serveur de test logAnalyzer
       Logging::Appenders.syslog(@class_name)

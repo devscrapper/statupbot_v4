@@ -128,6 +128,19 @@ ERR_CAPTCHA_SUBMITTING = 15
 ERR_VISIT_EXECUTION = 16
 ERR_TOO_MANY_CAPTCHA = 17
 
+def visit_failed(visit_id, reason, logger)
+  begin
+
+    log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
+    Monitoring.visit_failed(visit_id,
+                            reason,
+                            log_path)
+  rescue Exception => e
+    logger.an_event.warn e.message
+
+  end
+end
+
 def visit_started(visit, visitor, logger)
   begin
     Monitoring.visit_started(visit.id,
@@ -223,39 +236,40 @@ def visitor_execute_visit(opts, logger)
         case e.code
           when Visits::Visit::ARGUMENT_UNDEFINE
             exit_status = ERR_VISIT_DEFINITION
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit definition")
+            visit_failed(visit_details[:id], "visit definition", logger)
 
           when Visits::Visit::VISIT_NOT_LOAD
             exit_status = ERR_VISIT_LOADING
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit loading")
+            visit_failed(visit_details[:id], "visit loading", logger)
 
           when Visits::Visit::VISIT_NOT_CREATE
             exit_status = ERR_VISIT_CREATION
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit creation")
+            visit_failed(visit_details[:id], "visit creation", logger)
 
           when Visitors::Visitor::ARGUMENT_UNDEFINE
             exit_status = ERR_VISITOR_DEFINITON
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor definition")
+            visit_failed(visit_details[:id], "visitor definition", logger)
 
           when Visitors::Visitor::VISITOR_NOT_CREATE
             exit_status = ERR_VISITOR_CREATION
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor creation")
+            visit_failed(visit_details[:id], "visitor creation", logger)
 
           when Visitors::Visitor::VISITOR_NOT_BORN
             exit_status = ERR_VISITOR_BIRTH
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor birth")
+            visit_failed(visit_details[:id], "visitor birth", logger)
 
           when Visitors::Visitor::VISITOR_NOT_DIE
             exit_status = ERR_VISITOR_DEATH
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor death")
+            visit_failed(visit_details[:id], "visitor death", logger)
 
           when Visitors::Visitor::VISITOR_NOT_INHUME
             exit_status = ERR_VISITOR_INHUMATION
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor inhumation")
+            visit_failed(visit_details[:id], "visitor inhumation", logger)
 
           when Visitors::Visitor::VISITOR_NOT_OPEN
             exit_status = ERR_BROWSER_OPENING
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "browser opening")
+            visit_failed(visit_details[:id], "browser opening", logger)
+
             begin
               visitor.close_browser if e.history.include?(Browsers::Browser::BROWSER_NOT_RESIZE)
               visitor.die
@@ -267,7 +281,7 @@ def visitor_execute_visit(opts, logger)
           when Visitors::Visitor::VISITOR_NOT_CLOSE
             # le browser est tj actif
             exit_status = ERR_BROWSER_CLOSING
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "browser closing")
+            visit_failed(visit_details[:id], "browser closing", logger)
             begin
               visitor.die
 
@@ -277,32 +291,32 @@ def visitor_execute_visit(opts, logger)
 
           when Visitors::Visitor::VISITOR_NOT_FULL_EXECUTE_VISIT
             if e.history.include?(Browsers::Browser::BROWSER_NOT_FOUND_LINK)
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "link tracking")
+              visit_failed(visit_details[:id], "link tracking", logger)
               exit_status = ERR_LINK_TRACKING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_CHOOSE_ADVERT)
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "advert tracking")
+              visit_failed(visit_details[:id], "advert tracking", logger)
               exit_status = ERR_ADVERT_TRACKING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_CLOSE)
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "browser closing")
+              visit_failed(visit_details[:id], "browser closing", logger)
               exit_status = ERR_BROWSER_CLOSING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_DIE)
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor death")
+              visit_failed(visit_details[:id], "visitor death", logger)
               exit_status = ERR_VISITOR_DEATH
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_SUBMIT_CAPTCHA)
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "captcha submitting")
+              visit_failed(visit_details[:id], "captcha submitting", logger)
               exit_status = ERR_CAPTCHA_SUBMITTING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_TOO_MANY_CAPTCHA)
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "too many captcha")
+              visit_failed(visit_details[:id], "too many captcha", logger)
               exit_status = ERR_TOO_MANY_CAPTCHA
 
             else
               exit_status = ERR_VISIT_EXECUTION
-              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit execution")
+              visit_failed(visit_details[:id], "visit execution", logger)
             end
 
             begin
@@ -316,7 +330,7 @@ def visitor_execute_visit(opts, logger)
             exit_status
 
           else
-            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "error not catch")
+            visit_failed(visit_details[:id], "error not catch", logger)
             exit_status = KO
 
         end
@@ -411,7 +425,7 @@ else
   #--------------------------------------------------------------------------------------------------------------------
 
   logger.an_event.debug "begin execution visitor_bot"
-  
+
   exit_status = visitor_execute_visit(opts, logger)
 
   logger.an_event.debug "end execution visitor_bot, with state #{exit_status}"

@@ -196,7 +196,7 @@ module Visits
         end
 
       rescue Exception => e
-        @@logger.an_event.error e.message
+        @@logger.an_event.error "visit  has none action : #{e.message}"
         raise Error.new(VISIT_NOT_CREATE, :values => {:id => visit_details[:id]}, :error => e)
 
       else
