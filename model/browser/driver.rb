@@ -271,9 +271,12 @@ module Sahi
       end
 
       begin
-        wait(60) {
+        wait(5 * 60) {
+          # attend 5mn que le navigateur soit pret pour eviter des faux positif qd le navigateur est
+          #long a démarré qd la machine est surchargée
           is_ready?
         }
+
 
         raise "browser type not ready" unless is_ready?
 

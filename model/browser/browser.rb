@@ -122,8 +122,8 @@ module Browsers
       @@logger.an_event.debug "browser_details #{browser_details}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details.nil? or \
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details.nil? or \
         browser_details[:name].nil? or \
         browser_details[:name] == ""
 
@@ -148,11 +148,11 @@ module Browsers
             return Opera.new(visitor_dir, browser_details)
 
           else
-            raise Error.new(BROWSER_UNKNOWN, :values => {:browser => browser_name})
+            raise Errors::Error.new(BROWSER_UNKNOWN, :values => {:browser => browser_name})
         end
       rescue Exception => e
         @@logger.an_event.error "browser #{name} create : #{e.message}"
-        raise Error.new(BROWSER_NOT_CREATE, :values => {:browser => browser_name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_CREATE, :values => {:browser => browser_name}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} create"
@@ -206,7 +206,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error e.message
-        raise Error.new(BROWSER_NOT_FOUND_ALL_LINK, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_ALL_LINK, :values => {:browser => name}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} found all links #{links}"
@@ -235,7 +235,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser get html page : #{e.message}"
-        raise Error.new(BROWSER_NOT_FOUND_BODY, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_BODY, :values => {:browser => name}, :error => e)
 
       else
         @@logger.an_event.debug "browser get html page"
@@ -248,7 +248,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser parse html page : #{e.message}"
-        raise Error.new(BROWSER_NOT_FOUND_BODY, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_BODY, :values => {:browser => name}, :error => e)
 
       else
 
@@ -276,7 +276,7 @@ module Browsers
       @@logger.an_event.debug "link to click #{link}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "link"}) if link.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "link"}) if link.nil?
 
 
         if link.is_a?(Sahi::ElementStub)
@@ -314,9 +314,9 @@ module Browsers
 
         end
       rescue Exception => e
-        @@logger.an_event.error e.message
+        @@logger.an_event.error "link_element : #{e.message}"
 
-        raise Error.new(BROWSER_NOT_FOUND_LINK, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} found link #{link}" if link.is_a?(String)
@@ -376,8 +376,8 @@ module Browsers
         count -= 1
         retry if count > 0
         @@logger.an_event.error "browser #{name} click on url : #{e.message}"
-        raise Error.new(BROWSER_NOT_CLICK, :values => {:browser => name}, :error => e) if count > 0
-        raise Error.new(BROWSER_CLICK_MAX_COUNT, :values => {:browser => name, :link => url_before}, :error => e) unless count > 0
+        raise Errors::Error.new(BROWSER_NOT_CLICK, :values => {:browser => name}, :error => e) if count > 0
+        raise Errors::Error.new(BROWSER_CLICK_MAX_COUNT, :values => {:browser => name, :link => url_before}, :error => e) unless count > 0
 
       else
         @@logger.an_event.debug "browser #{name} click on url #{link}" if link.is_a?(String)
@@ -409,7 +409,7 @@ module Browsers
       @@logger.an_event.debug "url_start_page : #{url_start_page}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url_start_page"}) if url_start_page.nil? or url_start_page == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url_start_page"}) if url_start_page.nil? or url_start_page == ""
 
         #old_page_title = @driver.title
         #@@logger.an_event.debug "old_page_title : #{old_page_title}"
@@ -423,17 +423,17 @@ module Browsers
           hostname = URI.parse(URI.escape(url)).hostname
         end
         #pb de connection reseau par exemple
-        raise Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => hostname}) if @driver.div("error_connect").exists?
+        raise Errors::Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => hostname}) if @driver.div("error_connect").exists?
 
           # new_page_title = @driver.title
           # @@logger.an_event.debug "new_page_title : #{new_page_title}"
           # #erreur sahi...on est tj sur la page initiale de sahi
-          # raise Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
+          # raise Errors::Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} display start page : #{e.message}"
 
-        raise Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} display start page"
@@ -455,8 +455,8 @@ module Browsers
     #
     #----------------------------------------------------------------------------------------------------------------
     def exist_element?(type, id)
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type.empty?
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id"}) if id.nil? or id.empty?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type.empty?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id"}) if id.nil? or id.empty?
 
       @@logger.an_event.debug "type #{type}"
       @@logger.an_event.debug "id #{id}"
@@ -485,7 +485,7 @@ module Browsers
       @@logger.an_event.debug "link #{link}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "link"}) if link.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "link"}) if link.nil?
 
         exist = false
         if link.is_a?(Browsers::Sahi::ElementStub)
@@ -521,7 +521,7 @@ module Browsers
       rescue Exception => e
         @@logger.an_event.error "browser #{name} found link : #{e.message}"
 
-        raise Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} found link"
@@ -635,7 +635,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} go back : #{e.message}"
-        raise Error.new(BROWSER_NOT_GO_BACK, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_GO_BACK, :values => {:browser => name}, :error => e)
 
       else
 
@@ -660,7 +660,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} go to #{url} : #{e.message}"
-        raise Error.new(BROWSER_NOT_GO_TO, :values => {:browser => name, :url => url}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_GO_TO, :values => {:browser => name, :url => url}, :error => e)
 
       else
 
@@ -698,9 +698,9 @@ module Browsers
 
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if browser_details[:listening_port_proxy].nil? or browser_details[:listening_port_proxy] == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "screen_resolution"}) if browser_details[:screen_resolution].nil? or browser_details[:screen_resolution] == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "method_start_page"}) if method_start_page.nil? or method_start_page == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if browser_details[:listening_port_proxy].nil? or browser_details[:listening_port_proxy] == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "screen_resolution"}) if browser_details[:screen_resolution].nil? or browser_details[:screen_resolution] == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "method_start_page"}) if method_start_page.nil? or method_start_page == ""
 
         @@logger.an_event.debug "listening_port_proxy #{browser_details[:listening_port_proxy]}"
         @@logger.an_event.debug "screen_resolution #{browser_details[:screen_resolution]}"
@@ -754,7 +754,30 @@ module Browsers
       end
       bool
     end
+     #----------------------------------------------------------------------------------------------------------------
+    # is_reachable_url?
+    #----------------------------------------------------------------------------------------------------------------
+    # controle que l'url est accessible
+    #----------------------------------------------------------------------------------------------------------------
+    # input : url
+    # output : true|false
+    #----------------------------------------------------------------------------------------------------------------
+    def is_reachable_url?(url)
+      begin
+        wait(30, true, 5) {
+          RestClient.get url
+        }
 
+      rescue Exception => e
+        @@logger.an_event.debug "url #{url} unreachable : #{e.message}"
+        false
+
+      else
+        @@logger.an_event.debug "url #{url} reachable"
+        true
+
+      end
+    end
     #-----------------------------------------------------------------------------------------------------------------
     # kill_by_pid
     #-----------------------------------------------------------------------------------------------------------------
@@ -769,7 +792,7 @@ module Browsers
     def kill_by_pid
       count_try = 3
 
-      @@logger.an_event.debug "going to kill browser with process name #{@driver.browser_process_name}"
+      @@logger.an_event.debug "going to kill browser with pid #{@pid}"
       begin
         #TODO remplacer taskkill par kill pour linux
         res = IO.popen("taskkill /PID #{@pid} /T /F").read
@@ -785,7 +808,7 @@ module Browsers
         end
 
         @@logger.an_event.error "kill browser with pid #{@pid} : #{e.message}"
-        raise Error.new(CLOSE_DRIVER_FAILED, :error => e)
+        raise Errors::Error.new(CLOSE_DRIVER_FAILED, :error => e)
 
       else
         @@logger.an_event.debug "kill browser with pid #{@pid}"
@@ -823,7 +846,7 @@ module Browsers
         end
 
         @@logger.an_event.error "kill browser with process name #{@driver.browser_process_name} : #{e.message}"
-        raise Error.new(CLOSE_DRIVER_FAILED, :error => e)
+        raise Errors::Error.new(CLOSE_DRIVER_FAILED, :error => e)
 
       else
         @@logger.an_event.debug "kill browser with process name #{@driver.browser_process_name}"
@@ -874,7 +897,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} kill : #{e.message}"
-        raise Error.new(BROWSER_NOT_CLOSE, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_CLOSE, :values => {:browser => name}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} kill"
@@ -897,7 +920,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} reload #{url}"
-        raise Error.new(BROWSER_NOT_RELOAD, :values => {:url => url}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_RELOAD, :values => {:url => url}, :error => e)
 
       else
 
@@ -981,7 +1004,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} resize : #{e.message}"
-        raise Error.new(BROWSER_NOT_RESIZE, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_RESIZE, :values => {:browser => name}, :error => e)
 
       else
 
@@ -1021,9 +1044,9 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     def set_input_search(type, input, keywords)
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "input"}) if input.nil? or input == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keywords"}) if keywords.nil? or keywords == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "input"}) if input.nil? or input == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keywords"}) if keywords.nil? or keywords == ""
 
         @@logger.an_event.debug "type : #{type}"
         @@logger.an_event.debug "input : #{input}"
@@ -1044,7 +1067,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.fatal "set input search #{type} #{input} with #{keywords} : #{e.message}"
-        raise Error.new(BROWSER_NOT_SET_INPUT_SEARCH, :values => {:browser => name, :type => type, :input => input, :keywords => keywords}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_SET_INPUT_SEARCH, :values => {:browser => name, :type => type, :input => input, :keywords => keywords}, :error => e)
 
       else
         @@logger.an_event.debug "set input search #{type} #{input} with #{keywords}"
@@ -1065,9 +1088,9 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     def set_input_captcha(type, input, captcha)
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "input"}) if input.nil? or input == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "captcha"}) if captcha.nil? or captcha == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "input"}) if input.nil? or input == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "captcha"}) if captcha.nil? or captcha == ""
 
         @@logger.an_event.debug "type : #{type}"
         @@logger.an_event.debug "input : #{input}"
@@ -1079,7 +1102,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "set input captcha #{type} #{input} with #{captcha} : #{e.message}"
-        raise Error.new(BROWSER_NOT_SET_INPUT_CAPTCHA, :values => {:browser => name, :type => type, :input => input, :keywords => captcha}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_SET_INPUT_CAPTCHA, :values => {:browser => name, :type => type, :input => input, :keywords => captcha}, :error => e)
 
       else
         @@logger.an_event.debug "set input search #{type} #{input} with #{captcha}"
@@ -1104,13 +1127,13 @@ module Browsers
       @@logger.an_event.debug "form #{form}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "form"}) if form.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "form"}) if form.nil?
 
         @driver.submit(form).click
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} submit form #{form} : #{ e.message}"
-        raise Error.new(BROWSER_NOT_SUBMIT_FORM, :values => {:browser => name, :form => form}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_SUBMIT_FORM, :values => {:browser => name, :form => form}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} submit form #{form}"
@@ -1211,7 +1234,7 @@ module Browsers
 
         rescue Exception => e
           @@logger.an_event.fatal "take captcha : #{e.message}"
-          raise Error.new(BROWSER_NOT_TAKE_SCREENSHOT, :values => {:browser => name, :title => title}, :error => e)
+          raise Errors::Error.new(BROWSER_NOT_TAKE_SCREENSHOT, :values => {:browser => name, :title => title}, :error => e)
 
         else
 
@@ -1259,7 +1282,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} found title : #{e.message}"
-        raise Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
 
       else
 
@@ -1287,7 +1310,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "get current url : #{e.message}"
-        raise Error.new(BROWSER_NOT_FOUND_URL, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_FOUND_URL, :values => {:browser => name}, :error => e)
 
       else
         @@logger.an_event.debug "get current url : #{url}"
@@ -1295,7 +1318,30 @@ module Browsers
       end
     end
 
+    def wait(timeout, exception = false, interval=0.2)
 
+      if !block_given?
+        sleep(timeout)
+        return
+      end
+
+      timeout = interval if $staging == "development" # on execute une fois
+
+      while (timeout > 0)
+        sleep(interval)
+        timeout -= interval
+        begin
+          return if yield
+        rescue Exception => e
+          p "try again : #{e.message}"
+        else
+          p "try again."
+        end
+      end
+
+      raise e if !e.nil? and exception == true
+
+    end
   end
 end
 require_relative 'firefox'

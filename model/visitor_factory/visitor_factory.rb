@@ -253,62 +253,53 @@ class VisitorFactory
       with_advertising = visit[:advert][:advertising] != :none
       with_google_engine = visitor[:browser][:engine_search] == :google && visit[:referrer][:medium] == :organic
 
-      #-v ../archive/Firefox-19.0_la-boite-immo_2016-8-18-16-33-0_1.yml
-      # -l localhost
-      # -i 9996
-      # -m 15
-      # -p http
-      # -r muz11-wbsswsg.ca-technologies.fr
-      # -o 8080
-      # -x et00752
-      # -y Bremb@17"
-      cmd = "#{@@runtime_ruby} -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift)  \
-      #{VISITOR_BOT} \
-      -v #{details[:visit_file]} \
-      -l #{details[:ip_proxy_sahi]} \
-      -i #{details[:port_proxy_sahi].to_i} \
-      -m #{@@max_time_to_live_visit}                   \
-      #{geolocation(with_advertising, with_google_engine)}"
+      # -v       ../archive/Firefox-19.0_la-boite-immo_2016-8-18-16-33-0_1.yml
+      # -l      localhost
+      # -i      9996
+      # -m      15
+      # -p      http
+      # -r      muz11-wbsswsg.ca-technologies.fr
+      # -o      8080
+      # -x      et00752
+      # -y      Bremb@18"
 
-      @@logger.an_event.debug "cmd start visitor_bot #{cmd}"
+      cmd = "#{@@runtime_ruby} -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift)"
+      cmd += " #{VISITOR_BOT}"
+      cmd += " -v #{details[:visit_file]}"
+      cmd += " -l #{details[:ip_proxy_sahi]}"
+      cmd += " -i #{details[:port_proxy_sahi].to_i}"
+      cmd += " -m #{@@max_time_to_live_visit}"
+      cmd += " #{geolocation(with_advertising, with_google_engine)}"
 
-      visitor_bot_pid = 0
+      @@logger.an_event.debug "cmd : #{cmd}"
+
+      visitor_bot_pid = nil
+
 
       visitor_bot_pid = Timeout::timeout((@@max_time_to_live_visit + 2) * 60) {
+        @@logger.an_event.debug "start visitor_bot"
         visitor_bot_pid = Process.spawn(cmd)
         visitor_bot_pid, status = Process.wait2(visitor_bot_pid, 0)
         visitor_bot_pid
       }
-    rescue Timeout::Error => e
-      #TODO remplacer taskkill par kill pour linux
-      # kill du process qui contient ruby.exe, parfois il n'est pas tuer par windows qd visitor_bot s'arrete, prkoi ????
-      # par sécurité => nettoyage.
-      res = IO.popen("taskkill /PID #{visitor_bot_pid} /T /F").read
-      @@logger.an_event.debug ("ruby.exe(#{visitor_bot_pid}) for visitor #{visitor} was killed : #{res}") unless res == ""
 
     rescue Exception => e
-      @@logger.an_event.error "lauching visitor_bot with browser #{details[:pattern]} and visit file #{details[:visit_file]} : #{e.message}"
-      change_visit_state(visit[:id], Monitoring::NEVERSTARTED)
+      @@logger.an_event.error "start visitor_bot : #{e.message}"
+      change_visit_state(visit[:id], Monitoring::NEVERSTARTED) unless visitor_bot_pid.nil?
 
     else
-      @@logger.an_event.info "visitor_bot with browser #{details[:pattern]} and visit file #{details[:visit_file]} over : exit status #{status.exitstatus}"
+      @@logger.an_event.debug "start visitor_bot, status : #{status.exitstatus}"
 
-      if status.exitstatus == OK
-        delete_log_file(visitor[:id])
-
-      elsif status.exitstatus == ERR_BROWSER_CLOSING
-
-      end
+      delete_log_file(visitor[:id])
+      @@logger.an_event.debug "delete log visitor_bot"
 
     ensure
-      @@logger.an_event.info "stop visitor_bot with browser #{details[:pattern]} and visit file #{details[:visit_file]}"
-      #TODO remplacer taskkill par kill pour linux
-      #TODO tester que le pid existe
-      # kill du process qui contient ruby.exe, parfois il n'est pas tuer par windows qd visitor_bot s'arrete, prkoi ????
-      # par sécurité => nettoyage.
-      res = IO.popen("taskkill /PID #{visitor_bot_pid} /T /F").read
-      @@logger.an_event.debug ("ruby.exe(#{visitor_bot_pid}) for visitor #{visitor} was killed : #{res}") unless res == ""
-
+      if !visitor_bot_pid.nil? and running_by_pid?(visitor_bot_pid)
+        # kill du process qui contient ruby.exe, parfois il n'est pas tuer par windows qd visitor_bot s'arrete, prkoi ????
+        # par sécurité => nettoyage.
+        @@logger.an_event.info "kill visitor_bot"
+        kill_by_pid(visitor_bot_pid)
+      end
     end
   end
 
@@ -342,7 +333,7 @@ class VisitorFactory
       geo_to_s = ""
 
     else
-            # -p http
+      # -p http
       # -r muz11-wbsswsg.ca-technologies.fr
       # -o 8080
       # -x et00752
@@ -388,7 +379,51 @@ class VisitorFactory
     end
   end
 
+  def kill_by_pid(pid)
+    count_try = 3
 
+    begin
+      #TODO remplacer taskkill par kill pour linux
+      res = IO.popen("taskkill /PID #{pid} /T /F").read
+
+      @@logger.an_event.debug "result taskkill : #{res}"
+
+    rescue Exception => e
+      if count_try > 0
+        @@logger.an_event.debug "try #{count_try}, kill process #{pid} : #{e.message}"
+        count_try -= 1
+        sleep (1)
+        retry
+      end
+
+      @@logger.an_event.error "kill process #{pid} : #{e.message}"
+
+    else
+      @@logger.an_event.debug "kill process #{pid}"
+
+    end
+  end
+
+  def running_by_pid?(pid)
+
+    require 'csv'
+    #TODO remplacer tasklist par ps pour linux
+    res = IO.popen('tasklist /V /FI "PID eq ' + pid.to_s + '" /FO CSV /NH').read
+
+    @@logger.an_event.debug "tasklist for pid #{pid.to_s} : #{res}"
+
+    CSV.parse(res) do |row|
+      # res == Informationÿ: aucune tƒche en service ne correspond aux critŠres sp‚cifi‚s.
+      # donc le pid n'existe plus => le browser nest plus running
+      if !row[1].nil? and row[1].include?(pid.to_s)
+        @@logger.an_event.debug "running process #{pid} : yes"
+        return true
+      end
+      @@logger.an_event.debug "running process #{pid} : no"
+      false
+
+    end
+  end
 end
 
 

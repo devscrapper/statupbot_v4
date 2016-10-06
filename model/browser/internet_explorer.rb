@@ -99,8 +99,17 @@ module Browsers
         start_page_visit_url = "http://#{$start_page_server_ip}:#{$start_page_server_port}/start_link?method=#{@method_start_page}&url=#{encode_start_url}&visitor_id=#{visitor_id}"
         @@logger.an_event.debug "start_page_visit_url : #{start_page_visit_url}"
 
+        # internet explorer utilise le proxy syteme qui et parametré pour que les requetes locales au lan ne passe pas
+                # par le proxy sahi.
+                # il faut donc tester que l'url du serveur start_page est joignable avant d'y acceder sinon le navigateur
+                # se fige sur la page erreur du naviagetur "url non joignable"
+        if is_reachable_url?(start_page_visit_url)
+          @driver.display_start_page(start_page_visit_url, window_parameters)
 
-        super(start_page_visit_url, window_parameters)
+        else
+          #pb de connection reseau par exemple
+          raise Errors::Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => $start_page_server_port})
+        end
 
       rescue Exception => e
         @@logger.an_event.error "#{name} display start page #{start_url} : #{e.message}"

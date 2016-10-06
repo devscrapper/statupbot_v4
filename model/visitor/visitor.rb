@@ -365,21 +365,15 @@ module Visitors
                 # monitoring vers la console du script
                 # arret de l'execution du script et donc de la visit
                 @@logger.an_event.info "visitor stop visit because captcha"
-                screenshot_path = take_screenshot(count_finished_actions, action)
-                Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
                 raise e #stop la visite
 
               else
                 @@logger.an_event.error "visitor  make action  <#{COMMANDS[action]}> : #{e.message}"
-                screenshot_path = take_screenshot(count_finished_actions, action)
-                Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
                 raise e #stop la visite
             end
 
           rescue Exception => e
             @@logger.an_event.error "visitor  make action <#{COMMANDS[action]}> : #{e.message}"
-            screenshot_path = take_screenshot(count_finished_actions, action)
-            Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
             raise e #stop la visit
 
           else
