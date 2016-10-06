@@ -54,7 +54,7 @@ module Mim
       false
     end
 
-#TODO supprimer listening_ip_proxy
+#TODO supprimer listening_ip_proxy qui est l'ip du proxy sahi car cela ne fonctionne pas sur un serveur distant
     def initialize(visitor_dir, listening_ip_proxy, listening_port_proxy, ip_geo_proxy, port_geo_proxy, user_geo_proxy, pwd_geo_proxy)
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
       raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if listening_port_proxy.nil?
@@ -83,7 +83,7 @@ module Mim
       @userdata = File.join(@visitor_dir, 'userdata')
       @@logger.an_event.debug "userdata #{@userdata}"
 
-      #charge les param�tres
+      #charge les paramétres
       parameters = load_parameters
       @install_sahi_dir = parameters.install_sahi_dir
       @java_runtime_dir = parameters.java_runtime_dir
@@ -159,6 +159,7 @@ module Mim
       file_custom = File.read(proxy_properties)
       file_custom.gsub!(/listening_ip_proxy/, @listening_ip_proxy.to_s)
       file_custom.gsub!(/listening_port_proxy/, @listening_port_proxy.to_s)
+      file_custom.gsub!(/start_page_server_ip/, @start_page_server_ip.to_s)
       File.write(proxy_properties, file_custom)
       @@logger.an_event.debug "proxy.properties for ie opera edge"
 
