@@ -186,7 +186,7 @@ module Mim
           "" :
           "|" + @start_page_server_ip
 
-      userdata['browser_launch.delay_after_proxy_change'] = 1500
+      userdata['browser_launch.delay_after_proxy_change'] = 1500.to_s
 
       File.open(File.join(@userdata, 'config', "userdata.properties"), 'w') { |out| out.write(userdata.to_s) }
 
