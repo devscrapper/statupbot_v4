@@ -186,6 +186,8 @@ module Mim
           "" :
           "|" + @start_page_server_ip
 
+      userdata['browser_launch.delay_after_proxy_change'] = 1500
+
       File.open(File.join(@userdata, 'config', "userdata.properties"), 'w') { |out| out.write(userdata.to_s) }
 
       @@logger.an_event.debug "customized userdata.properties"
