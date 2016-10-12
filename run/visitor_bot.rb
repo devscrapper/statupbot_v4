@@ -141,6 +141,18 @@ def visit_failed(visit_id, reason, logger)
   end
 end
 
+def visit_not_found(visit_id, reason, logger)
+  begin
+
+    log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
+    Monitoring.visit_not_found(visit_id,
+                            reason,
+                            log_path)
+  rescue Exception => e
+    logger.an_event.warn e.message
+
+  end
+end
 def visit_started(visit, visitor, logger)
   begin
     Monitoring.visit_started(visit.id,
