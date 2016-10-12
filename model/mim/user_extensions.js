@@ -89,7 +89,6 @@ Sahi.prototype.go_back = function () {
 };
 
 
-
 /* met à jour un attribut d'un balise HTML : target par exemple pour <a>
  a : elementstub html
  b : attribut
@@ -102,6 +101,76 @@ Sahi.prototype.setAttribute = function (a, b, c) {
     return a.setAttribute(b, c)
 };
 
+Sahi.prototype.screenshot_body = function () {
+
+    try {
+        //error_label = le texte de l'excetpion si une erreur a été levée
+        // 'over' si tout est OK
+        var error_label = document.createElement("p");
+        error_label.id = "error_label";
+        document.body.appendChild(error_label);
+
+        //le screenshot encodé en base 64
+        var screenshot_base64 = document.createElement("p");
+        screenshot_base64.id = "screenshot_base64";
+        document.body.appendChild(screenshot_base64);
+
+        screenshot(document.body)
+    }
+    catch (e) {
+        document.getElementById("error_label").appendChild(document.createTextNode("screenshot_body => " + e));
+
+    }
+}
+
+Sahi.prototype.screenshot_element_by_id = function (id) {
+    try {
+        //error_label = le texte de l'excetpion si une erreur a été levée
+        var error_label = document.createElement("p");
+        error_label.id = "error_label";
+        //le screenshot encodé en base 64
+        var screenshot_base64 = document.createElement("p");
+        screenshot_base64.id = "screenshot_base64";
+
+        screenshot(document.getElementById(id)[0]);
+    }
+    catch (e) {
+
+    }
+}
+
+function screenshot(elt) {
+    try {
+        //TODO gérer internet explorer qui ne connait pas nativement Promise
+        html2canvas(elt).then(function (canvas) {
+                // html2canvas a fait le screenshot, il est dans le canvas
+                try {
+                    //à commenter
+                    document.body.appendChild(canvas);
+
+                    //encodage du screenshot en base 64, en chaine de caractère pour le retourner
+                    var dataURL = canvas.toDataURL("image/png");
+                    dataURL = dataURL.replace(/^data:image\/(png|jpg);base64,/, "")
+
+                    //stockage dans la page html, dans l'element 'screenshot_base64'
+                    document.getElementById("screenshot_base64").appendChild(document.createTextNode(dataURL));
+
+                    // indique que la capture est terminée
+                    document.getElementById("error_label").appendChild(document.createTextNode("over"));
+                }
+                catch (e) {
+                    document.getElementById("error_label").appendChild(document.createTextNode("screenshot 1 => " + e));
+                }
+            }
+        )
+        ;
+    }
+
+    catch
+        (e) {
+        document.getElementById("error_label").appendChild(document.createTextNode("screenshot 2 => " + e));
+    }
+}
 
 /*
  recupere les links (retournés par la méthode document.link ) de la fenetre courante.
@@ -121,13 +190,13 @@ Sahi.prototype.links = function () {
         return JSON.stringify({links: links_in_window(window)});
     }
     catch (e) {
-         //trace.write("links Exception : " + e.message + "<br>");
+        //trace.write("links Exception : " + e.message + "<br>");
         return e;
     }
 };
 
 function links_in_window(w) {
-     //trace.write("links_in_window debut<br>")
+    //trace.write("links_in_window debut<br>")
     try {
         var res = new Array(),
             arr_lnks = null;
@@ -143,7 +212,7 @@ function links_in_window(w) {
                             text: encodeURI(arr_lnks[i].textContent || arr_lnks[i].text).replace("'", "&#44;")
                         });
 
-                         //trace.write(arr_lnks[i].href + "<br>");
+                        //trace.write(arr_lnks[i].href + "<br>");
                     }
                 }
                 for (var j = 0; j < w.frames.length; j++) {
@@ -153,9 +222,9 @@ function links_in_window(w) {
         }
     }
     catch (e) {
-         //trace.write("links_in_window Exception " + e.message + "<br>");
+        //trace.write("links_in_window Exception " + e.message + "<br>");
     }
-     //trace.write("links_in_window fin<br>")
+    //trace.write("links_in_window fin<br>")
     return res;
 }
 function links_in_document(d) {
@@ -165,10 +234,10 @@ function links_in_document(d) {
         lnks = d.links;
     }
     catch (e) {
-         //trace.write("links_in_document exception" + e.message + "<br>");
+        //trace.write("links_in_document exception" + e.message + "<br>");
         lnks = new Array();
     }
-     //trace.write("links_in_document fin<br>");
+    //trace.write("links_in_document fin<br>");
     return lnks;
 }
 function is_selectable(link, url_window) {

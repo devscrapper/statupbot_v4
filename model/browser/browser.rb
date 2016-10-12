@@ -754,7 +754,8 @@ module Browsers
       end
       bool
     end
-     #----------------------------------------------------------------------------------------------------------------
+
+    #----------------------------------------------------------------------------------------------------------------
     # is_reachable_url?
     #----------------------------------------------------------------------------------------------------------------
     # controle que l'url est accessible
@@ -778,6 +779,7 @@ module Browsers
 
       end
     end
+
     #-----------------------------------------------------------------------------------------------------------------
     # kill_by_pid
     #-----------------------------------------------------------------------------------------------------------------
@@ -1165,43 +1167,60 @@ module Browsers
       File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
         f.flock(File::LOCK_EX)
 
+
+        if output_file.nil?
+
+          title = @driver.title
+          @@logger.an_event.debug title
+          output_file = Flow.new(DIR_TMP,
+                                 @driver.name.gsub(" ", "-"),
+                                 title[0..32],
+                                 Date.today,
+                                 Time.parse(Tim.now).hour * 3600 + Time.parse(Time.now).min * 60,
+                                 ".png")
+
+        end
+
+        #-------------------------------------------------------------------------------------------------------------
+        # prise du screenshot avec canvas, en premiere intention
+        #-------------------------------------------------------------------------------------------------------------
         begin
-          if output_file.nil?
-
-            title = @driver.title
-            @@logger.an_event.debug title
-            output_file = Flow.new(DIR_TMP,
-                                   @driver.name.gsub(" ", "-"),
-                                   title[0..32],
-                                   Date.today,
-                                   Time.parse(Tim.now).hour * 3600 + Time.parse(Time.now).min * 60,
-                                   ".png")
-
-          end
-          #-------------------------------------------------------------------------------------------------------------
-          # affiche le browser en premier plan
-          #-------------------------------------------------------------------------------------------------------------
-          #TODO update for linux
-          @window.restore if @window.minimized?
-          @window.activate
-          @@logger.an_event.debug "restore de la fenetre du browser"
-
-          @driver.take_screenshot(output_file, @height.to_i)
+          @driver.take_screenshot_by_canvas(output_file)
 
         rescue Exception => e
-          @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"
-          @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
+          @@logger.an_event.error "screenshot by canvas : #{e.message}"
+          # echec de la prise du screenshot avec canvas on essaie avec win32screenshot
+          #-------------------------------------------------------------------------------------------------------------
+          # prise du screenshot avec win32screenshot
+          #-------------------------------------------------------------------------------------------------------------
+          begin
+            # affiche le browser en premier plan
+            #TODO update for linux
+            @window.restore if @window.minimized?
+            @window.activate
+            @@logger.an_event.debug "restore de la fenetre du browser"
+
+            #prise du screenshot
+            @driver.take_screenshot(output_file, @height.to_i)
+
+          rescue Exception => e
+            @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"
+            @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
+
+          else
+            @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
+
+          ensure
+            # cache le browser
+            @window.minimize
+            @@logger.an_event.debug "minimize de la fenetre du browser"
+          end
 
         else
           @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
 
-        ensure
-          #-------------------------------------------------------------------------------------------------------------
-          # cache le browser
-          #-------------------------------------------------------------------------------------------------------------
-          @window.minimize
-          @@logger.an_event.debug "minimize de la fenetre du browser"
         end
+
 
         output_file.absolute_path
       }
@@ -1342,6 +1361,7 @@ module Browsers
       raise e if !e.nil? and exception == true
 
     end
+
   end
 end
 require_relative 'firefox'

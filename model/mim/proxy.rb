@@ -116,6 +116,20 @@ module Mim
       FileUtils.cp_r(File.join(File.dirname(__FILE__), '5xx.htm'), File.join(@visitor_dir, 'htdocs', 'spr'))
 
       #-----------------------------------------------------------------------------------------------------------
+      # copie html2canvas.js qui permet de gérer les screenshot
+      # copie promise.min.js car internet explorer ne connait pas promise.js
+      # /visitors/visitor_id/config
+      #-----------------------------------------------------------------------------------------------------------
+      FileUtils.cp_r(File.join(File.dirname(__FILE__), 'html2canvas.js'), File.join(@visitor_dir, 'htdocs', 'spr'))
+      FileUtils.cp_r(File.join(File.dirname(__FILE__), 'promise.min.js'), File.join(@visitor_dir, 'htdocs', 'spr'))
+
+      #-----------------------------------------------------------------------------------------------------------
+      # copie inject_top_.txt qui permet injecter des fichiers javascript dans chaque page html
+      # celui-ci est spécialisé par l'ajout de html2canvas et promise
+      #-----------------------------------------------------------------------------------------------------------
+      FileUtils.cp_r(File.join(File.dirname(__FILE__), 'inject_top.txt'), File.join(@visitor_dir, 'config'))
+
+      #-----------------------------------------------------------------------------------------------------------
       # publie le repository des browsers (repository.csv) vers le fichier contenant les browser types
       #-----------------------------------------------------------------------------------------------------------
       bt = Mim::BrowserTypes::from_csv

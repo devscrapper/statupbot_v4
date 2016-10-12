@@ -66,6 +66,8 @@ module Sahi
 
     end
 
+
+
     def body
       body = nil
       wait(60) {
@@ -331,7 +333,37 @@ module Sahi
 
     end
 
+    def take_screenshot_by_canvas(screenshot_flow)
+      #----------------------------------------------------------------------------------------------------------------
+      # prise du screenshot  (execution asynchrone par html2canvas avec Promise)
+      #----------------------------------------------------------------------------------------------------------------
+      fetch("_sahi.screenshot_body()")
 
+      #----------------------------------------------------------------------------------------------------------------
+      # donc attend que le screenshot soit fini
+      #----------------------------------------------------------------------------------------------------------------
+      error_label = ""
+      wait(5) {
+        error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
+        !error_label.empty?
+      }
+
+      #----------------------------------------------------------------------------------------------------------------
+      # gestion du retour positif ou d'une exception, lors du screenshot
+      #----------------------------------------------------------------------------------------------------------------
+      # une exception a été levé, on l'a propage.
+      raise error_label unless error_label == "over"
+
+      # tout c'est bien passé
+      # recuperation du screenshot au format base64
+      screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
+
+      # sauvegarde du screenshot dans le fichier
+      File.open(screenshot_flow.absolute_path, 'wb') do |f|
+        f.write(Base64.decode64(screenshot_base64))
+      end
+
+    end
     def take_screenshot(screenshot_flow, brw_height)
       begin
         #-------------------------------------------------------------------------------------------------------------
