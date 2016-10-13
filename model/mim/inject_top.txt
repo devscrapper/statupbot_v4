@@ -1,0 +1,7 @@
+<!--SAHI_INJECT_START-->
+<script src="/_s_/sprc/concat.js,listen.js,async.js,actions.js,touch.js,sfl.js,language_pack.js,applet2.js,html2canvas.js,promise.min.js" id='_sahi_concat'></script>
+<script src="//$commonDomain/_s_/dyn/SessionState_config/sahiconfig.js"></script>
+<!--extra_js_placeholder-->
+<!--selenium_js_placeholder-->
+<!--SAHI_INJECT_END-->
+

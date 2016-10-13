@@ -1,0 +1,1 @@
+..\localpath.cmd        && ruby -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift) D:\Personnel\referentiel\dev\statupbot.v4\run\visitor_bot.rb -v ../archive/Chrome-39.0.2139.3_la-boite-immo_2016-8-19-6-32-0_1.yml -l localhost -i 9997 -m 15 -p http -r muz11-wbsswsg.ca-technologies.fr -o 8080 -x et00752 -y Bremb@17"
