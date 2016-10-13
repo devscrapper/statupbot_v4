@@ -1190,7 +1190,7 @@ module Browsers
         #-------------------------------------------------------------------------------------------------------------
         #creation d'une section critique, car avec win32screenshot on mt en avant plan le browser car on prend
         #une photo du destop ; screener que le browser generait des white & blanc screen
-        File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+        File.open(File.join(DIR_TMP, "screenshot"), File::RDWR|File::CREAT, 0644) { |f|
           f.flock(File::LOCK_EX)
           begin
             # affiche le browser en premier plan
@@ -1251,7 +1251,7 @@ module Browsers
         #-------------------------------------------------------------------------------------------------------------
         #creation d'une section critique, car avec win32screenshot on mt en avant plan le browser car on prend
         #une photo du destop ; screener que le browser generait des white & blanc screen
-        File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+        File.open(File.join(DIR_TMP, "screenshot"), File::RDWR|File::CREAT, 0644) { |f|
           f.flock(File::LOCK_EX)
           begin
             # affiche le browser en premier plan
