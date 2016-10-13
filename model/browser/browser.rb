@@ -1160,39 +1160,37 @@ module Browsers
     # grave si on ne pas faire de screenshot
     # => on ne fait que logger
     #-----------------------------------------------------------------------------------------------------------------
-
-
     def take_screenshot(output_file=nil)
-      #creation d'une section critique
-      File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
-        f.flock(File::LOCK_EX)
+      if output_file.nil?
 
+        title = @driver.title
+        @@logger.an_event.debug title
+        output_file = Flow.new(DIR_TMP,
+                               @driver.name.gsub(" ", "-"),
+                               title[0..32],
+                               Date.today,
+                               Time.parse(Tim.now).hour * 3600 + Time.parse(Time.now).min * 60,
+                               ".png")
 
-        if output_file.nil?
+      end
 
-          title = @driver.title
-          @@logger.an_event.debug title
-          output_file = Flow.new(DIR_TMP,
-                                 @driver.name.gsub(" ", "-"),
-                                 title[0..32],
-                                 Date.today,
-                                 Time.parse(Tim.now).hour * 3600 + Time.parse(Time.now).min * 60,
-                                 ".png")
+      #-------------------------------------------------------------------------------------------------------------
+      # prise du screenshot avec canvas, en premiere intention
+      #-------------------------------------------------------------------------------------------------------------
+      begin
+        #prise du screenshot
+        @driver.take_screenshot_by_canvas(output_file)
 
-        end
-
+      rescue Exception => e
+        @@logger.an_event.error "screenshot by canvas : #{e.message}"
+        # echec de la prise du screenshot avec canvas on essaie avec win32screenshot
         #-------------------------------------------------------------------------------------------------------------
-        # prise du screenshot avec canvas, en premiere intention
+        # prise du screenshot avec win32screenshot
         #-------------------------------------------------------------------------------------------------------------
-        begin
-          @driver.take_screenshot_by_canvas(output_file)
-
-        rescue Exception => e
-          @@logger.an_event.error "screenshot by canvas : #{e.message}"
-          # echec de la prise du screenshot avec canvas on essaie avec win32screenshot
-          #-------------------------------------------------------------------------------------------------------------
-          # prise du screenshot avec win32screenshot
-          #-------------------------------------------------------------------------------------------------------------
+        #creation d'une section critique, car avec win32screenshot on mt en avant plan le browser car on prend
+        #une photo du destop ; screener que le browser generait des white & blanc screen
+        File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+          f.flock(File::LOCK_EX)
           begin
             # affiche le browser en premier plan
             #TODO update for linux
@@ -1204,7 +1202,7 @@ module Browsers
             @driver.take_screenshot(output_file, @height.to_i)
 
           rescue Exception => e
-            @@logger.an_event.error "browser #{name} take screen shot #{output_file.basename} : #{e.message}"
+            @@logger.an_event.error "browser #{name} take screen shot avec win32screenshot #{output_file.basename} : #{e.message}"
             @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
 
           else
@@ -1215,15 +1213,15 @@ module Browsers
             @window.minimize
             @@logger.an_event.debug "minimize de la fenetre du browser"
           end
+        }
+      else
+        @@logger.an_event.info "browser #{name} take screen shot avec canvas #{output_file.basename}"
 
-        else
-          @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
-
-        end
+      end
 
 
-        output_file.absolute_path
-      }
+      output_file.absolute_path
+
     end
 
     #-----------------------------------------------------------------------------------------------------------------
