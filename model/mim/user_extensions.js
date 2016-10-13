@@ -126,22 +126,26 @@ Sahi.prototype.screenshot_body = function () {
 Sahi.prototype.screenshot_element_by_id = function (id) {
     try {
         //error_label = le texte de l'excetpion si une erreur a été levée
+        // 'over' si tout est OK
         var error_label = document.createElement("p");
         error_label.id = "error_label";
+        document.body.appendChild(error_label);
+
         //le screenshot encodé en base 64
         var screenshot_base64 = document.createElement("p");
         screenshot_base64.id = "screenshot_base64";
+        document.body.appendChild(screenshot_base64);
 
         screenshot(document.getElementById(id)[0]);
     }
     catch (e) {
-
+        document.getElementById("error_label").appendChild(document.createTextNode("screenshot_element_by_id => " + e));
     }
 }
 
 function screenshot(elt) {
     try {
-        //TODO gérer internet explorer qui ne connait pas nativement Promise
+
         html2canvas(elt).then(function (canvas) {
                 // html2canvas a fait le screenshot, il est dans le canvas
                 try {

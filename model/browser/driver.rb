@@ -67,7 +67,6 @@ module Sahi
     end
 
 
-
     def body
       body = nil
       wait(60) {
@@ -333,37 +332,83 @@ module Sahi
 
     end
 
-    def take_screenshot_by_canvas(screenshot_flow)
-      #----------------------------------------------------------------------------------------------------------------
-      # prise du screenshot  (execution asynchrone par html2canvas avec Promise)
-      #----------------------------------------------------------------------------------------------------------------
-      fetch("_sahi.screenshot_body()")
+    def take_screenshot_body_by_canvas(screenshot_flow)
+      begin
+        #----------------------------------------------------------------------------------------------------------------
+        # prise du screenshot  (execution asynchrone par html2canvas avec Promise)
+        #----------------------------------------------------------------------------------------------------------------
+        fetch("_sahi.screenshot_body()")
 
-      #----------------------------------------------------------------------------------------------------------------
-      # donc attend que le screenshot soit fini
-      #----------------------------------------------------------------------------------------------------------------
-      error_label = ""
-      wait(5) {
-        error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
-        !error_label.empty?
-      }
+        #----------------------------------------------------------------------------------------------------------------
+        # donc attend que le screenshot soit fini
+        #----------------------------------------------------------------------------------------------------------------
+        error_label = ""
+        wait(5) {
+          error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
+          !error_label.empty?
+        }
 
-      #----------------------------------------------------------------------------------------------------------------
-      # gestion du retour positif ou d'une exception, lors du screenshot
-      #----------------------------------------------------------------------------------------------------------------
-      # une exception a été levé, on l'a propage.
-      raise error_label unless error_label == "over"
+        #----------------------------------------------------------------------------------------------------------------
+        # gestion du retour positif ou d'une exception, lors du screenshot
+        #----------------------------------------------------------------------------------------------------------------
+        # une exception a été levé, on l'a propage.
+        raise error_label unless error_label == "over"
 
-      # tout c'est bien passé
-      # recuperation du screenshot au format base64
-      screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
+        # tout c'est bien passé
+        # recuperation du screenshot au format base64
+        screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
 
-      # sauvegarde du screenshot dans le fichier
-      File.open(screenshot_flow.absolute_path, 'wb') do |f|
-        f.write(Base64.decode64(screenshot_base64))
+        # sauvegarde du screenshot dans le fichier
+        File.open(screenshot_flow.absolute_path, 'wb') do |f|
+          f.write(Base64.decode64(screenshot_base64))
+        end
+      rescue Exception => e
+        @@logger.an_event.error "take screenshot body by canvas #{screenshot_flow.basename} : #{e.message}"
+        raise e
+
+      else
+        @@logger.an_event.debug "take screenshot body by canvas #{screenshot_flow.basename}"
       end
-
     end
+
+    def take_screenshot_element_by_id_by_canvas(screenshot_flow, id_captcha)
+      begin
+        #----------------------------------------------------------------------------------------------------------------
+        # prise du screenshot  (execution asynchrone par html2canvas avec Promise)
+        #----------------------------------------------------------------------------------------------------------------
+        fetch("_sahi.screenshot_element_by_id(\"#{id_captcha}\")")
+
+        #----------------------------------------------------------------------------------------------------------------
+        # donc attend que le screenshot soit fini
+        #----------------------------------------------------------------------------------------------------------------
+        error_label = ""
+        wait(5) {
+          error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
+          !error_label.empty?
+        }
+
+        #----------------------------------------------------------------------------------------------------------------
+        # gestion du retour positif ou d'une exception, lors du screenshot
+        #----------------------------------------------------------------------------------------------------------------
+        # une exception a été levé, on l'a propage.
+        raise error_label unless error_label == "over"
+
+        # tout c'est bien passé
+        # recuperation du screenshot au format base64
+        screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
+
+        # sauvegarde du screenshot dans le fichier
+        File.open(screenshot_flow.absolute_path, 'wb') do |f|
+          f.write(Base64.decode64(screenshot_base64))
+        end
+      rescue Exception => e
+        @@logger.an_event.error "take screenshot element by id #{id_captcha} by canvas #{screenshot_flow.basename} : #{e.message}"
+        raise e
+      else
+        @@logger.an_event.debug "take screenshot element by id #{id_captcha} by canvas #{screenshot_flow.basename}"
+      end
+    end
+
     def take_screenshot(screenshot_flow, brw_height)
       begin
         #-------------------------------------------------------------------------------------------------------------
@@ -402,7 +447,7 @@ module Sahi
     end
 
 
-    def take_area_screenshot(screenshot_flow, coord)
+    def take_screenshot_area(screenshot_flow, coord)
 
       begin
 
@@ -571,7 +616,9 @@ module Sahi
         @@logger.an_event.debug "suppression du screenshot #{screenshot_tmp.basename}"
       }
     end
-  end # Browser
+  end
+
+  # Browser
 
 
   #-------------------------------------------------------------------------------------------------------------

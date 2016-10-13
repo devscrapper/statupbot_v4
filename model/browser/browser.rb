@@ -1179,7 +1179,7 @@ module Browsers
       #-------------------------------------------------------------------------------------------------------------
       begin
         #prise du screenshot
-        @driver.take_screenshot_by_canvas(output_file)
+        @driver.take_screenshot_body_by_canvas(output_file)
 
       rescue Exception => e
         @@logger.an_event.error "screenshot by canvas : #{e.message}"
@@ -1235,37 +1235,53 @@ module Browsers
 
 
     def take_captcha(output_file, coord_captcha)
-      #creation d'une section critique
-      File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
-        f.flock(File::LOCK_EX)
-        begin
-          #-------------------------------------------------------------------------------------------------------------
-          # affiche le browser en premier plan
-          #-------------------------------------------------------------------------------------------------------------
-          #TODO update for linux
-          @window.restore if window.minimized?
-          @window.activate
-          @@logger.an_event.debug "restore de la fenetre du browser"
+      #-------------------------------------------------------------------------------------------------------------
+      # prise du captcha avec canvas, en premiere intention
+      #-------------------------------------------------------------------------------------------------------------
+      begin
+        #prise du screenshot
+        @driver.take_screenshot_element_by_id_by_canvas(output_file, @engine_search.id_image_captcha)
 
-          @driver.take_area_screenshot(output_file, coord_captcha)
+      rescue Exception => e
+        @@logger.an_event.error "captcha by canvas : #{e.message}"
+        # echec de la prise du captcha avec canvas on essaie avec win32screenshot
+        #-------------------------------------------------------------------------------------------------------------
+        # prise du captcha avec win32screenshot
+        #-------------------------------------------------------------------------------------------------------------
+        #creation d'une section critique, car avec win32screenshot on mt en avant plan le browser car on prend
+        #une photo du destop ; screener que le browser generait des white & blanc screen
+        File.open("screenshot", File::RDWR|File::CREAT, 0644) { |f|
+          f.flock(File::LOCK_EX)
+          begin
+            # affiche le browser en premier plan
+            @window.restore if window.minimized?
+            @window.activate
+            @@logger.an_event.debug "restore de la fenetre du browser"
 
-        rescue Exception => e
-          @@logger.an_event.fatal "take captcha : #{e.message}"
-          raise Errors::Error.new(BROWSER_NOT_TAKE_SCREENSHOT, :values => {:browser => name, :title => title}, :error => e)
+            @driver.take_screenshot_area(output_file, coord_captcha)
 
-        else
+          rescue Exception => e
+            @@logger.an_event.fatal "take captcha : #{e.message}"
+            raise Errors::Error.new(BROWSER_NOT_TAKE_CAPTCHA, :values => {:browser => name, :title => title}, :error => e)
 
-          @@logger.an_event.info "browser #{name} take captcha"
+          else
 
-        ensure
-          #-------------------------------------------------------------------------------------------------------------
-          # cache le browser
-          #-------------------------------------------------------------------------------------------------------------
-          @window.minimize
-          @@logger.an_event.debug "minimize de la fenetre du browser"
+            @@logger.an_event.info "browser #{name} take captcha"
 
-        end
-      }
+          ensure
+            #-------------------------------------------------------------------------------------------------------------
+            # cache le browser
+            #-------------------------------------------------------------------------------------------------------------
+            @window.minimize
+            @@logger.an_event.debug "minimize de la fenetre du browser"
+
+          end
+        }
+
+      else
+        @@logger.an_event.info "browser #{name} take captcha"
+
+      end
     end
 
     #----------------------------------------------------------------------------------------------------------------
