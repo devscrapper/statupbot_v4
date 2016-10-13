@@ -23,8 +23,8 @@ module Browsers
       @@logger.an_event.debug "version #{browser_details[:version]}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details[:name].nil? or browser_details[:name] == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser version"}) if browser_details[:version].nil? or browser_details[:version] == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details[:name].nil? or browser_details[:name] == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser version"}) if browser_details[:version].nil? or browser_details[:version] == ""
 
         super(visitor_dir,
               browser_details,
@@ -72,8 +72,8 @@ module Browsers
       @@logger.an_event.debug "visitor_id : #{visitor_id}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url ==""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url ==""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
 
         window_parameters = "fullscreen=no,left=0,menubar=yes,scrollbars=yes,status=yes,titlebar=yes,toolbar=yes"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
@@ -135,7 +135,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} open : #{e.message}"
-        raise Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} open"

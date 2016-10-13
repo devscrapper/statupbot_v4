@@ -1,5 +1,6 @@
 # encoding: utf-8
 require_relative 'parameter'
+require_relative 'logging'
 require 'rest-client'
 
 
@@ -9,7 +10,7 @@ module Monitoring
   #--------------------------------------------------------------------------------------------------------------------
   PARAMETERS = File.dirname(__FILE__) + "/../../parameter/monitoring_server.yml"
   ENVIRONMENT= File.dirname(__FILE__) + "/../../parameter/environment.yml"
-  ADVERTNOTFOUND = :advertnotfound    #identifie les visits pour lesquelles on a chercher un adword ou un adsens que lon a pas trouvé
+  ADVERTNOTFOUND = :advertnotfound #identifie les visits pour lesquelles on a chercher un adword ou un adsens que lon a pas trouvé
   START = :started
   PUBLISHED = :published
   SUCCESS = :success
@@ -31,6 +32,7 @@ module Monitoring
 
 
     begin
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
       load_parameter()
 
       wait(60, true, 5) {
@@ -43,26 +45,28 @@ module Monitoring
       }
 
     rescue Exception => e
-      $stderr << "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.error "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
 
-    ensure
+      @@logger.an_event.debug "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
 
     end
   end
 
   def visit_failed(visit_id, reason, log_path)
-      change_state_visit(visit_id, FAIL, reason)
-      send_log(visit_id, log_path)
+    change_state_visit(visit_id, FAIL, reason)
+    send_log(visit_id, log_path)
   end
 
   def visit_not_found(visit_id, reason, log_path)
     change_state_visit(visit_id, ADVERTNOTFOUND, reason)
     send_log(visit_id, log_path)
   end
+
   def visit_started(visit_id, actions, ip_geo_proxy)
     begin
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
       load_parameter()
 
       wait(60, true, 5) {
@@ -74,10 +78,10 @@ module Monitoring
 
       }
     rescue Exception => e
-      $stderr << "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.error "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-      p "started state to visit #{visit_id}"
+      @@logger.an_event.debug "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
 
     ensure
 
@@ -88,6 +92,7 @@ module Monitoring
 
     # les actions sont optionnelles
     begin
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
       load_parameter()
 
       wait(60, true, 5) {
@@ -98,10 +103,10 @@ module Monitoring
 
       }
     rescue Exception => e
-      $stderr << "cannot change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.error "change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-      p "set count browsed page of visit #{visit_id}"
+      @@logger.an_event.debug "change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
 
     ensure
 
@@ -124,16 +129,18 @@ module Monitoring
 
       }
     rescue Exception => e
-      $stderr << "cannot send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.error "send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-      p "send screenshot of visit #{visit_id}"
+      @@logger.an_event.debug "send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
     end
   end
 
   def captcha_browse(visit_id, captcha_path, index, text=nil)
     #text est la value du captcha
     begin
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
+
       resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/captchas")
 
       wait(60, true, 5) {
@@ -153,10 +160,10 @@ module Monitoring
       }
 
     rescue Exception => e
-      $stderr << "cannot create browsed captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.error "send captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-      p "send captcha of visit #{visit_id}"
+      @@logger.an_event.debug "send captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
 
     end
   end
@@ -180,6 +187,7 @@ module Monitoring
 
   def send_log(visit_id, log_path)
     begin
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
       load_parameter()
 
       resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/logs")
@@ -194,21 +202,22 @@ module Monitoring
         end
       }
     rescue Exception => e
-      $stderr << "cannot send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.error "send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
-      p "send log file of visit #{visit_id}"
+      @@logger.an_event.debug "send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port})"
 
     ensure
 
     end
   end
+
   # si pas de bloc passé => wait pour une duree passé en paramètre
   # si un bloc est passé => evalue le bloc tant que le bloc return false, leve une exception, ou que le timeout n'est pas atteind
   # qd le timeout est atteint, si exception == true alors propage l'exception hors du wait
 
   def wait(timeout, exception = false, interval=0.2)
-
+    @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
     if !block_given?
       sleep(timeout)
       return
@@ -222,9 +231,9 @@ module Monitoring
       begin
         return if yield
       rescue Exception => e
-        p "try again : #{e.message}"
+        @@logger.an_event.debug "try again : #{e.message}"
       else
-        p "try again."
+        @@logger.an_event.debug "try again."
       end
     end
 

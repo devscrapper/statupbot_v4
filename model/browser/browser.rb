@@ -766,7 +766,7 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     def is_reachable_url?(url)
       begin
-        wait(30, true, 5) {
+        @driver.wait(30, true, 5) {
           RestClient.get url
         }
 
@@ -1352,30 +1352,6 @@ module Browsers
       end
     end
 
-    def wait(timeout, exception = false, interval=0.2)
-
-      if !block_given?
-        sleep(timeout)
-        return
-      end
-
-      timeout = interval if $staging == "development" # on execute une fois
-
-      while (timeout > 0)
-        sleep(interval)
-        timeout -= interval
-        begin
-          return if yield
-        rescue Exception => e
-          p "try again : #{e.message}"
-        else
-          p "try again."
-        end
-      end
-
-      raise e if !e.nil? and exception == true
-
-    end
 
   end
 end

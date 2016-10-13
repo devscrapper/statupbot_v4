@@ -240,7 +240,7 @@ module Sahi
     def open
 
       begin
-        wait(60) {
+        wait(60, true) {
           check_proxy
         }
 
@@ -272,14 +272,12 @@ module Sahi
       end
 
       begin
-        wait(5 * 60) {
+        wait(5 * 60, true, 2) {
           # attend 5mn que le navigateur soit pret pour eviter des faux positif qd le navigateur est
           #long a démarré qd la machine est surchargée
-          is_ready?
+          raise "browser type not ready" unless is_ready?
+          true
         }
-
-
-        raise "browser type not ready" unless is_ready?
 
       rescue Exception => e
         @@logger.an_event.error "driver open : #{e.message}"
@@ -616,14 +614,41 @@ module Sahi
         @@logger.an_event.debug "suppression du screenshot #{screenshot_tmp.basename}"
       }
     end
+
+    def wait(timeout, exception = false, interval=0.2)
+
+      if !block_given?
+        sleep(timeout)
+        return
+      end
+
+      # timeout = interval if $staging == "development" # on execute une fois
+
+      while (timeout > 0)
+        sleep(interval)
+        timeout -= interval
+        begin
+          return if yield
+        rescue Exception => e
+          @@logger.an_event.warn "try again : #{e.message}"
+        else
+          @@logger.an_event.debug "try again."
+        end
+      end
+
+      raise e if !e.nil? and exception == true
+
+    end
+
+
   end
 
-  # Browser
+# Browser
 
 
-  #-------------------------------------------------------------------------------------------------------------
-  # ElementStub
-  #-------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------
+# ElementStub
+#-------------------------------------------------------------------------------------------------------------
 
 
   class ElementStub
