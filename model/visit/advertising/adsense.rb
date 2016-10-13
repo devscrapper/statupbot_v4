@@ -12,13 +12,13 @@ module Visits
 
         @@logger.an_event.debug "advertiser #{advertiser}"
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advertiser"}) if advertiser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advertiser"}) if advertiser.nil?
         @advertiser = advertiser
       end
 
       #advert retourne un Link_element ElementStub)
       def advert(driver)
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "driver"}) if driver.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "driver"}) if driver.nil?
         link = nil
         links = []
         count_try = 0
@@ -50,7 +50,7 @@ module Visits
           count_try += 1
           retry if count_try < 3
           @@logger.an_event.error e.message
-          raise Error.new(NONE_ADVERT, :error => e)
+          raise Errors::Error.new(NONE_ADVERT, :error => e)
 
         else
           @@logger.an_event.info "count advert #{self.class.name} links : #{links.size}"

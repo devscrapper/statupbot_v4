@@ -67,7 +67,7 @@ module Pages
       @@logger.an_event.debug "text #{text}"
       @@logger.an_event.debug "window_tab #{window_tab}"
 
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url"}) if url.nil?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url"}) if url.nil?
 
       @window_tab = window_tab
       @text = text
@@ -84,7 +84,7 @@ module Pages
 
       rescue Exception => e
         @@logger.an_event.debug "url : #{e.message}"
-        raise Error.new(LINK_NOT_CREATE, :values => {:link => url})
+        raise Errors::Error.new(LINK_NOT_CREATE, :values => {:link => url})
       else
         @@logger.an_event.debug self.to_s
 
@@ -105,7 +105,7 @@ module Pages
         found = @element.exists?
       end
       #@element.displayed? and @element.enabled?
-      raise Error.new(LINK_NOT_EXIST, :values => {:link => @text}) unless found
+      raise Errors::Error.new(LINK_NOT_EXIST, :values => {:link => @text}) unless found
     end
 
     def url

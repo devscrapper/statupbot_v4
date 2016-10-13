@@ -129,7 +129,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error e.message
-        raise Error.new(VISITOR_NOT_BORN, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_BORN, :error => e)
 
       else
         @@logger.an_event.info "visitor  is born"
@@ -154,7 +154,7 @@ module Visitors
       @@logger.an_event.debug "visitor detail #{visitor_details}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_details"}) if visitor_details.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_details"}) if visitor_details.nil?
         @history = []
         @failed_links = []
 
@@ -202,7 +202,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor create runtime directory, config proxy Sahi and browser : #{e.message}"
-        raise Error.new(VISITOR_NOT_CREATE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CREATE, :error => e)
 
       else
         @@logger.an_event.info "visitor create runtime directory, config proxy Sahi and browser"
@@ -235,7 +235,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor  close browser : #{e.message}"
-        raise Error.new(VISITOR_NOT_CLOSE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLOSE, :error => e)
 
       else
         @@logger.an_event.info "visitor  close browser"
@@ -262,7 +262,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor  die : #{e.message}"
-        raise Error.new(VISITOR_NOT_DIE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_DIE, :error => e)
       else
         @@logger.an_event.info "visitor  die"
       ensure
@@ -291,7 +291,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor  delete log  : #{e.message}"
-        raise Error.new(LOG_VISITOR_NOT_DELETE, :error => e)
+        raise Errors::Error.new(LOG_VISITOR_NOT_DELETE, :error => e)
 
       else
         @@logger.an_event.info "visitor  delete log"
@@ -331,7 +331,7 @@ module Visitors
 
           begin
 
-            raise Error.new(VISITOR_NOT_KNOWN_ACTION, :values => {:action => action}) if COMMANDS[action].nil?
+            raise Errors::Error.new(VISITOR_NOT_KNOWN_ACTION, :values => {:action => action}) if COMMANDS[action].nil?
             eval(COMMANDS[action])
 
           rescue Errors::Error => e
@@ -403,7 +403,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor execute visit : #{e.message}"
-        raise Error.new(VISITOR_NOT_FULL_EXECUTE_VISIT, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_FULL_EXECUTE_VISIT, :error => e)
 
       else
         @@logger.an_event.info "visitor execute visit."
@@ -437,7 +437,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor  inhume : #{e.message}"
-        raise Error.new(VISITOR_NOT_INHUME, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_INHUME, :error => e)
 
       else
         @@logger.an_event.info "visitor  inhume"
@@ -469,7 +469,7 @@ module Visitors
 
         rescue Exception => e
           @@logger.an_event.error "visitor  open and resize browser : #{e.message}"
-          raise Error.new(VISITOR_NOT_OPEN, :error => e)
+          raise Errors::Error.new(VISITOR_NOT_OPEN, :error => e)
 
         else
           @@logger.an_event.info "visitor  open and resize browser"
@@ -500,7 +500,7 @@ module Visitors
         @failed_links.each { |l| @@logger.an_event.debug "failed_link : #{l}" }
 
       rescue Exception => e
-        raise Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
         link
@@ -525,7 +525,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor  chose advert on website : #{e.message}"
-        raise Error.new(VISITOR_NOT_CHOOSE_ADVERT, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CHOOSE_ADVERT, :error => e)
 
       else
         @@logger.an_event.info "visitor  chose advert on website."
@@ -542,7 +542,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor  clicked on link advert on website : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_ADVERT, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_ADVERT, :error => e)
 
       else
         @@logger.an_event.info "visitor  clicked on link advert on website."
@@ -560,7 +560,7 @@ module Visitors
 
       rescue Errors::Error => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -580,7 +580,7 @@ module Visitors
 
         end
         @@logger.an_event.error "visitor browsed advertiser website page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -610,7 +610,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor clicked on landing link #{link.url} on results page : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_LANDING, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LANDING, :error => e)
 
       else
         @@logger.an_event.info "visitor  clicked on link #{link.url} on results page."
@@ -627,7 +627,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -647,7 +647,7 @@ module Visitors
 
         end
         @@logger.an_event.error "visitor browsed website landing page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -678,7 +678,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor  chose link <#{link.url}> on advertiser website : #{e.message}"
-        raise Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
         @@logger.an_event.info "visitor  chose link <#{link.url}> on advertiser website."
@@ -695,7 +695,7 @@ module Visitors
       rescue Exception => e
         @failed_links << link.url
         @@logger.an_event.error "visitor clicked on link #{link.url} on advertiser website : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER, :error => e)
 
       else
         @@logger.an_event.info "visitor  clicked on link #{link.url}> on advertiser website."
@@ -711,12 +711,12 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
         @@logger.an_event.error "visitor browsed unmanage page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -743,7 +743,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor  chose link <#{link.url}> on results search : #{e.message}"
-        raise Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
         @@logger.an_event.info "visitor  chose link <#{link.url}> on results search."
@@ -760,7 +760,7 @@ module Visitors
       rescue Exception => e
         @failed_links << link.url
         @@logger.an_event.error "visitor clicked on link #{link.url} on results page : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_RESULT, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_RESULT, :error => e)
 
       else
         @@logger.an_event.info "visitor clicked on link #{link.url} on results page."
@@ -778,7 +778,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -798,7 +798,7 @@ module Visitors
 
         end
         @@logger.an_event.error "visitor browsed unknown website page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -826,7 +826,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor chose link <#{link.url}> on unknown website : #{e.message}"
-        raise Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
         @@logger.an_event.info "visitor chose link <#{link.url}> on unknown website."
@@ -843,7 +843,7 @@ module Visitors
       rescue Exception => e
         @failed_links << link.url
         @@logger.an_event.error "visitor clicked on link #{link.url} on unknown website : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_UNKNOWN, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_UNKNOWN, :error => e)
 
       else
         @@logger.an_event.info "visitor  clicked on link <#{link.url}> on unknown website."
@@ -859,12 +859,12 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
         @@logger.an_event.error "visitor browsed unmanage page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -893,7 +893,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor  chose link <#{link.url}> on website : #{e.message}"
-        raise Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
         @@logger.an_event.info "visitor  chose link <#{link.url}> on website."
@@ -910,7 +910,7 @@ module Visitors
       rescue Exception => e
         @failed_links << link.url
         @@logger.an_event.error "visitor clicked on link #{link.url} on website : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_WEBSITE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_WEBSITE, :error => e)
 
       else
         @@logger.an_event.info "visitor  clicked on link #{link.url} on website."
@@ -926,12 +926,12 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
         @@logger.an_event.error "visitor browsed website page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -960,7 +960,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor clicked on next : #{e.message}"
-        raise Error.new(VISITOR_NOT_CLICK_ON_NEXT, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_NEXT, :error => e)
 
       else
         @@logger.an_event.info "visitor clicked on next"
@@ -975,7 +975,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -995,7 +995,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed next results search page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -1023,7 +1023,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor clicked on prev : #{e.message}"
-        raise Error.new(VISITOR_NOT_CLICK_ON_PREV, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_PREV, :error => e)
 
       else
         @@logger.an_event.info "visitor clicked on prev"
@@ -1038,7 +1038,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -1058,7 +1058,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed prev results search page"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -1088,7 +1088,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor clicked on referral link #{link.url} on results page : #{e.message}."
-        raise Error.new(VISITOR_NOT_CLICK_ON_REFERRAL, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_CLICK_ON_REFERRAL, :error => e)
 
       else
         @@logger.an_event.info "visitor clicked on link #{link.url} on results page."
@@ -1102,7 +1102,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -1122,7 +1122,7 @@ module Visitors
 
         end
         @@logger.an_event.error "visitor browsed referral website page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -1176,7 +1176,7 @@ module Visitors
       rescue Exception => e
 
         @@logger.an_event.error "visitor went back to previous page : #{e.message}"
-        raise Error.new(VISITOR_NOT_GO_BACK, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_GO_BACK, :error => e)
 
       else
         @@logger.an_event.info "visitor went back to previous page"
@@ -1199,7 +1199,7 @@ module Visitors
                                             @browser) if before_last_page.is_a?(Pages::Unmanage)
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -1219,7 +1219,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed #{@current_page.class.name} page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -1245,12 +1245,12 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
         @@logger.an_event.error "visitor browsed landing page : #{e.message}"
-        raise Error.new(VISITOR_NOT_GO_TO_LANDING, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_GO_TO_LANDING, :error => e)
 
       else
 
@@ -1275,12 +1275,12 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
         @@logger.an_event.error "visitor browsed referral page : #{e.message}"
-        raise Error.new(VISITOR_NOT_GO_TO_REFERRAL, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_GO_TO_REFERRAL, :error => e)
 
       else
 
@@ -1306,7 +1306,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor went to engine search page <#{url}> : #{e.message}"
-        raise Error.new(VISITOR_NOT_GO_TO_ENGINE_SEARCH, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_GO_TO_ENGINE_SEARCH, :error => e)
 
       else
         @@logger.an_event.info "visitor  went to engine search page <#{url}>"
@@ -1321,7 +1321,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -1341,7 +1341,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed enginesearch page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -1371,7 +1371,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor went to engine search page <#{url}> : #{e.message}"
-        raise Error.new(VISITOR_NOT_START_ENGINE_SEARCH, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_START_ENGINE_SEARCH, :error => e)
 
       else
         @@logger.an_event.info "visitor went to engine search page <#{url}>"
@@ -1386,7 +1386,7 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
@@ -1406,7 +1406,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed enginesearch page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         @@logger.an_event.info "visitor browsed enginesearch page"
@@ -1433,12 +1433,12 @@ module Visitors
 
       rescue Exception => e
         if Pages::Error.is_a?(@browser)
-          raise Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
 
         end
 
         @@logger.an_event.error "visitor browsed website page : #{e.message}"
-        raise Error.new(VISITOR_NOT_START_LANDING, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_START_LANDING, :error => e)
 
       else
 
@@ -1479,7 +1479,7 @@ module Visitors
 
       rescue Exception => e
         @@logger.an_event.error "visitor managed captcha : #{e.message}."
-        raise Error.new(VISITOR_NOT_SUBMIT_CAPTCHA, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_SUBMIT_CAPTCHA, :error => e)
 
       else
         @@logger.an_event.info "visitor managed captcha"
@@ -1494,7 +1494,7 @@ module Visitors
                                    MAX_COUNT_SUBMITING_CAPTCHA - max_count_submiting_captcha + 1,
                                    captcha_page.text)
 
-        raise Error.new(VISITOR_TOO_MANY_CAPTCHA, :error => e) if max_count_submiting_captcha == 0
+        raise Errors::Error.new(VISITOR_TOO_MANY_CAPTCHA, :error => e) if max_count_submiting_captcha == 0
 
         max_count_submiting_captcha
 
@@ -1515,7 +1515,7 @@ module Visitors
     #----------------------------------------------------------------------------------------------------------------
     def read(page)
 
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "page"}) if page.nil?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "page"}) if page.nil?
 
       @@logger.an_event.info "visitor begin reading <#{page.url}> during #{page.sleeping_time}s"
 
@@ -1562,7 +1562,7 @@ module Visitors
 
         end
         @@logger.an_event.error "visitor submited final search <#{keywords}> : #{e.message}"
-        raise Error.new(VISITOR_NOT_SUBMIT_FINAL_SEARCH, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_SUBMIT_FINAL_SEARCH, :error => e)
 
       else
         @@logger.an_event.info "visitor submited final search <#{keywords}>."
@@ -1595,7 +1595,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed results search page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------
@@ -1647,7 +1647,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor submited search <#{keywords}> : #{e.message}"
-        raise Error.new(VISITOR_NOT_SUBMIT_SEARCH, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_SUBMIT_SEARCH, :error => e)
 
       else
         @@logger.an_event.info "visitor submited search <#{keywords}>."
@@ -1677,7 +1677,7 @@ module Visitors
         end
 
         @@logger.an_event.error "visitor browsed results search page : #{e.message}"
-        raise Error.new(VISITOR_NOT_READ_PAGE, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
         #--------------------------------------------------------------------------------------------------------

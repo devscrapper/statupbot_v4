@@ -64,8 +64,8 @@ module Pages
       count_try = 3
       sleep 5
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit"}) if visit.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit"}) if visit.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
 
         sleep 5
 
@@ -97,7 +97,7 @@ module Pages
           end
         }
 
-        raise Error.new(Pages::Page::PAGE_NONE_INSIDE_LINKS) if @inside_hostname_links.empty? and @inside_fqdn_links.empty?
+        raise Errors::Error.new(Pages::Page::PAGE_NONE_INSIDE_LINKS) if @inside_hostname_links.empty? and @inside_fqdn_links.empty?
 
       rescue Exception => e
         @@logger.an_event.debug  "creation website page : #{e.message}"
@@ -109,7 +109,7 @@ module Pages
           retry
 
         end
-        raise Error.new(PAGE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       ensure
         @@logger.an_event.debug "#{self.to_s}"
@@ -122,7 +122,7 @@ module Pages
       @@logger.an_event.debug "around #{around}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "around"}) if around.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "around"}) if around.nil?
 
         link = nil
 
@@ -147,10 +147,10 @@ module Pages
           else
             @@logger.an_event.warn "around #{around} unknown"
 
-            raise Error.new(PAGE_AROUND_UNKNOWN, :values => {:around => around})
+            raise Errors::Error.new(PAGE_AROUND_UNKNOWN, :values => {:around => around})
         end
 
-        raise Error.new(PAGE_NONE_LINK_BY_AROUND, :values => {:url => url, :around => around}) if link.nil?
+        raise Errors::Error.new(PAGE_NONE_LINK_BY_AROUND, :values => {:url => url, :around => around}) if link.nil?
 
       rescue Exception => e
         @@logger.an_event.error e.message

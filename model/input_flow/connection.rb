@@ -50,8 +50,8 @@ module Input_flows
         begin
           nul, ress_type, ress_id = @http_request_uri.split("/")
 
-          raise Error.new(ARGUMENT_NOT_DEFINE, :values => {:variable => "ress_type"}) if ress_type.nil? or ress_type.empty?
-          raise Error.new(ARGUMENT_NOT_DEFINE, :values => {:variable => "ress_id"}) if ress_id.nil? or ress_id.empty?
+          raise Errors::Error.new(ARGUMENT_NOT_DEFINE, :values => {:variable => "ress_type"}) if ress_type.nil? or ress_type.empty?
+          raise Errors::Error.new(ARGUMENT_NOT_DEFINE, :values => {:variable => "ress_id"}) if ress_id.nil? or ress_id.empty?
 
           @logger.an_event.debug "@http_request_method : #{@http_request_method}"
 
@@ -77,7 +77,7 @@ module Input_flows
 
 
                 else
-                  raise Error.new(RESSOURCE_NOT_MANAGE, :values => {:ressource => ress_type})
+                  raise Errors::Error.new(RESSOURCE_NOT_MANAGE, :values => {:ressource => ress_type})
 
               end
               @logger.an_event.info "#{tasks.size} events for #{ress_id} from repository"
@@ -97,14 +97,14 @@ module Input_flows
                   visit_flow = send_to_visitor_factory(@http_content)
                   @logger.an_event.info "save visit flow #{visit_flow.basename}"
                 else
-                  raise Error.new(RESSOURCE_NOT_MANAGE, :values => {:ressource => ress_type})
+                  raise Errors::Error.new(RESSOURCE_NOT_MANAGE, :values => {:ressource => ress_type})
 
               end
 
 
 
             else
-              raise Error.new(VERBE_HTTP_NOT_MANAGE, :values => {:verb => @http_request_method})
+              raise Errors::Error.new(VERBE_HTTP_NOT_MANAGE, :values => {:verb => @http_request_method})
           end
 
         rescue Error, Exception => e

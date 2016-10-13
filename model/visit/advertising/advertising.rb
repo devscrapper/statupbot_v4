@@ -45,8 +45,8 @@ module Visits
 
 
         begin
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => advertising}) if pub_details[:advertising].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => advertiser}) if pub_details[:advertiser].nil? and pub_details[:advertising] != :none
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => advertising}) if pub_details[:advertising].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => advertiser}) if pub_details[:advertiser].nil? and pub_details[:advertising] != :none
 
           case pub_details[:advertising]
             when :none
@@ -66,7 +66,7 @@ module Visits
 
         rescue Exception => e
           @@logger.an_event.error e.message
-          raise Error.new(ADVERTISING_NOT_BUILD, :error => e)
+          raise Errors::Error.new(ADVERTISING_NOT_BUILD, :error => e)
 
         else
           @@logger.an_event.debug "advertising #{self.class} build"

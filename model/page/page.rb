@@ -109,9 +109,9 @@ module Pages
       @@logger.an_event.debug "duration #{duration}"
 
 
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "href"}) if href.nil? or href == ""
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "title"}) if title.nil?
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if duration.nil?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "href"}) if href.nil? or href == ""
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "title"}) if title.nil?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if duration.nil?
 
       begin
         @uri = URI.parse(href)

@@ -66,14 +66,14 @@ module Pages
       count_try = 3
       sleep 5
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id_visit"}) if id_visit.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "home_visitor"}) if home_visitor.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search"}) if browser.engine_search.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.id_captcha"}) if browser.engine_search.id_captcha.nil? or browser.engine_search.id_captcha.empty?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.type_captcha"}) if browser.engine_search.type_captcha.nil? or browser.engine_search.type_captcha.empty?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.label_button_captcha"}) if browser.engine_search.label_button_captcha.nil? or browser.engine_search.label_button_captcha.empty?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.coord_captcha"}) if browser.engine_search.coord_captcha.empty?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id_visit"}) if id_visit.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "home_visitor"}) if home_visitor.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search"}) if browser.engine_search.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.id_captcha"}) if browser.engine_search.id_captcha.nil? or browser.engine_search.id_captcha.empty?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.type_captcha"}) if browser.engine_search.type_captcha.nil? or browser.engine_search.type_captcha.empty?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.label_button_captcha"}) if browser.engine_search.label_button_captcha.nil? or browser.engine_search.label_button_captcha.empty?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser.engine_search.coord_captcha"}) if browser.engine_search.coord_captcha.empty?
 
         @input = browser.engine_search.id_captcha
         @type = browser.engine_search.type_captcha
@@ -83,7 +83,7 @@ module Pages
         #teste la présence de la zone de saisie
         #parfois la page n'est pas affichée mais l'url ipv4.google... est bien dans la zone de l'url
         #dans ce cas on recharge la page
-        raise Error.new(PAGE_NONE_ELEMENT,
+        raise Errors::Error.new(PAGE_NONE_ELEMENT,
                         :values => {:url => browser.url,
                                     :type => @type,
                                     :id => @input}) unless browser.exist_element?(type, input)
@@ -128,12 +128,12 @@ module Pages
         end
 
         @@logger.an_event.error "captcha converted to string : #{e.message}"
-        raise Error.new(PAGE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       rescue Exception => e
 
         @@logger.an_event.error "captcha converted to string : #{e.message}"
-        raise Error.new(PAGE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       else
         # i = 0

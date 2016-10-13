@@ -46,7 +46,7 @@ module Visits
         super(visit_details[:id],
               visit_details[:start_date_time],
               visit_details[:referrer])
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advert"}) if visit_details[:advert].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advert"}) if visit_details[:advert].nil?
 
         @@logger.an_event.debug "advert #{visit_details[:advert]}"
 

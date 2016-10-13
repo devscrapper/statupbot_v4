@@ -24,7 +24,7 @@ module Geolocations
         @user = r[:user]
         @password = r[:password]
       else
-        raise Error.new(GEO_BAD_PROPERTIES, :values => {:geo => geo_line})
+        raise Errors::Error.new(GEO_BAD_PROPERTIES, :values => {:geo => geo_line})
       end
     end
 
@@ -36,7 +36,7 @@ module Geolocations
           when Net::HTTPSuccess
             true
           else
-            raise Error.new(GEO_NOT_AVAILABLE, :values => {:geo => to_s})
+            raise Errors::Error.new(GEO_NOT_AVAILABLE, :values => {:geo => to_s})
         end
       end
     end

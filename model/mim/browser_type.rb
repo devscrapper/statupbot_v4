@@ -78,7 +78,7 @@ module Mim
 # si pas trouvé lève une exception : BROWSER_VERSION_NOT_DEFINE
     def self.exist?(browser_types_dir, browser_type)
 
-      raise Error.new(BROWSER_TYPE_NOT_DEFINE,
+      raise Errors::Error.new(BROWSER_TYPE_NOT_DEFINE,
                       :values => {:path => browser_types_dir + BROWSER_TYPE_FILE_XML}) unless File.exist?(File.join(browser_types_dir, BROWSER_TYPE_FILE_XML))
 
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
@@ -93,7 +93,7 @@ module Mim
       unless found
         @@logger.an_event.error "browser types #{browser_type} not exist"
         browser, browser_version, ip, port = browser_type.split(/_/)
-        raise Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
+        raise Errors::Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
       end
 
       @@logger.an_event.debug "browser types #{browser_type} exist"
@@ -102,7 +102,7 @@ module Mim
 
     def self.from_csv
       begin
-        raise Error.new(BROWSER_TYPE_NOT_DEFINE, :values => {:path => BROWSER_TYPE_FILE}) unless File.exist?(File.join(BROWSER_TYPE_FILE))
+        raise Errors::Error.new(BROWSER_TYPE_NOT_DEFINE, :values => {:path => BROWSER_TYPE_FILE}) unless File.exist?(File.join(BROWSER_TYPE_FILE))
 
         @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
@@ -131,7 +131,7 @@ module Mim
         }
       rescue Exception => e
         @@logger.an_event.error "repository file loaded : #{e.message}"
-        raise Error.new(BROWSER_TYPE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(BROWSER_TYPE_NOT_CREATE, :error => e)
 
       else
         @@logger.an_event.debug "repository file loaded"
@@ -142,7 +142,7 @@ module Mim
     def self.from_xml(browser_types_dir)
       # pas encore utiliser
       begin
-        raise Error.new(BROWSER_TYPE_NOT_DEFINE,
+        raise Errors::Error.new(BROWSER_TYPE_NOT_DEFINE,
                         :values => {:path => BROWSER_TYPE_FILE}) unless File.exist?(File.join(browser_types_dir + BROWSER_TYPE_FILE_XML))
 
         @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
@@ -162,7 +162,7 @@ module Mim
 
       rescue Exception => e
         @@logger.an_event.error "browsertypes  file loaded : #{e.message}"
-        raise Error.new(BROWSER_TYPE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(BROWSER_TYPE_NOT_CREATE, :error => e)
 
       else
         @@logger.an_event.debug "browsertypes file loaded"
@@ -187,7 +187,7 @@ module Mim
     end
 
     def self.process_name(browser_types_dir, browser_type)
-      raise Error.new(BROWSER_TYPE_NOT_DEFINE,
+      raise Errors::Error.new(BROWSER_TYPE_NOT_DEFINE,
                       :values => {:path => browser_types_dir + BROWSER_TYPE_FILE_XML}) unless File.exist?(File.join(browser_types_dir + BROWSER_TYPE_FILE_XML))
 
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
@@ -204,7 +204,7 @@ module Mim
       unless found
         @@logger.an_event.error "browser types #{browser_type} not exist"
         browser, browser_version, ip, port = browser_type.split(/_/)
-        raise Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
+        raise Errors::Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
       end
 
       @@logger.an_event.debug "browser types #{browser_type} exist"
@@ -215,14 +215,14 @@ module Mim
       begin
         @browsers[browser][browser_version]["proxy_system"]=="true"
       rescue Exception => e
-        raise Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
+        raise Errors::Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
       ensure
       end
     end
 
     def publish_to_sahi(browser_types_dir, booked_port, proxy_ip_list)
       begin
-        raise Error.new(BROWSER_TYPE_EMPTY) if @browsers.nil?
+        raise Errors::Error.new(BROWSER_TYPE_EMPTY) if @browsers.nil?
 
         data = <<-_end_of_xml_
 <browserTypes>
@@ -236,7 +236,7 @@ module Mim
         f.close
 
       rescue Exception => e
-        raise Error.new(BROWSER_TYPE_NOT_PUBLISH, :error => e)
+        raise Errors::Error.new(BROWSER_TYPE_NOT_PUBLISH, :error => e)
       else
       ensure
       end
@@ -247,7 +247,7 @@ module Mim
       begin
         @browsers[browser][browser_version]["runtime_path"]
       rescue Exception => e
-        raise Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
+        raise Errors::Error.new(BROWSER_VERSION_NOT_DEFINE, :values => {:browser => browser, :vrs => browser_version})
       ensure
       end
     end
@@ -298,7 +298,7 @@ module Mim
         icon = "ie.png"
         unless File.exist?(details["runtime_path"])
           @@logger.an_event.error "runtime browser internet explorer #{version} path <#{details["runtime_path"]}> not found"
-          raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
+          raise Errors::Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
         end
         path = details["runtime_path"]
         options = "-noframemerging"
@@ -321,7 +321,7 @@ module Mim
             icon = "firefox.png"
             unless File.exist?(details["runtime_path"])
               @@logger.an_event.error "runtime browser firefox #{version} path <#{details["runtime_path"]}> not found"
-              raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
+              raise Errors::Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
             end
             path = details["runtime_path"]
             options = "-profile \"$userDir/browser/ff/profiles\" -no-remote "
@@ -345,7 +345,7 @@ module Mim
             icon = "chrome.png"
             unless File.exist?(details["runtime_path"])
               @@logger.an_event.error "runtime browser chrome #{version} path <#{details["runtime_path"]}> not found"
-              raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
+              raise Errors::Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
             end
             path = details["runtime_path"]
             options = "--user-data-dir=$userDir\\browser\\chrome\\profiles
@@ -367,7 +367,7 @@ module Mim
         icon = "safari.png"
         unless File.exist?(details["runtime_path"])
           @@logger.an_event.error "runtime browser safari #{version} path <#{details["runtime_path"]}> not found"
-          raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
+          raise Errors::Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
         end
         path = details["runtime_path"]
         options = ""
@@ -399,7 +399,7 @@ module Mim
         icon = "opera.png"
         unless File.exist?(details["runtime_path"])
           @@logger.an_event.error "runtime browser opera #{version} path <#{details["runtime_path"]}> not found"
-          raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
+          raise Errors::Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
         end
         path = details["runtime_path"]
         options = ""

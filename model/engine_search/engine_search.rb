@@ -64,11 +64,11 @@ module EngineSearches
         when :yahoo
           return Yahoo.new
         else
-          raise Error.new(ENGINE_UNKNOWN, :values => {:engine => engine})
+          raise Errors::Error.new(ENGINE_UNKNOWN, :values => {:engine => engine})
       end
     rescue Exception => e
       @@logger.an_event.error e.message
-      raise Error.new(ENGINE_NOT_CREATE, :values => {:engine => engine}, :error => e)
+      raise Errors::Error.new(ENGINE_NOT_CREATE, :values => {:engine => engine}, :error => e)
 
     else
       @@logger.an_event.debug "search engine #{engine} create"

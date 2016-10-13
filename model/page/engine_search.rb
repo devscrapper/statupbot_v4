@@ -60,8 +60,8 @@ module Pages
       count_try = 3
       sleep 5
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit"}) if visit.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit"}) if visit.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
 
         start_time = Time.now
 
@@ -72,7 +72,7 @@ module Pages
         #teste la présence de la zone de saisie
         #parfois la page n'est pas affichée mais l'url ipv4.google... est bien dans la zone de l'url
         #dans ce cas on recharge la page
-        raise Error.new(PAGE_NONE_ELEMENT,
+        raise Errors::Error.new(PAGE_NONE_ELEMENT,
                         :values => {:url => browser.url,
                                     :type => @type,
                                     :id => @input}) unless browser.exist_element?(type, input)
@@ -93,7 +93,7 @@ module Pages
 
         end
 
-        raise Error.new(PAGE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       ensure
         @@logger.an_event.debug "page engine search #{self.to_s}"

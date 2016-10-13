@@ -178,9 +178,9 @@ module Sahi
       @@logger.an_event.debug "listening_port_sahi #{listening_port_sahi}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => browser_type}) if browser_type.nil? or browser_type == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => browser_process_name}) if browser_process_name.nil? or browser_process_name == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => listening_port_sahi}) if listening_port_sahi.nil? or listening_port_sahi.nil? == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => browser_type}) if browser_type.nil? or browser_type == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => browser_process_name}) if browser_process_name.nil? or browser_process_name == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => listening_port_sahi}) if listening_port_sahi.nil? or listening_port_sahi.nil? == ""
 
         @@sem_screenshot = Mutex.new
         # les requetes (check_proxy_local, launchPreconfiguredBrowser, quit) vers le proxy local sont exécutées avec localhst:9999
@@ -196,7 +196,7 @@ module Sahi
 
       rescue Exception => e
         @@logger.an_event.fatal "driver #{@browser_type} create : #{e.message}"
-        raise Error.new(DRIVER_NOT_CREATE, :error => e)
+        raise Errors::Error.new(DRIVER_NOT_CREATE, :error => e)
 
       else
         @@logger.an_event.debug "driver #{@browser_type} create"
@@ -246,7 +246,7 @@ module Sahi
 
       rescue Exception => e
         @@logger.an_event.error "driver open : #{e.message}"
-        raise Error.new(SAHI_PROXY_NOT_FOUND, :values => {:where => "remote"}, :error => e)
+        raise Errors::Error.new(SAHI_PROXY_NOT_FOUND, :values => {:where => "remote"}, :error => e)
 
       else
         @@logger.an_event.debug "check proxy #{@proxy_host}:#{@proxy_port}"
@@ -264,7 +264,7 @@ module Sahi
 
       rescue Exception => e
         @@logger.an_event.error "driver open, launchPreconfiguredBrowser : #{e.message}"
-        raise Error.new(OPEN_DRIVER_FAILED, :error => e)
+        raise Errors::Error.new(OPEN_DRIVER_FAILED, :error => e)
 
       else
         @@logger.an_event.debug "launchPreconfiguredBrowser"
@@ -281,7 +281,7 @@ module Sahi
 
       rescue Exception => e
         @@logger.an_event.error "driver open : #{e.message}"
-        raise Error.new(OPEN_DRIVER_FAILED, :error => e)
+        raise Errors::Error.new(OPEN_DRIVER_FAILED, :error => e)
 
       else
         @@logger.an_event.debug "driver ready"
@@ -307,7 +307,7 @@ module Sahi
         exec_command("kill") # kill piloté par SAHI proxy
 
       rescue Exception => e
-        raise Error.new(CLOSE_DRIVER_TIMEOUT, :error => e)
+        raise Errors::Error.new(CLOSE_DRIVER_TIMEOUT, :error => e)
 
       end
     end
@@ -622,7 +622,7 @@ module Sahi
         return
       end
 
-      # timeout = interval if $staging == "development" # on execute une fois
+       timeout = interval if $staging == "development" # on execute une fois
 
       while (timeout > 0)
         sleep(interval)

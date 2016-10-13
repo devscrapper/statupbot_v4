@@ -54,12 +54,12 @@ module Visits
       #----------------------------------------------------------------------------------------------------------------
       def initialize(referer_details)
         begin
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keyword"}) if referer_details[:keyword].size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "durations"}) if referer_details[:durations].size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.min"}) if referer_details[:random_search][:min].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.max"}) if referer_details[:random_search][:max].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.max"}) if referer_details[:random_surf][:max].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.min"}) if referer_details[:random_surf][:min].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keyword"}) if referer_details[:keyword].size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "durations"}) if referer_details[:durations].size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.min"}) if referer_details[:random_search][:min].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.max"}) if referer_details[:random_search][:max].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.max"}) if referer_details[:random_surf][:max].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.min"}) if referer_details[:random_surf][:min].nil?
 
           @keywords = referer_details[:keyword]
 
@@ -76,7 +76,7 @@ module Visits
 
         rescue Exception => e
           @@logger.an_event.error e.message
-          raise Error.new(REFERRER_NOT_CREATE, :error => e)
+          raise Errors::Error.new(REFERRER_NOT_CREATE, :error => e)
 
         else
           @@logger.an_event.debug "referrer #{self.class} create"

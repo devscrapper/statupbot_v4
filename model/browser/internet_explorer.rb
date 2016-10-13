@@ -26,9 +26,9 @@ module Browsers
       @@logger.an_event.debug "visitor_dir #{visitor_dir}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details[:name].nil? or browser_details[:name] == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser version"}) if browser_details[:version].nil? or browser_details[:version] == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details[:name].nil? or browser_details[:name] == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser version"}) if browser_details[:version].nil? or browser_details[:version] == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
 
 
         super(visitor_dir,
@@ -86,8 +86,8 @@ module Browsers
       @@logger.an_event.debug "start_url : #{start_url}"
       @@logger.an_event.debug "visitor_id : #{visitor_id}"
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url ==""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url ==""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
 
 
         window_parameters = "channelmode=0,fullscreen=0,left=0,menubar=1,resizable=1,scrollbars=1,status=1,titlebar=1,toolbar=1"
@@ -168,7 +168,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} open : #{e.message}"
-        raise Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_OPEN, :values => {:browser => name}, :error => e)
 
       else
         @@logger.an_event.debug "browser #{name} open"
@@ -198,9 +198,9 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     def set_input_search(type, input, keywords)
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "input"}) if input.nil? or input == ""
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keywords"}) if keywords.nil? or keywords == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "type"}) if type.nil? or type == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "input"}) if input.nil? or input == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keywords"}) if keywords.nil? or keywords == ""
 
         r = "#{type}(\"#{input}\", \"#{keywords}\")"
         eval(r)
@@ -211,7 +211,7 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.fatal "set input search #{type} #{input} with #{keywords} : #{e.message}"
-        raise Error.new(BROWSER_NOT_SET_INPUT_SEARCH, :values => {:browser => name, :type => type, :input => input, :keywords => keywords}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_SET_INPUT_SEARCH, :values => {:browser => name, :type => type, :input => input, :keywords => keywords}, :error => e)
 
       else
         @@logger.an_event.debug "set input search #{type} #{input} with #{keywords}"

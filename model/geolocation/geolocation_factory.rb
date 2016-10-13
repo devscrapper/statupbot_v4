@@ -99,7 +99,7 @@ module Geolocations
       begin
 
         geo = select_one
-        raise Error.new(GEO_NOT_VALID, :values => {:country => criteria[:country], :protocol => criteria[:protocol]}) if (!criteria[:country].nil? and criteria[:country].downcase != geo.country.downcase) or
+        raise Errors::Error.new(GEO_NOT_VALID, :values => {:country => criteria[:country], :protocol => criteria[:protocol]}) if (!criteria[:country].nil? and criteria[:country].downcase != geo.country.downcase) or
             (!criteria[:protocol].nil? and criteria[:protocol].downcase != geo.protocol.downcase)
 
       rescue Exception => e
@@ -115,7 +115,7 @@ module Geolocations
               retry
             else
               @@logger.an_event.error e.message
-              raise Error.new(GEO_NONE_COMPLIANT)
+              raise Errors::Error.new(GEO_NONE_COMPLIANT)
             end
         end
       else
@@ -164,7 +164,7 @@ module Geolocations
         proxy_list = Proxy.get
 
       rescue Exception => e
-        raise Error.new(GEO_NOT_RETRIEVE, :error => e)
+        raise Errors::Error.new(GEO_NOT_RETRIEVE, :error => e)
 
       else
         @geolocations_file.write(proxy_list)
@@ -208,7 +208,7 @@ module Geolocations
       begin
 
 
-        raise Error.new(NONE_GEOLOCATION) if @geolocations.size == 0
+        raise Errors::Error.new(NONE_GEOLOCATION) if @geolocations.size == 0
 
         Mutex.new.synchronize {
           geo = @geolocations.shift

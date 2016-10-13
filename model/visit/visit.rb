@@ -125,7 +125,7 @@ module Visits
 
       begin
         @@logger.an_event.debug "file_path #{file_path}"
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "json_visit"}) if json_visit.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "json_visit"}) if json_visit.nil?
 
         @@logger.an_event.debug "visit_details #{json_visit}"
 
@@ -145,8 +145,8 @@ module Visits
 
       begin
         @@logger.an_event.debug "file_path #{file_path}"
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "file_path"}) if file_path.nil?
-        raise Error.new(VISIT_NOT_FOUND, :values => {:path => file_path}) unless File.exist?(file_path)
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "file_path"}) if file_path.nil?
+        raise Errors::Error.new(VISIT_NOT_FOUND, :values => {:path => file_path}) unless File.exist?(file_path)
 
         visit_file = File.open(file_path, "r:BOM|UTF-8:-")
         details = YAML::load(visit_file.read)
@@ -156,7 +156,7 @@ module Visits
 
       rescue Exception => e
         @@logger.an_event.error e.message
-        raise Error.new(VISIT_NOT_LOAD, :values => {:file => file_path}, :error => e)
+        raise Errors::Error.new(VISIT_NOT_LOAD, :values => {:file => file_path}, :error => e)
 
       else
         @@logger.an_event.info "visit file #{file_path} loaded"
@@ -169,8 +169,8 @@ module Visits
 
     def self.build(visit_details, website_details)
 
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit_details"}) if visit_details.nil? or visit_details.empty?
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "website_details"}) if website_details.nil? or website_details.empty?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit_details"}) if visit_details.nil? or visit_details.empty?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "website_details"}) if website_details.nil? or website_details.empty?
 
       begin
 
@@ -197,7 +197,7 @@ module Visits
 
       rescue Exception => e
         @@logger.an_event.error "visit  has none action : #{e.message}"
-        raise Error.new(VISIT_NOT_CREATE, :values => {:id => visit_details[:id]}, :error => e)
+        raise Errors::Error.new(VISIT_NOT_CREATE, :values => {:id => visit_details[:id]}, :error => e)
 
       else
         @@logger.an_event.info "visit #{visit.id} has #{visit.actions.size} actions : #{visit.actions}"
@@ -229,9 +229,9 @@ module Visits
     def initialize(id_visit, start_date_time, referrer)
       begin
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id"}) if id_visit.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_date_time"}) if start_date_time.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "referrer"}) if referrer.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "id"}) if id_visit.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_date_time"}) if start_date_time.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "referrer"}) if referrer.nil?
 
         @@logger.an_event.debug "id_visit #{id_visit}"
         @@logger.an_event.debug "start_date_time #{start_date_time}"

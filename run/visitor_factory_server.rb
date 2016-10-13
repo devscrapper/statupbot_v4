@@ -177,7 +177,7 @@ begin
     # s'exécuteront dans VisitorFactoryMonoInstance pour assurer une execution à la fois
     case max_count_current_visit
       when 0
-        raise Error.new(VisitorFactory::NONE_FACTORY)
+        raise Errors::Error.new(VisitorFactory::NONE_FACTORY)
 
       when 1
 

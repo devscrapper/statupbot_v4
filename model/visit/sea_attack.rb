@@ -46,15 +46,15 @@ module Visits
               visit_details[:start_date_time],
               visit_details[:referrer])
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advert"}) if visit_details[:advert].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advert"}) if visit_details[:advert].nil?
 
         @@logger.an_event.debug "advert #{visit_details[:advert]}"
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "f"}) if @referrer.durations.size == 0
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "f"}) if @referrer.durations.size == 0
 
         @advertising = Advertising.build(visit_details[:advert])
 
-       raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "j"}) if @advertising.advertiser.durations.size == 0
+       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "j"}) if @advertising.advertiser.durations.size == 0
 
 
         f = @referrer.durations.size

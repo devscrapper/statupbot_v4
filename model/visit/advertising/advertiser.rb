@@ -39,8 +39,8 @@ module Visits
         @@logger.an_event.debug "durations #{advertiser_details[:durations]}"
         @@logger.an_event.debug "arounds #{advertiser_details[:arounds]}"
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "durations"}) if advertiser_details[:durations].nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "arounds"}) if advertiser_details[:arounds].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "durations"}) if advertiser_details[:durations].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "arounds"}) if advertiser_details[:arounds].nil?
 
         @durations = advertiser_details[:durations]
         @arounds = advertiser_details[:arounds]

@@ -57,9 +57,9 @@ module Mim
 #TODO supprimer listening_ip_proxy qui est l'ip du proxy sahi car cela ne fonctionne pas sur un serveur distant
     def initialize(visitor_dir, listening_ip_proxy, listening_port_proxy, ip_geo_proxy, port_geo_proxy, user_geo_proxy, pwd_geo_proxy)
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if listening_port_proxy.nil?
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_ip_proxy"}) if listening_ip_proxy.nil?
-      raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if listening_port_proxy.nil?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_ip_proxy"}) if listening_ip_proxy.nil?
+      raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
 
       @listening_port_proxy = listening_port_proxy
       @listening_ip_proxy = listening_ip_proxy

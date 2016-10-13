@@ -61,8 +61,8 @@ module Pages
       count_try = 3
       sleep 5
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if duration.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if duration.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
 
         sleep 5
 
@@ -96,7 +96,7 @@ module Pages
             @outside_fqdn_links << l if l.uri.hostname != @uri.hostname
           end
         }
-        raise Error.new(PAGE_NONE_INSIDE_LINKS) if @inside_hostname_links.empty? and @inside_fqdn_links.empty?
+        raise Errors::Error.new(PAGE_NONE_INSIDE_LINKS) if @inside_hostname_links.empty? and @inside_fqdn_links.empty?
 
       rescue Exception => e
         @@logger.an_event.debug  "creation website unmanage page : #{e.message}"
@@ -108,7 +108,7 @@ module Pages
           retry
 
         end
-        raise Error.new(PAGE_NOT_CREATE, :error => e)
+        raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       else
         @@logger.an_event.debug "#{self.to_s}"
@@ -130,7 +130,7 @@ module Pages
       @@logger.an_event.debug "around #{around}"
 
       begin
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "around"}) if around.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "around"}) if around.nil?
 
         link = nil
 
@@ -138,8 +138,8 @@ module Pages
 
           when :inside_fqdn
             # on ne bloque pas un surf sur un site que l'on ne gere pas et maitrise pas les stats
-            # donc si pas de lien qui sont dans le meême fqdn, on elargie au hostname
-            # si pas de lien qui ont le même hostname, on elargie au hors site
+            # donc si pas de lien qui sont dans le meï¿½me fqdn, on elargie au hostname
+            # si pas de lien qui ont le mï¿½me hostname, on elargie au hors site
             if @inside_fqdn_links.size > 0
               link = @inside_fqdn_links.shuffle!.shift
             elsif @inside_hostname_links.size > 0
@@ -150,7 +150,7 @@ module Pages
 
           when :inside_hostname
             # on ne bloque pas un surf sur un site que l'on ne gere pas et maitrise pas les stats
-            # si pas de lien qui ont le même hostname, on elargie au hors site
+            # si pas de lien qui ont le mï¿½me hostname, on elargie au hors site
             if @inside_hostname_links.size > 0
               link = @inside_hostname_links.shuffle!.shift
             else
@@ -168,10 +168,10 @@ module Pages
           else
             @@logger.an_event.warn "around #{around} unknown"
 
-            raise Error.new(PAGE_AROUND_UNKNOWN, :values => {:around => around})
+            raise Errors::Error.new(PAGE_AROUND_UNKNOWN, :values => {:around => around})
         end
 
-        raise Error.new(PAGE_NONE_LINK_BY_AROUND, :values => {:url => url, :around => around}) if link.nil?
+        raise Errors::Error.new(PAGE_NONE_LINK_BY_AROUND, :values => {:url => url, :around => around}) if link.nil?
 
       rescue Exception => e
         @@logger.an_event.error e.message

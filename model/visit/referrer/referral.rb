@@ -47,14 +47,14 @@ module Visits
 
         begin
 
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "referral_path"}) if referer_details[:referral_path].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if referer_details[:duration].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "referral_hostname"}) if referer_details[:referral_hostname].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keyword"}) if referer_details[:keyword].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.min"}) if referer_details[:random_search][:min].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.max"}) if referer_details[:random_search][:max].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.max"}) if referer_details[:random_surf][:max].nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.min"}) if referer_details[:random_surf][:min].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "referral_path"}) if referer_details[:referral_path].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if referer_details[:duration].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "referral_hostname"}) if referer_details[:referral_hostname].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "keyword"}) if referer_details[:keyword].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.min"}) if referer_details[:random_search][:min].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_search.max"}) if referer_details[:random_search][:max].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.max"}) if referer_details[:random_surf][:max].nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "random_surf.min"}) if referer_details[:random_surf][:min].nil?
 
 
           @keywords = referer_details[:keyword]
@@ -80,7 +80,7 @@ module Visits
 
         rescue Exception => e
           @@logger.an_event.error e.message
-          raise Error.new(REFERRER_NOT_CREATE, :error => e)
+          raise Errors::Error.new(REFERRER_NOT_CREATE, :error => e)
 
         else
           @@logger.an_event.debug "referral create"

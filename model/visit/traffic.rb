@@ -83,12 +83,12 @@ module Visits
               visit_details[:start_date_time],
               visit_details[:referrer])
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "many_hostname"}) if website_details[:many_hostname].nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "many_account_ga"}) if website_details[:many_account_ga].nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "durations"}) if visit_details[:durations].nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "landing link fqdn"}) if visit_details[:landing][:fqdn].nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "landing link path"}) if visit_details[:landing][:path].nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "landing link scheme"}) if visit_details[:landing][:scheme].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "many_hostname"}) if website_details[:many_hostname].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "many_account_ga"}) if website_details[:many_account_ga].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "durations"}) if visit_details[:durations].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "landing link fqdn"}) if visit_details[:landing][:fqdn].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "landing link path"}) if visit_details[:landing][:path].nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "landing link scheme"}) if visit_details[:landing][:scheme].nil?
 
         @@logger.an_event.debug "many_hostname #{website_details[:many_hostname]}"
         @@logger.an_event.debug "many_account_ga #{website_details[:many_account_ga]}"
@@ -110,11 +110,11 @@ module Visits
           @actions = /#{@regexp}/.random_example
 
         elsif @referrer.is_a?(Referral)
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "k"}) if @referrer.fake_keywords.nil? or @referrer.fake_keywords.size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "f"}) if @referrer.durations.size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "i"}) if @durations.size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "x"}) if @referrer.referral_uri_search.nil?
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "x"}) if @referrer.page_url.nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "k"}) if @referrer.fake_keywords.nil? or @referrer.fake_keywords.size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "f"}) if @referrer.durations.size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "i"}) if @durations.size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "x"}) if @referrer.referral_uri_search.nil?
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "x"}) if @referrer.page_url.nil?
 
           i = @durations.size
           k = @referrer.fake_keywords.size > 1 ? Random.new.rand(1 .. @referrer.fake_keywords.size - 1) : 0
@@ -136,9 +136,9 @@ module Visits
           @@logger.an_event.debug "@actions #{@actions}"
 
         elsif @referrer.is_a?(Search)
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "k"}) if @referrer.fake_keywords.nil? or @referrer.fake_keywords.size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "f"}) if @referrer.durations.size == 0
-          raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "i"}) if @durations.size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "k"}) if @referrer.fake_keywords.nil? or @referrer.fake_keywords.size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "f"}) if @referrer.durations.size == 0
+          raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "i"}) if @durations.size == 0
 
           i = @durations.size
           k = @referrer.fake_keywords.size > 1 ? Random.new.rand(1 .. @referrer.fake_keywords.size - 1) : 0

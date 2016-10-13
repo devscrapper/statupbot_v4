@@ -96,12 +96,12 @@ module Visits
               return Referral.new(referer_details)
 
             else
-              raise Error.new(MEDIUM_UNKNOWN, :values => {:medium => referer_details[:medium]})
+              raise Errors::Error.new(MEDIUM_UNKNOWN, :values => {:medium => referer_details[:medium]})
           end
 
         rescue Exception => e
           @@logger.an_event.error e.message
-          raise Error.new(REFERRER_NOT_CREATE, :error => e)
+          raise Errors::Error.new(REFERRER_NOT_CREATE, :error => e)
 
 
         else

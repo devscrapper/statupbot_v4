@@ -12,15 +12,15 @@ module Visits
         @@logger.an_event.debug "fqdns #{fqdns}"
         @@logger.an_event.debug "advertiser #{advertiser}"
 
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advertiser"}) if advertiser.nil?
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "fqdns"}) if fqdns.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advertiser"}) if advertiser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "fqdns"}) if fqdns.nil?
         @advertiser = advertiser
         @fqdns = fqdns
       end
 
       #advert retourne un Link_element ElementStub contenant le domain de Advertiser.domain
       def advert(browser)
-        raise Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
         link = nil
 
         begin
@@ -66,7 +66,7 @@ module Visits
 
         rescue Exception => e
           @@logger.an_event.error "advertising #{self.class.name} found #{link} : #{e.message}"
-          raise Error.new(ADVERTISING_NOT_FOUND, :error => e, :values => {:advertising => self.class.name})
+          raise Errors::Error.new(ADVERTISING_NOT_FOUND, :error => e, :values => {:advertising => self.class.name})
 
         else
           @@logger.an_event.info "advertising #{self.class.name} found #{link}"
