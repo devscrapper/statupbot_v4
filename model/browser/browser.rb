@@ -90,77 +90,6 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     # class methods
     #----------------------------------------------------------------------------------------------------------------
-
-    #----------------------------------------------------------------------------------------------------------------
-    # build
-    #----------------------------------------------------------------------------------------------------------------
-    # crée un geolocation :
-    #----------------------------------------------------------------------------------------------------------------
-    # input :
-    # repertoire de runtime du visitor
-    # détails du browser issue du fichier de visit :
-    # :name: Chrome
-    # :version: '33.0.1750.117'
-    # :operating_system: Windows
-    # :operating_system_version: '7'
-    # :flash_version: 11.5 r502      # 2014/09/10 : non utilisé
-    # :java_enabled: 'Yes'           # 2014/09/10 : non utilisé
-    # :screens_colors: 32-bit        # 2014/09/10 : non utilisé
-    # :screen_resolution: 1366x768
-    # output : none
-    # StandardError :
-    # les paramètres en entrée font défaut
-    # le type de browser est inconnu
-    # une exception provenant des classes Firefox, InterneEexplorer, Chrome
-    #----------------------------------------------------------------------------------------------------------------
-    #         #Les navigateurs disponibles sont definis dans le fichier d:\sahi\userdata\config\browser_types.xml
-    #----------------------------------------------------------------------------------------------------------------
-    def self.build(visitor_dir, browser_details)
-      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
-
-      @@logger.an_event.debug "visitor_dir #{visitor_dir}"
-      @@logger.an_event.debug "browser_details #{browser_details}"
-
-      begin
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details.nil? or \
-        browser_details[:name].nil? or \
-        browser_details[:name] == ""
-
-        browser_name = browser_details[:name]
-        # le browser name doit rester une chaine de car (et pas un symbol) car tout le param BrowserType utilise le format chaine de caractere
-        case browser_name
-          when "Firefox"
-            return Firefox.new(visitor_dir, browser_details)
-
-          when "Internet Explorer"
-            return InternetExplorer.new(visitor_dir, browser_details)
-
-          when "Chrome"
-            return Chrome.new(visitor_dir, browser_details)
-
-          #when "Safari"
-          #TODO mettre en oeuvre Safari
-          when "Edge"
-            return Edge.new(visitor_dir, browser_details)
-
-          when "Opera"
-            return Opera.new(visitor_dir, browser_details)
-
-          else
-            raise Errors::Error.new(BROWSER_UNKNOWN, :values => {:browser => browser_name})
-        end
-      rescue Exception => e
-        @@logger.an_event.error "browser #{name} create : #{e.message}"
-        raise Errors::Error.new(BROWSER_NOT_CREATE, :values => {:browser => browser_name}, :error => e)
-
-      else
-        @@logger.an_event.debug "browser #{name} create"
-      ensure
-
-      end
-    end
-
     #----------------------------------------------------------------------------------------------------------------
     # instance methods
     #----------------------------------------------------------------------------------------------------------------
@@ -211,6 +140,78 @@ module Browsers
       else
         @@logger.an_event.debug "browser #{name} found all links #{links}"
         links
+
+      end
+    end
+
+
+    #----------------------------------------------------------------------------------------------------------------
+    # build
+    #----------------------------------------------------------------------------------------------------------------
+    # crée un geolocation :
+    #----------------------------------------------------------------------------------------------------------------
+    # input :
+    # repertoire de runtime du visitor
+    # détails du browser issue du fichier de visit :
+    # :name: Chrome
+    # :version: '33.0.1750.117'
+    # :operating_system: Windows
+    # :operating_system_version: '7'
+    # :flash_version: 11.5 r502      # 2014/09/10 : non utilisé
+    # :java_enabled: 'Yes'           # 2014/09/10 : non utilisé
+    # :screens_colors: 32-bit        # 2014/09/10 : non utilisé
+    # :screen_resolution: 1366x768
+    # output : none
+    # StandardError :
+    # les paramètres en entrée font défaut
+    # le type de browser est inconnu
+    # une exception provenant des classes Firefox, InterneEexplorer, Chrome
+    #----------------------------------------------------------------------------------------------------------------
+    #         #Les navigateurs disponibles sont definis dans le fichier d:\sahi\userdata\config\browser_types.xml
+    #----------------------------------------------------------------------------------------------------------------
+    def self.build(visitor_dir, browser_details)
+      @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
+
+      @@logger.an_event.debug "visitor_dir #{visitor_dir}"
+      @@logger.an_event.debug "browser_details #{browser_details}"
+
+      begin
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_dir"}) if visitor_dir.nil? or visitor_dir == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser name"}) if browser_details.nil? or \
+        browser_details[:name].nil? or \
+        browser_details[:name] == ""
+
+        browser_name = browser_details[:name]
+        # le browser name doit rester une chaine de car (et pas un symbol) car tout le param BrowserType utilise le format chaine de caractere
+        case browser_name
+          when "Firefox"
+            return Firefox.new(visitor_dir, browser_details)
+
+          when "Internet Explorer"
+            return InternetExplorer.new(visitor_dir, browser_details)
+
+          when "Chrome"
+            return Chrome.new(visitor_dir, browser_details)
+
+          when "Safari"
+            return Safari.new(visitor_dir, browser_details)
+
+          when "Edge"
+            return Edge.new(visitor_dir, browser_details)
+
+          when "Opera"
+            return Opera.new(visitor_dir, browser_details)
+
+          else
+            raise Errors::Error.new(BROWSER_UNKNOWN, :values => {:browser => browser_name})
+        end
+      rescue Exception => e
+        @@logger.an_event.error "browser #{name} create : #{e.message}"
+        raise Errors::Error.new(BROWSER_NOT_CREATE, :values => {:browser => browser_name}, :error => e)
+
+      else
+        @@logger.an_event.debug "browser #{name} create"
+      ensure
 
       end
     end
@@ -723,7 +724,7 @@ module Browsers
 
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} initialize : #{e.message}"
+        @@logger.an_event.error "browser #{browser_type} initialize : #{e.message}"
         raise e
 
       else

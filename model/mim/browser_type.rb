@@ -360,7 +360,23 @@ module Mim
     end
 
     def Safari(browser_versions)
-      #appliquer la methode internet explorer
+      res = ""
+      browser_versions.each_pair { |version, details|
+        name = "Safari_#{version}"
+        display_name = "Safari #{version}"
+        icon = "safari.png"
+        unless File.exist?(details["runtime_path"])
+          @@logger.an_event.error "runtime browser safari #{version} path <#{details["runtime_path"]}> not found"
+          raise Error.new(VisitorFactory::RUNTIME_BROWSER_PATH_NOT_FOUND, :values => {:path => details["runtime_path"]})
+        end
+        path = details["runtime_path"]
+        options = ""
+        process_name = "safari.exe"
+        use_system_proxy = "true"
+        res += browser_type(name, display_name, icon, path, options, process_name, use_system_proxy)
+
+      }
+      res
     end
 
     def Opera(browser_versions)
@@ -439,6 +455,8 @@ module Mim
             res += Opera(browser[1])
           when "Edge"
             res += Edge(browser[1])
+          when "Safari"
+            res += Safari(browser[1])
         end
       } unless @browsers.nil?
       res
