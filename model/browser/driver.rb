@@ -355,12 +355,21 @@ module Sahi
         #----------------------------------------------------------------------------------------------------------------
         # gestion du retour positif ou d'une exception, lors du screenshot
         #----------------------------------------------------------------------------------------------------------------
-        # une exception a été levé, on l'a propage.
-        raise error_label unless error_label == "over"
+
 
         # tout c'est bien passé
         # recuperation du screenshot au format base64
-        screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
+        screenshot_base64 = ""
+        wait(30, false, 1) {
+          screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
+          @@logger.an_event.debug "screenshot_base64 <#{screenshot_base64}>"
+          @@logger.an_event.debug "screenshot_base64 is empty? <#{screenshot_base64.empty?}>"
+          @@logger.an_event.debug "screenshot_base64 is nil? <#{screenshot_base64.nil?}>"
+          !screenshot_base64.empty?
+        }
+        # une exception a été levé, on l'a propage.
+        raise error_label if (screenshot_base64.empty? or screenshot_base64.nil?)
+
 
         # sauvegarde du screenshot dans le fichier
         File.open(screenshot_flow.absolute_path, 'wb') do |f|
