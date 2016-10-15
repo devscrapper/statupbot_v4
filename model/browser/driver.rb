@@ -69,7 +69,7 @@ module Sahi
 
     def body
       body = nil
-      wait(60) {
+      wait(60, false, 1) {
         body = fetch("window.document.body.innerHTML")
         !body.nil? and !body.empty?
       }
@@ -98,7 +98,7 @@ module Sahi
 
     def current_url
       url = nil
-      wait(60) {
+      wait(60, false, 1) {
         url = fetch("window.location.href")
         !url.nil? and !url.empty?
       }
@@ -209,7 +209,7 @@ module Sahi
 
     def links
       links = nil
-      wait(60) {
+      wait(60, false, 1) {
         links = fetch("_sahi.links()")
         !links.nil?
       }
@@ -342,7 +342,7 @@ module Sahi
         # donc attend que le screenshot soit fini
         #----------------------------------------------------------------------------------------------------------------
         error_label = ""
-        wait(5) {
+        wait(30, false, 1) {
           error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
           @@logger.an_event.debug "error_label <#{error_label}>"
           @@logger.an_event.debug "error_label is empty? <#{error_label.empty?}>"
@@ -386,7 +386,7 @@ module Sahi
         # donc attend que le screenshot soit fini
         #----------------------------------------------------------------------------------------------------------------
         error_label = ""
-        wait(5) {
+        wait(30, false, 1) {
           error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
           !error_label.empty?
         }
@@ -477,7 +477,7 @@ module Sahi
 
     def title
       title = nil
-      wait(60) {
+      wait(30, false, 1) {
         title = fetch("_sahi._title()")
         !title.nil? and !title.empty?
       }
@@ -571,7 +571,7 @@ module Sahi
         screenshot(screenshot_tmp)
 
         # attend que l'image ait été enregistrée pour ne pas en perdre
-        wait(60) { screenshot_tmp.exist? }
+        wait(60, false, 1) { screenshot_tmp.exist? }
         @@logger.an_event.debug "page #{screenshot_tmp.vol} du screenshot #{screenshot_tmp.basename} existe"
 
         #si pas derniere page alors on passe à la page suivante
