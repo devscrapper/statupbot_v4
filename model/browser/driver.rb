@@ -242,6 +242,7 @@ module Sahi
       begin
         wait(60, true) {
           check_proxy
+          true
         }
 
       rescue Exception => e
@@ -622,7 +623,7 @@ module Sahi
         return
       end
 
-       timeout = interval if $staging == "development" # on execute une fois
+      #timeout = interval if $staging == "development" # on execute une fois
 
       while (timeout > 0)
         sleep(interval)
