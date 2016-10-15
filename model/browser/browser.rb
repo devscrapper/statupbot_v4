@@ -1202,6 +1202,9 @@ module Browsers
             #prise du screenshot
             @driver.take_screenshot(output_file, @height.to_i)
 
+            # cache le browser
+            @window.minimize
+            @@logger.an_event.debug "minimize de la fenetre du browser"
           rescue Exception => e
             @@logger.an_event.error "browser #{name} take screen shot avec win32screenshot #{output_file.basename} : #{e.message}"
             @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
@@ -1210,9 +1213,7 @@ module Browsers
             @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
 
           ensure
-            # cache le browser
-            @window.minimize
-            @@logger.an_event.debug "minimize de la fenetre du browser"
+
           end
         }
       else

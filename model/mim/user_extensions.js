@@ -106,9 +106,18 @@ Sahi.prototype.screenshot_body = function () {
     try {
         //error_label = le texte de l'excetpion si une erreur a été levée
         // 'over' si tout est OK
+
         var error_label = document.createElement("p");
         error_label.id = "error_label";
-        document.body.appendChild(error_label);
+        if (document.contains(document.getElementById("error_label"))) {
+            var trace = window.open().document;
+            trace.write("error_label : ");
+                    document.getElementById("error_label").remove();
+        }   else {
+            document.body.appendChild(error_label);
+        }
+
+
 
         //le screenshot encodé en base 64
         var screenshot_base64 = document.createElement("p");
