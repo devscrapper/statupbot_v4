@@ -20,5 +20,5 @@ test;windows;seven;Chrome;23.0.1271.97;D:\GoogleChromePortable\37.0.2062.124\Goo
 test;windows;seven;Firefox;24.0;C:\Program Files\Mozilla Firefox\31\firefox.exe;false
 test;windows;seven;Firefox;19.0;C:\Program Files\Mozilla Firefox\31\firefox.exe;false
 test;windows;seven;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
-test;windows;seven;Safari;16.0;D:\Safari\safari.exe;true
+test;windows;seven;Safari;16.0;C:\Program Files (x86)\safari\safari.exe;true
 test;windows;seven;Edge;none;;true

@@ -344,6 +344,11 @@ module Sahi
         error_label = ""
         wait(5) {
           error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
+          @@logger.an_event.debug "error_label <#{error_label}>"
+          @@logger.an_event.debug "error_label is empty? <#{error_label.empty?}>"
+          @@logger.an_event.debug "error_label is nil? <#{error_label.nil?}>"
+          # test empty? car dans error_label on peut recuperer soit over pour tout c'est bien pass,soit le libelle
+          # de l'exception. => il ne doit jamais y avoir du vide.
           !error_label.empty?
         }
 
