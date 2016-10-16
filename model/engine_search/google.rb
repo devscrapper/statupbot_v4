@@ -20,7 +20,8 @@ module EngineSearches
       @id_captcha = "captcha"  # id de l'objet javascript qui contient le captcha à saisir
       @type_captcha = "textbox" # le type de l'objet jaavscript qui contient le captcha à saisir
       @label_button_captcha = "Envoyer"  # label button captcha
-      @id_image_captcha  ="Activez l'affichage des images"    # id_image_captacha
+      @css_image_captcha  ="#error_connect > div > form > img"    # image_captacha
+
       @coord_captcha = [0,180,300,330]
     end
 

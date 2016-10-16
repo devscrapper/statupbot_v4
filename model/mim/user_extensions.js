@@ -110,19 +110,21 @@ Sahi.prototype.screenshot_body = function () {
         var error_label = document.createElement("p");
         error_label.id = "error_label";
         if (document.contains(document.getElementById("error_label"))) {
-            var trace = window.open().document;
-            trace.write("error_label : ");
-                    document.getElementById("error_label").remove();
-        }   else {
+            document.getElementById("error_label").remove();
+        } else {
             document.body.appendChild(error_label);
         }
-
 
 
         //le screenshot encodé en base 64
         var screenshot_base64 = document.createElement("p");
         screenshot_base64.id = "screenshot_base64";
-        document.body.appendChild(screenshot_base64);
+        if (document.contains(document.getElementById("screenshot_base64"))) {
+            document.getElementById("screenshot_base64").remove();
+        } else {
+            document.body.appendChild(screenshot_base64);
+        }
+
 
         screenshot(document.body)
     }
@@ -138,14 +140,29 @@ Sahi.prototype.screenshot_element_by_id = function (id) {
         // 'over' si tout est OK
         var error_label = document.createElement("p");
         error_label.id = "error_label";
-        document.body.appendChild(error_label);
+        if (document.contains(document.getElementById("error_label"))) {
+            document.getElementById("error_label").remove();
+        } else {
+            document.body.appendChild(error_label);
+        }
+
 
         //le screenshot encodé en base 64
         var screenshot_base64 = document.createElement("p");
         screenshot_base64.id = "screenshot_base64";
-        document.body.appendChild(screenshot_base64);
+        if (document.contains(document.getElementById("screenshot_base64"))) {
+            document.getElementById("screenshot_base64").remove();
+        } else {
+            document.body.appendChild(screenshot_base64);
+        }
 
-        screenshot(document.getElementById(id)[0]);
+        var captcha = document.querySelector(id);
+        if (isNull(captcha) == true) {
+            throw "captcha not found" ;
+        }
+        else {
+            screenshot(captcha);
+        }
     }
     catch (e) {
         document.getElementById("error_label").appendChild(document.createTextNode("screenshot_element_by_id => " + e));
