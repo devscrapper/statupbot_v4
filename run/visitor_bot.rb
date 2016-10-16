@@ -141,11 +141,11 @@ def visit_failed(visit_id, reason, logger)
   end
 end
 
-def visit_not_found(visit_id, reason, logger)
+def advert_not_found(visit_id, reason, logger)
   begin
 
     log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
-    Monitoring.visit_not_found(visit_id,
+    Monitoring.advert_not_found(visit_id,
                             reason,
                             log_path)
   rescue Exception => e
@@ -307,7 +307,7 @@ def visitor_execute_visit(opts, logger)
               exit_status = ERR_LINK_TRACKING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_CHOOSE_ADVERT)
-              visit_not_found(visit_details[:id], "advert tracking", logger)
+              advert_not_found(visit_details[:id], "advert tracking", logger)
               exit_status = ERR_ADVERT_TRACKING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_CLOSE)

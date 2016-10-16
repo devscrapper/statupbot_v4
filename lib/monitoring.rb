@@ -59,7 +59,7 @@ module Monitoring
     send_log(visit_id, log_path)
   end
 
-  def visit_not_found(visit_id, reason, log_path)
+  def advert_not_found(visit_id, reason, log_path)
     change_state_visit(visit_id, ADVERTNOTFOUND, reason)
     send_log(visit_id, log_path)
   end
@@ -241,7 +241,7 @@ module Monitoring
 
   end
 
-  module_function :visit_not_found
+  module_function :advert_not_found
   module_function :visit_started
   module_function :visit_failed
   module_function :change_state_visit
