@@ -31,7 +31,7 @@ module Visits
           # par sécurité on attend et test à concurrence de 60s, jusqu'à ce que la liste ne soit pas vide.
           # en desespoir de cause, si le pb persiste alors elle sera vide.
           # ou bien il ny a vraimenet pas d'awords sur la page Google.
-          browser.driver.wait(60) {
+          wait(30, true, 1.3) {
             body = browser.body
             @@logger.an_event.debug "body : #{body}"
             adwords = browser.engine_search.adverts(body)
@@ -74,6 +74,33 @@ module Visits
         end
 
         link
+
+      end
+
+      private
+
+      def wait(timeout, exception = false, interval=0.2)
+
+        if !block_given?
+          sleep(timeout)
+          return
+        end
+
+        #timeout = interval if $staging == "development" # on execute une fois
+
+        while (timeout > 0)
+          sleep(interval)
+          timeout -= interval
+          begin
+            return if yield
+          rescue Exception => e
+            @@logger.an_event.warn "try again : #{e.message}"
+          else
+            @@logger.an_event.debug "try again."
+          end
+        end
+
+        raise e if !e.nil? and exception == true
 
       end
 
