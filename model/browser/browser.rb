@@ -1242,7 +1242,7 @@ module Browsers
       #-------------------------------------------------------------------------------------------------------------
       begin
         #prise du screenshot
-        @driver.take_screenshot_element_by_id_by_canvas(output_file, @engine_search.id_image_captcha)
+        @driver.take_screenshot_element_by_id_by_canvas(output_file, @engine_search.css_image_captcha)
 
       rescue Exception => e
         @@logger.an_event.error "captcha by canvas : #{e.message}"

@@ -19,7 +19,7 @@ module EngineSearches
       @id_capcha ='' , # TODO id de l'objet javascript qui contient le captcha à saisir
       @type_captcha = '', #TODO le type de l'objet jaavscript qui contient le captcha à saisir
       @label_button_captcha = ""  #TODO à definir label button captcha
-      @id_image_captcha  =""    # TODO defnir id_image_captacha
+      @css_image_captcha  =""    # TODO defnir id_image_captacha
       @coord_captcha = [] #TODO definir coordonate image captcha
     end
 
