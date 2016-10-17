@@ -190,7 +190,7 @@ module Logging
                                       {:age => :daily,
                                        :keep => 7,
                                        :roll_by => :date,
-                                       :layout => Logging.layouts.pattern(:pattern => '[%d] %-5l %-16c %-32M %-5L %x{,} :  %m %F\n')})
+                                       :layout => Logging.layouts.pattern(:pattern => '[%d] %-5l %-33c : %m %F\n')})
 
 
     end

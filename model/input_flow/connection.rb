@@ -17,7 +17,6 @@ module Input_flows
     VERBE_HTTP_NOT_MANAGE = 1804
     DIR_TMP = [File.dirname(__FILE__), "..", "..", "tmp"]
 
-    @@title_html = ""
 
     attr :logger
 
@@ -63,24 +62,6 @@ module Input_flows
             #--------------------------------------------------------------------------------------------------------------
             when "GET"
 
-              @logger.an_event.info "list #{ress_id} events from repository"
-              case ress_type
-                when "input_flows"
-                  tasks = "OK"
-                  @@title_html = "input_flows online"
-                when "geolocations"
-                  #TODO
-                when "visits"
-                     #TODO
-#                    tasks = @calendar.all_events_on_date(Calendar.next_day(ress_id))
-                  @@title_html = "On #{ress_id} tasks"
-
-
-                else
-                  raise Errors::Error.new(RESSOURCE_NOT_MANAGE, :values => {:ressource => ress_type})
-
-              end
-              @logger.an_event.info "#{tasks.size} events for #{ress_id} from repository"
             #--------------------------------------------------------------------------------------------------------------
             # POST
             #--------------------------------------------------------------------------------------------------------------
@@ -89,10 +70,6 @@ module Input_flows
               @logger.an_event.debug "@http_content : #{@http_content}"
 
               case ress_type
-                when "geolocations"
-                  geo_flow = send_to_geolocation_factory(ress_id,@http_content)
-                  @logger.an_event.info "save geolocations flow #{geo_flow.basename}"
-
                 when "visits"
                   visit_flow = send_to_visitor_factory(@http_content)
                   @logger.an_event.info "save visit flow #{visit_flow.basename}"
@@ -100,8 +77,6 @@ module Input_flows
                   raise Errors::Error.new(RESSOURCE_NOT_MANAGE, :values => {:ressource => ress_type})
 
               end
-
-
 
             else
               raise Errors::Error.new(VERBE_HTTP_NOT_MANAGE, :values => {:verb => @http_request_method})
@@ -151,8 +126,7 @@ module Input_flows
         if @http[:accept].include?("text/html") and response.status == 200
           # formatage des données en html si aucune erreur et si accès avec un navigateur
           response.content_type 'text/html'
-          response.content = @calendar.to_html(results, @@title_html) if results.is_a?(Array)
-          response.content = results unless results.is_a?(Array)
+          response.content = results
         else
           response.content_type 'application/json'
           response.content = results.to_json
@@ -187,15 +161,7 @@ module Input_flows
 
 
     private
-    # visit est un flux json
-    def send_to_geolocation_factory(geo_filename, geolocation_details)
 
-      geo_flow = Flow.from_basename(File.join($dir_tmp || DIR_TMP), geo_filename)
-      geo_flow.write(geolocation_details)
-      geo_flow.close
-      geo_flow.archive_previous
-      geo_flow
-    end
     def send_to_visitor_factory(visit_details)
 
       visit_details = YAML::load(visit_details)
