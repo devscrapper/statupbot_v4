@@ -87,7 +87,7 @@ module Input_flows
           results = e
 
         else
-          results = tasks # as usual, the last expression evaluated in the block will be the return value.
+          results = visit_flow.basename # as usual, the last expression evaluated in the block will be the return value.
 
         ensure
 
