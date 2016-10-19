@@ -12,8 +12,8 @@ test:
   :debugging:  true
   :install_sahi_dir: ["d:", "sahi_pro_runner_631" ]
   :launcher_runtime_dir: ["d:" , "statupbot", "tmp", "launcher"]
-  :java_runtime_dir: ["c:", "Program Files", "Java", "jre1.8.0_77", "bin"]
-  :java_key_tool_path: ["C:", "Program Files", "Java", "jre1.8.0_77", "bin", "keytool.exe"]
+  :java_runtime_dir: ["d:", "java", "bin"]
+  :java_key_tool_path: ["d:", "java", "bin", "keytool.exe"]
   :start_page_server_ip: "192.168.1.88"
   :start_page_server_port: 8080
 

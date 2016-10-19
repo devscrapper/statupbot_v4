@@ -8,8 +8,8 @@ development:
 
 
 test:
-  :java_runtime_path: ["\"c:", "Program Files", "Java", "jre1.8.0_77", "bin", "java.exe\""]
-  :java_key_tool_path: ["\"C:", "Program Files", "Java", "jre1.8.0_77", "bin", "keytool.exe\""]
+  :java_runtime_path: ["d:", "java", "bin", "java.exe"]
+  :java_key_tool_path: ["d:", "java", "bin", "keytool.exe"]
   :image_magick_path: ["d:", "imagemagick"]
   :start_page_server_ip: "192.168.1.88"
   :start_page_server_port: 8080
