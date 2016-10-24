@@ -101,104 +101,115 @@ Sahi.prototype.setAttribute = function (a, b, c) {
     return a.setAttribute(b, c)
 };
 
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    alert(document.cookie);
+}
+Sahi.prototype.getCookie = function (cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
 Sahi.prototype.screenshot_body = function () {
-
     try {
-        //error_label = le texte de l'excetpion si une erreur a été levée
-        // 'over' si tout est OK
-
-        var error_label = document.createElement("p");
-        error_label.id = "error_label";
-        if (document.contains(document.getElementById("error_label"))) {
-            document.getElementById("error_label").remove();
-        } else {
-            document.body.appendChild(error_label);
-        }
-
-
-        //le screenshot encodé en base 64
-        var screenshot_base64 = document.createElement("p");
-        screenshot_base64.id = "screenshot_base64";
-        if (document.contains(document.getElementById("screenshot_base64"))) {
-            document.getElementById("screenshot_base64").remove();
-        } else {
-            document.body.appendChild(screenshot_base64);
-        }
-
-
         screenshot(document.body)
     }
     catch (e) {
-        document.getElementById("error_label").appendChild(document.createTextNode("screenshot_body => " + e));
+        throw ("ERROR => screenshot_body => " + e);
 
     }
 }
 
-Sahi.prototype.screenshot_element_by_id = function (id) {
+Sahi.prototype.screenshot_element_by_css = function (css) {
     try {
-        //error_label = le texte de l'excetpion si une erreur a été levée
-        // 'over' si tout est OK
-        var error_label = document.createElement("p");
-        error_label.id = "error_label";
-        if (document.contains(document.getElementById("error_label"))) {
-            document.getElementById("error_label").remove();
-        } else {
-            document.body.appendChild(error_label);
-        }
+        var captcha = document.querySelector(css);
 
-
-        //le screenshot encodé en base 64
-        var screenshot_base64 = document.createElement("p");
-        screenshot_base64.id = "screenshot_base64";
-        if (document.contains(document.getElementById("screenshot_base64"))) {
-            document.getElementById("screenshot_base64").remove();
-        } else {
-            document.body.appendChild(screenshot_base64);
-        }
-
-        var captcha = document.querySelector(id);
-        if (isNull(captcha) == true) {
-            throw "captcha not found" ;
+        if (!captcha) {
+            throw "captcha not found";
         }
         else {
             screenshot(captcha);
         }
     }
     catch (e) {
-        document.getElementById("error_label").appendChild(document.createTextNode("screenshot_element_by_id => " + e));
+        throw ("ERROR => screenshot_element_by_css => " + e);
     }
 }
 
 function screenshot(elt) {
     try {
-
-        html2canvas(elt).then(function (canvas) {
+        html2canvas(elt, {
+            onrendered: function (canvas) {
                 // html2canvas a fait le screenshot, il est dans le canvas
                 try {
-                    //à commenter
-                    document.body.appendChild(canvas);
-
                     //encodage du screenshot en base 64, en chaine de caractère pour le retourner
-                    var dataURL = canvas.toDataURL("image/png");
+                    dataURL = canvas.toDataURL("image/png");
                     dataURL = dataURL.replace(/^data:image\/(png|jpg);base64,/, "")
 
                     //stockage dans la page html, dans l'element 'screenshot_base64'
-                    document.getElementById("screenshot_base64").appendChild(document.createTextNode(dataURL));
+                    //setCookie("screenshot", dataURL, 1) ;
+                    // save image as png
+                    if (typeof(Storage) !== "undefined") {
+                        // Code for localStorage/sessionStorage.
+                        localStorage.screenshot_base64 = dataURL;
+                        delete dataURL;
 
-                    // indique que la capture est terminée
-                    document.getElementById("error_label").appendChild(document.createTextNode("over"));
+                    } else {
+                        // Sorry! No Web Storage support..
+                        throw "no local storage";
+                    }
+
                 }
                 catch (e) {
-                    document.getElementById("error_label").appendChild(document.createTextNode("screenshot 1 => " + e));
+                    throw("ERROR => screenshot 1 => " + e);
+                }
+            }
+        });
+
+/*        html2canvas(elt).then(function (canvas) {
+                // html2canvas a fait le screenshot, il est dans le canvas
+                try {
+                    //encodage du screenshot en base 64, en chaine de caractère pour le retourner
+                    dataURL = canvas.toDataURL("image/png");
+                    dataURL = dataURL.replace(/^data:image\/(png|jpg);base64,/, "")
+
+                    //stockage dans la page html, dans l'element 'screenshot_base64'
+                    //setCookie("screenshot", dataURL, 1) ;
+                    // save image as png
+                    if (typeof(Storage) !== "undefined") {
+                        // Code for localStorage/sessionStorage.
+                        localStorage.screenshot_base64 = "SCREENSHOT" + dataURL;
+                        delete dataURL;
+
+                    } else {
+                        // Sorry! No Web Storage support..
+                        throw "no local storage";
+                    }
+
+                }
+                catch (e) {
+                    throw("ERROR => screenshot 1 => " + e);
                 }
             }
         )
-        ;
+        ;*/
     }
 
-    catch
-        (e) {
-        document.getElementById("error_label").appendChild(document.createTextNode("screenshot 2 => " + e));
+    catch (e) {
+        throw ("ERROR => screenshot 2 => " + e);
     }
 }
 

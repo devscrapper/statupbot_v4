@@ -113,7 +113,7 @@ module Sahi
     end
 
     def domain(name)
-      win = Browser.new(@browser_type, @proxy_port)
+      win = Browser.new(@browser_type, @browser_process_name, @proxy_host, @proxy_port)
 
       win.proxy_host = @proxy_host
       win.proxy_port = @proxy_port
@@ -292,7 +292,7 @@ module Sahi
 
     # represents a popup window. The name is either the window name or its title.
     def popup(name)
-      win = Browser.new(@browser_type, @proxy_port)
+      win = Browser.new(@browser_type, @browser_process_name, @proxy_host, @proxy_port)
 
       win.proxy_host = @proxy_host
       win.proxy_port = @proxy_port
@@ -332,50 +332,46 @@ module Sahi
     end
 
     def take_screenshot_body_by_canvas(screenshot_flow)
+    count = 3
+
       begin
         #----------------------------------------------------------------------------------------------------------------
         # prise du screenshot  (execution asynchrone par html2canvas avec Promise)
         #----------------------------------------------------------------------------------------------------------------
+        @@logger.an_event.debug "#{count} => going to take screenshot body by canvas"
         fetch("_sahi.screenshot_body()")
 
         #----------------------------------------------------------------------------------------------------------------
         # donc attend que le screenshot soit fini
         #----------------------------------------------------------------------------------------------------------------
-        error_label = ""
-        wait(30, false, 1) {
-          error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
-          @@logger.an_event.debug "error_label <#{error_label}>"
-          @@logger.an_event.debug "error_label is empty? <#{error_label.empty?}>"
-          @@logger.an_event.debug "error_label is nil? <#{error_label.nil?}>"
-          # test empty? car dans error_label on peut recuperer soit over pour tout c'est bien pass,soit le libelle
-          # de l'exception. => il ne doit jamais y avoir du vide.
-          !error_label.empty?
-        }
-
-        #----------------------------------------------------------------------------------------------------------------
-        # gestion du retour positif ou d'une exception, lors du screenshot
-        #----------------------------------------------------------------------------------------------------------------
-
-
-        # tout c'est bien passé
-        # recuperation du screenshot au format base64
+        @@logger.an_event.debug "waiting screenshot ..."
         screenshot_base64 = ""
-        wait(30, false, 1) {
-          screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
-          @@logger.an_event.debug "screenshot_base64 <#{screenshot_base64}>"
+
+        wait(60, false, 2) {
+          # on va chercher le resultat dans le local storage du bronwser
+          screenshot_base64 = fetch("localStorage.screenshot_base64")
+
+          @@logger.an_event.debug "screenshot_base64 <#{screenshot_base64[0..32]}>"
           @@logger.an_event.debug "screenshot_base64 is empty? <#{screenshot_base64.empty?}>"
           @@logger.an_event.debug "screenshot_base64 is nil? <#{screenshot_base64.nil?}>"
-          !screenshot_base64.empty?
-        }
-        # une exception a été levé, on l'a propage.
-        raise error_label if (screenshot_base64.empty? or screenshot_base64.nil?)
 
+          !screenshot_base64.include?("undefined") and !screenshot_base64.empty? and !screenshot_base64.nil?
+        }
+
+        raise "screenshot_base64 : #{screenshot_base64}" if screenshot_base64.include?("undefined") or screenshot_base64.empty? or screenshot_base64.nil?
+
+        # suppressin de la variable screenshot_base64 dans le local storuage du browser
+        fetch("localStorage.removeItem(\"screenshot_base64\")")
 
         # sauvegarde du screenshot dans le fichier
         File.open(screenshot_flow.absolute_path, 'wb') do |f|
           f.write(Base64.decode64(screenshot_base64))
         end
+
       rescue Exception => e
+        @@logger.an_event.warn "#{count} => take screenshot body by canvas #{screenshot_flow.basename} : #{e.message}"
+        count -= 1
+        retry if count > 0
         @@logger.an_event.error "take screenshot body by canvas #{screenshot_flow.basename} : #{e.message}"
         raise e
 
@@ -385,38 +381,46 @@ module Sahi
     end
 
     def take_screenshot_element_by_id_by_canvas(screenshot_flow, id_captcha)
+      count = 3
+
       begin
         #----------------------------------------------------------------------------------------------------------------
         # prise du screenshot  (execution asynchrone par html2canvas avec Promise)
         #----------------------------------------------------------------------------------------------------------------
-        fetch("_sahi.screenshot_element_by_id(\"#{id_captcha}\")")
+        @@logger.an_event.debug "#{count} => going to take screenshot captcha by canvas"
+        fetch("_sahi.screenshot_element_by_css(\"#{id_captcha}\")")
 
         #----------------------------------------------------------------------------------------------------------------
         # donc attend que le screenshot soit fini
         #----------------------------------------------------------------------------------------------------------------
-        error_label = ""
-        wait(30, false, 1) {
-          error_label = fetch("window.document.getElementById(\"error_label\").innerHTML")
-          !error_label.empty?
+        @@logger.an_event.debug "waiting screenshot ..."
+        screenshot_base64 = ""
+
+        wait(60, false, 2) {
+          screenshot_base64 = fetch("localStorage.screenshot_base64")
+
+          @@logger.an_event.warn "screenshot_base64 <#{screenshot_base64[0..32]}>"
+          @@logger.an_event.debug "screenshot_base64 is empty? <#{screenshot_base64.empty?}>"
+          @@logger.an_event.debug "screenshot_base64 is nil? <#{screenshot_base64.nil?}>"
+
+          !screenshot_base64.include?("undefined") and !screenshot_base64.empty? and !screenshot_base64.nil?
         }
 
-        #----------------------------------------------------------------------------------------------------------------
-        # gestion du retour positif ou d'une exception, lors du screenshot
-        #----------------------------------------------------------------------------------------------------------------
-        # une exception a été levé, on l'a propage.
-        raise error_label unless error_label == "over"
+        raise "screenshot_base64 : #{screenshot_base64}" if screenshot_base64.include?("undefined") or screenshot_base64.empty? or screenshot_base64.nil?
 
-        # tout c'est bien passé
-        # recuperation du screenshot au format base64
-        screenshot_base64 = fetch("window.document.getElementById(\"screenshot_base64\").innerHTML")
+        fetch("localStorage.removeItem(\"screenshot_base64\")")
 
         # sauvegarde du screenshot dans le fichier
         File.open(screenshot_flow.absolute_path, 'wb') do |f|
           f.write(Base64.decode64(screenshot_base64))
         end
       rescue Exception => e
+        @@logger.an_event.warn "#{count} => take screenshot element by id by canvas #{screenshot_flow.basename} : #{e.message}"
+        count -= 1
+        retry if count > 0
         @@logger.an_event.error "take screenshot element by id #{id_captcha} by canvas #{screenshot_flow.basename} : #{e.message}"
         raise e
+
       else
         @@logger.an_event.debug "take screenshot element by id #{id_captcha} by canvas #{screenshot_flow.basename}"
       end
