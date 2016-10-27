@@ -87,7 +87,7 @@ module Browsers
 
         super(start_page_visit_url, window_parameters)
 
-        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
+        Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
         click_on(start_url)
 
