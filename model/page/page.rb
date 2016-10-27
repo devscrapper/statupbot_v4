@@ -41,6 +41,7 @@ module Pages
     PAGE_NONE_LINK_BY_URL = 506
     PAGE_NONE_INSIDE_LINKS = 507
     PAGE_NONE_ELEMENT = 508
+    PROXY_GEOLOCATION = 509
 
     #----------------------------------------------------------------------------------------------------------------
     # constant

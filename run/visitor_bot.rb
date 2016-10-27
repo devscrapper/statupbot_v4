@@ -127,6 +127,8 @@ ERR_ADVERT_TRACKING = 14
 ERR_CAPTCHA_SUBMITTING = 15
 ERR_VISIT_EXECUTION = 16
 ERR_TOO_MANY_CAPTCHA = 17
+ERR_SAHI_PROXY_NOT_CONNECT = 18
+ERR_GEO_PROXY = 19
 
 def visit_failed(visit_id, reason, logger)
   begin
@@ -325,6 +327,14 @@ def visitor_execute_visit(opts, logger)
             elsif e.history.include?(Visitors::Visitor::VISITOR_TOO_MANY_CAPTCHA)
               visit_failed(visit_details[:id], "too many captcha", logger)
               exit_status = ERR_TOO_MANY_CAPTCHA
+
+            elsif e.history.include?(Pages::Page::URL_NOT_FOUND)
+              visit_failed(visit_details[:id], "sahi cannot connect", logger)
+              exit_status = ERR_SAHI_PROXY_NOT_CONNECT
+
+            elsif e.history.include?(Pages::Page::PROXY_GEOLOCATION)
+              visit_failed(visit_details[:id], "geo proxy error", logger)
+              exit_status = ERR_GEO_PROXY
 
             else
               exit_status = ERR_VISIT_EXECUTION

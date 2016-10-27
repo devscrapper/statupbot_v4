@@ -423,13 +423,6 @@ module Browsers
         rescue Exception => e
           hostname = URI.parse(URI.escape(url)).hostname
         end
-        #pb de connection reseau par exemple
-        raise Errors::Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => hostname}) if @driver.div("error_connect").exists?
-
-          # new_page_title = @driver.title
-          # @@logger.an_event.debug "new_page_title : #{new_page_title}"
-          # #erreur sahi...on est tj sur la page initiale de sahi
-          # raise Errors::Error.new(BROWSER_NOT_ACCESS_URL, :values => {:browser => name, :url => url_start_page}) if new_page_title == old_page_title
 
       rescue Exception => e
         @@logger.an_event.error "browser #{name} display start page : #{e.message}"

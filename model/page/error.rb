@@ -56,26 +56,29 @@ module Pages
     #
     #----------------------------------------------------------------------------------------------------------------
 
-
+    #----------------------------------------------------------------------------------------------------------------
+    # leve une exception si :
+    # le proxy de genolocation retourne une erreur
+    # le proxy Sahi n'arrive pas acceder à l'url demandée
+    # si pas de pb connu alors retourne false
+    #----------------------------------------------------------------------------------------------------------------
     def self.is_a?(browser)
       @@logger = Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
-      current_url = browser.url
+      url = browser.url
       body = browser.body
       @@logger.an_event.debug "body : #{body}"
-      text = body.css("body > center > div > div > b").text
-      @@logger.an_event.debug "text : #{text}"
 
-      @@logger.an_event.debug "text == Sahi could not connect to the desired URL : #{text == "Sahi could not connect to the desired URL"}"
-      bool = text == "Sahi could not connect to the desired URL"
-      if bool
-        @@logger.an_event.info "current url #{current_url} is error page"
+      sahi_connect_error = body.css("body > center > div > div > b").text
+      @@logger.an_event.debug "sahi_connect_error : #{sahi_connect_error} => #{sahi_connect_error == "Sahi could not connect to the desired URL" }"
 
-      else
-        @@logger.an_event.info "current url #{current_url} not error page"
+      geolocation_proxy_connect_error = body.css("body").text
+      @@logger.an_event.debug "geolocation_proxy_connect_error : #{geolocation_proxy_connect_error.to_i >= 400}"
 
-      end
-      bool
+      raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url}) if sahi_connect_error == "Sahi could not connect to the desired URL"
+      raise Errors::Error.new(Pages::Page::PROXY_GEOLOCATION, :values => {:url => url, :error => geolocation_proxy_connect_error}) if geolocation_proxy_connect_error.to_i >= 400 #error http client et serveur
+
+      false
     end
 
     def to_s

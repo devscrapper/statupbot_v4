@@ -559,10 +559,7 @@ module Visitors
                                             @browser)
 
       rescue Errors::Error => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -579,6 +576,7 @@ module Visitors
           retry
 
         end
+
         @@logger.an_event.error "visitor browsed advertiser website page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
@@ -626,10 +624,7 @@ module Visitors
         @current_page = Pages::Website.new(@visit, @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -710,10 +705,7 @@ module Visitors
                                             @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         @@logger.an_event.error "visitor browsed unmanage page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
@@ -777,10 +769,7 @@ module Visitors
                                             @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -858,10 +847,7 @@ module Visitors
                                             @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         @@logger.an_event.error "visitor browsed unmanage page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
@@ -925,10 +911,7 @@ module Visitors
         @current_page = Pages::Website.new(@visit, @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         @@logger.an_event.error "visitor browsed website page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
@@ -974,10 +957,7 @@ module Visitors
                                            @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -1037,10 +1017,7 @@ module Visitors
                                            @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -1101,10 +1078,7 @@ module Visitors
         @current_page = Pages::Unmanage.new(visit.referrer.duration, @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -1198,10 +1172,7 @@ module Visitors
         @current_page = Pages::Unmanage.new(before_last_page.duration,
                                             @browser) if before_last_page.is_a?(Pages::Unmanage)
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -1244,10 +1215,7 @@ module Visitors
         @current_page = Pages::Website.new(@visit, @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         @@logger.an_event.error "visitor browsed landing page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_GO_TO_LANDING, :error => e)
@@ -1274,10 +1242,7 @@ module Visitors
 
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         @@logger.an_event.error "visitor browsed referral page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_GO_TO_REFERRAL, :error => e)
@@ -1320,10 +1285,7 @@ module Visitors
                                                 @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -1385,10 +1347,7 @@ module Visitors
                                                 @browser)
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         if Pages::Captcha.is_a?(@browser)
           #--------------------------------------------------------------------------------------------------------
@@ -1421,24 +1380,32 @@ module Visitors
     end
 
     def go_to_start_landing
-
       begin
         @@logger.an_event.debug "action #{__method__}"
 
         url = @visit.landing_link.url
+
         @browser.display_start_page(url, @id)
+
+      rescue Exception => e
+        @@logger.an_event.error "visitor went to landing page <#{url}> : #{e.message}"
+        raise Errors::Error.new(VISITOR_NOT_START_LANDING, :error => e)
+
+      else
+        @@logger.an_event.info "visitor went to landing page <#{url}>"
+
+      end
+
+      begin
 
         @current_page = Pages::Website.new(@visit, @browser)
 
 
       rescue Exception => e
-        if Pages::Error.is_a?(@browser)
-          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url})
-
-        end
+        Pages::Error.is_a?(@browser) # leve automatiquement une exception si erreur connue
 
         @@logger.an_event.error "visitor browsed website page : #{e.message}"
-        raise Errors::Error.new(VISITOR_NOT_START_LANDING, :error => e)
+        raise Errors::Error.new(VISITOR_NOT_READ_PAGE, :error => e)
 
       else
 

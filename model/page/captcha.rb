@@ -158,10 +158,10 @@ module Pages
       current_url = browser.url
       bool = browser.engine_search.is_captcha_page?(current_url)
       if bool
-        @@logger.an_event.info "current url #{current_url} is captcha page"
+        @@logger.an_event.warn "current url #{current_url} is captcha page"
 
       else
-        @@logger.an_event.info "current url #{current_url} not captcha page"
+        @@logger.an_event.debug "current url #{current_url} not captcha page"
 
       end
       bool
