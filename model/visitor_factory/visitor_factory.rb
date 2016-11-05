@@ -282,10 +282,18 @@ class VisitorFactory
         visitor_bot_pid, status = Process.wait2(visitor_bot_pid, 0)
         visitor_bot_pid
       }
+    rescue Timeout::Error => e
+      change_visit_state(visit_details[:id], Monitoring::OVERTTL, "visit over ttl")
 
     rescue Exception => e
       @@logger.an_event.error "start visitor_bot : #{e.message}"
-      change_visit_state(visit[:id], Monitoring::NEVERSTARTED) unless visitor_bot_pid.nil?
+      if visitor_bot_pid.nil?
+        change_visit_state(visit[:id], Monitoring::NEVERSTARTED, "visit not started")
+
+      else
+        change_visit_state(visit_details[:id], Monitoring::FAIL, e.message)
+
+      end
 
     else
       @@logger.an_event.debug "start visitor_bot, status : #{status.exitstatus}"
@@ -352,9 +360,9 @@ class VisitorFactory
   end
 
 
-  def change_visit_state(visit_id, state)
+  def change_visit_state(visit_id, state, reason=nil)
     begin
-      Monitoring.change_state_visit(visit_id, state)
+      Monitoring.change_state_visit(visit_id, state, reason)
 
     rescue Exception => e
       @@logger.an_event.warn ("change state #{state} of visit #{visit_id} : #{e.message}")
@@ -363,6 +371,7 @@ class VisitorFactory
       @@logger.an_event.info("change state #{state} of visit #{visit_id}")
     end
   end
+
 
   def delete_log_file(visitor_id)
     begin
