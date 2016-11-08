@@ -17,15 +17,15 @@ module Visits
       end
 
       #advert retourne un Link_element ElementStub)
-      def advert(driver)
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "driver"}) if driver.nil?
+      def advert(browser)
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
         link = nil
         links = []
         count_try = 0
         adverts = []
         begin
           DOMAINS.each { |domain|
-            frame = driver.domain(domain)
+            frame = browser.driver.domain(domain)
 
             if frame.domain_exist?
               adverts += frame.link("/.*googleads.g.doubleclick.net.*/").collect_similar

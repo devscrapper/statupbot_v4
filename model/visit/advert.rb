@@ -43,9 +43,7 @@ module Visits
     def initialize(visit_details, website_details)
 
       begin
-        super(visit_details[:id],
-              visit_details[:start_date_time],
-              visit_details[:referrer])
+        super(visit_details,website_details) # create traffic
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "advert"}) if visit_details[:advert].nil?
 
         @@logger.an_event.debug "advert #{visit_details[:advert]}"

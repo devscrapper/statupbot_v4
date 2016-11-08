@@ -28,7 +28,7 @@ module Visits
   # f : index de la page de resultats du MDR dans laquelle on trouve le lien de la landing page. ; issu du fichier yaml
   # de la visite
   # q : nombre de sites visités par page de resultats du MDR avant de passer à la visite ; calculé aléaoirement entre [2-3]
-    #--------------------------------------------------------------------------------------------------------------------
+  #--------------------------------------------------------------------------------------------------------------------
   # type    | random | random | referrer | advertising | advertising | expression reguliere
   #         | search | surf   |          | on website  | on results  |
   #--------------------------------------------------------------------------------------------------------------------
@@ -116,7 +116,6 @@ module Visits
          :start_date_time # date et heure de demarrage de la visit
 
 
-
     #----------------------------------------------------------------------------------------------------------------
     # class methods
     #----------------------------------------------------------------------------------------------------------------
@@ -175,6 +174,9 @@ module Visits
       begin
 
         case visit_details[:type]
+          when :advert
+            visit = Advert.new(visit_details, website_details)
+
           when :traffic
             case visit_details[:advert][:advertising]
               when :none
