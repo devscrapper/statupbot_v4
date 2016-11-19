@@ -155,7 +155,7 @@ module Visitors
 
       begin
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_details"}) if visitor_details.nil?
-        @history = []
+        @history = History.new(COMMANDS)
         @failed_links = []
 
         @id = visitor_details[:id]
@@ -319,15 +319,12 @@ module Visitors
         @visit = visit
 
         script = @visit.script
+        @@logger.an_event.debug "script #{script}"
 
         count_finished_actions = 0
 
         for action in script
-          @@logger.an_event.debug "script #{script}"
-
-          for h in @history
-            @@logger.an_event.debug "history : #{h[0]} #{h[1]}"
-          end
+          @@logger.an_event.debug "current action  <#{action}>"
 
           begin
 
@@ -344,12 +341,14 @@ module Visitors
                 act = "e"
                 script.insert(count_finished_actions + 1, act)
                 @@logger.an_event.info "visitor  make action <#{COMMANDS[act]}> instead of  <#{COMMANDS[action]}>"
+                @@logger.an_event.debug "script #{script}"
 
               when VISITOR_NOT_READ_PAGE
                 # ajout dans le script d'action pour revenir à la page précédent pour refaire l'action qui a planté.
                 # ceci s'arretera quand il n'y aura plus de lien sur lesquel clickés ; lien choisi dans les 3 actions
                 script.insert(count_finished_actions + 1, ["c", action]).flatten!
                 @@logger.an_event.info "visitor  go back to make action #{COMMANDS[action]} again"
+                @@logger.an_event.debug "script #{script}"
 
               when VISITOR_NOT_CLICK_ON_RESULT,
                   VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER,
@@ -359,6 +358,7 @@ module Visitors
                 #  ceci s'arretera quand il n'y aura plus de lien sur lesquels clickés
                 script.insert(count_finished_actions + 1, action)
                 @@logger.an_event.info "visitor  make action <#{COMMANDS[action]}> again"
+                @@logger.an_event.debug "script #{script}"
 
               when VISITOR_NOT_SUBMIT_CAPTCHA, VISITOR_TOO_MANY_CAPTCHA
                 # un captcha est survenu, il a été impossible de le gerer
@@ -391,6 +391,7 @@ module Visitors
             # passent par ENSURE 
             # les autres levent une exception dans le RESCUE donc ne passent pas par là. Elle seront captées par
             # les RESCUE qui englobele FOR
+            @@logger.an_event.info @history.to_s
             screenshot_path = take_screenshot(count_finished_actions, action)
             Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
             @@logger.an_event.info "visitor  executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
@@ -588,7 +589,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
     end
@@ -652,7 +653,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -718,7 +719,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -797,7 +798,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -860,7 +861,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -924,7 +925,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -985,7 +986,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1045,7 +1046,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1106,7 +1107,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1117,12 +1118,12 @@ module Visitors
       begin
         @@logger.an_event.debug "action #{__method__}"
 
-        before_last_page = @history[@history.size - 2][1].dup
+        before_last_page = @history.before_last_page
         current_url = @browser.url
         @@logger.an_event.debug "before_last_page  = #{before_last_page}"
         @@logger.an_event.debug "current_url = #{current_url}"
 
-        if @browser.driver == @history[@history.size - 2][0]
+        if @history.is_before_last?(@browser.driver)
           # on est dans la même fenetre que la fenetre où on veut aller
 
           #2016/08/23 : simplification du go_back : si le go_back du browser n'amene pas sur la page voulu (IE, cpatcha, ...)
@@ -1144,7 +1145,7 @@ module Visitors
           # et on clos la fenetre ouverte par le click
           @@logger.an_event.debug "close popup #{@browser.driver.popup_name}"
           @browser.driver.close
-          @browser.driver = @history[@history.size - 2][0].dup
+          @browser.driver = @history.before_last_driver
         end
 
       rescue Exception => e
@@ -1200,7 +1201,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1226,7 +1227,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
     end
@@ -1253,7 +1254,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
     end
@@ -1313,7 +1314,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1372,7 +1373,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1413,7 +1414,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
     end
@@ -1572,7 +1573,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1654,7 +1655,7 @@ module Visitors
         read(@current_page)
 
       ensure
-        @history << [@browser.driver, @current_page]
+        @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
       end
@@ -1691,6 +1692,63 @@ module Visitors
 
         end
       end
+    end
+  end
+
+  #-----------------------------------------------------------------------------------------------------------------
+  # History
+  #-----------------------------------------------------------------------------------------------------------------
+  # contient la liste ordonnée de toutes les pages lues par le visitor parmi l'ensemble de driver utilisées lors de la visit
+  #-----------------------------------------------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------------------------------------------
+
+  class History < Array
+    # array contenant un hash composé de
+    # :driver : contient l'objet driver
+    # :page : contient l'objet page
+
+    attr_reader :cmds # hash des actions potentielles
+
+    def initialize(commands)
+       @cmds = commands
+    end
+
+    def add(method, driver, page)
+      self << {:time => Time.now.strftime('%I:%M:%S %p') , :cmd => @cmds.key(method.to_s), :driver => driver, :page => page}
+    end
+
+    #retourn vrai ou faux si elt (= driver ou page) est before_last
+    def is_before_last?(elt)
+      self[self.size - 2][:page].url == elt.url or self[self.size - 2][:driver].popup_name == elt.popup_name
+    end
+
+    # retourn l'avant denriere page
+    def before_last_page
+      #@history[@history.size - 2][1].dup
+      self[self.size - 2][:page].dup
+    end
+        # retourn l'avant denriere driver
+    def before_last_driver
+      #@history[@history.size - 2][1].dup
+      self[self.size - 2][:driver].dup
+    end
+    def to_s
+      end_col0 = 11
+      end_col1 = 2
+      end_col2 = 11
+      end_col3 = 18
+      end_col4 = 98
+      res = "\n" + '|- BEGIN - HISTORY ---------------------------------------------------------------------------------------------------------------------------------------------|'  + "\n"
+      res += '| Time         | Cmd | Driver       | Page                | Url                                                                                                 |' + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      self.each{|h| res +=
+          "| #{h[:time][0..end_col0].ljust(end_col0 + 2)}| \
+#{h[:cmd][0..end_col1].ljust(end_col1 + 2)}| \
+#{h[:driver].popup_name.to_s[0..end_col2].ljust(end_col2 + 2)}| \
+#{h[:page].class.name[0..end_col3].ljust(end_col3 + 2)}| \
+#{h[:page].url[0..end_col4].ljust(end_col4 + 2)}|" + "\n"}
+      res += "|- END - HISTORY------------------------------------------------------------------------------------------------------------------------------------------------|"
+      res
     end
   end
 end

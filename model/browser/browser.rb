@@ -13,6 +13,7 @@ require_relative '../page/link'
 require_relative '../page/page'
 require_relative '../../lib/error'
 require_relative '../../lib/flow'
+require_relative 'driver'
 #bilbiothèque interface avec sahi :
 require_relative '../mim/browser_type' #gestion des browser type
 
@@ -60,6 +61,8 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     # constants
     #----------------------------------------------------------------------------------------------------------------
+    ACCEPT_POPUP = true      # autorise l'ouverture d'une nouvelle fentre ou tab pour executer la visite apres le display start page
+    NO_ACCEPT_POPUP = false  # execution de la viste dans la fenetre ou tab courante du display start page
     NO_REFERER = "noreferrer"
     DATA_URI = "datauri"
     WITHOUT_LINKS = false #utiliser pour préciser que on ne recupere pas les links avec la fonction de l'extension javascript : get_details_cuurent_page
@@ -367,7 +370,7 @@ module Browsers
           end
 
         else
-          @driver.wait(60) { url_before != url }
+          @driver.wait(20) { url_before != url }
           #raise "same url after click : #{url_before}" if url_before == url
 
         end
@@ -405,33 +408,42 @@ module Browsers
     # StandardError :
     # Si il est impossible de recuperer les propriétés de la page
     #----------------------------------------------------------------------------------------------------------------
-    def display_start_page (url_start_page, window_parameters)
+    def display_start_page (start_url, visitor_id, window_parameters, accept_popup = true)
 
-      @@logger.an_event.debug "url_start_page : #{url_start_page}"
+      @@logger.an_event.debug "start_url : #{start_url}"
+      @@logger.an_event.debug "visitor_id : #{visitor_id}"
+      @@logger.an_event.debug "window_parameters : #{window_parameters}"
 
       begin
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url_start_page"}) if url_start_page.nil? or url_start_page == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url_start_page"}) if start_url.nil? or start_url == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "window_parameters"}) if window_parameters.nil? or window_parameters == ""
 
-        #old_page_title = @driver.title
-        #@@logger.an_event.debug "old_page_title : #{old_page_title}"
+        @driver.display_start_page(url_start_page(start_url, visitor_id, accept_popup),
+                                   window_parameters)
 
+        case @method_start_page
+          when NO_REFERER
+            Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
-        @driver.display_start_page(url_start_page, window_parameters)
+            click_on(start_url, accept_popup)
 
-        begin
-          hostname = URI.parse(url_start_page).hostname
-        rescue Exception => e
-          hostname = URI.parse(URI.escape(url)).hostname
+          when DATA_URI
+            # on change d'onglet
+            if @driver.new_popup_is_open?()
+              # on remplace le driver principal par celui de la nouvelle fenetre
+              @driver = @driver.focus_popup
+              @@logger.an_event.debug "replace driver by popup driver"
+            end
         end
 
+        @@logger.an_event.info "history_size #{@driver.history_size}"
+        @@logger.an_event.info "referrer #{@driver.referrer}"
+
+        Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
+
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} display start page : #{e.message}"
-
-        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page}, :error => e)
-
-      else
-        @@logger.an_event.debug "browser #{name} display start page"
-          #  start_page
+        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page(start_url, visitor_id, accept_popup)}, :error => e)
 
       ensure
 
@@ -759,7 +771,7 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     def is_reachable_url?(url)
       begin
-        @driver.wait(30, true, 5) {
+        wait(15, true, 1) {
           RestClient.get url
         }
 
@@ -1071,6 +1083,12 @@ module Browsers
       end
     end
 
+    def url_start_page(start_url, visitor_id, accept_popup)
+      encode_start_url = Addressable::URI.encode_component(start_url, Addressable::URI::CharacterClasses::UNRESERVED)
+
+      "http://#{$start_page_server_ip}:#{$start_page_server_port}/start_link?method=#{@method_start_page}&url=#{encode_start_url}&visitor_id=#{visitor_id}&popup=#{accept_popup}"
+    end
+
     #----------------------------------------------------------------------------------------------------------------
     # set_input_captcha
     #----------------------------------------------------------------------------------------------------------------
@@ -1346,13 +1364,38 @@ module Browsers
       end
     end
 
+    private
+    def wait(timeout, exception = false, interval=0.2)
 
+      if !block_given?
+        sleep(timeout)
+        return
+      end
+
+      #timeout = interval if $staging == "development" # on execute une fois
+
+      while (timeout > 0)
+        sleep(interval)
+        timeout -= interval
+        begin
+          return if yield
+        rescue Exception => e
+          @@logger.an_event.warn "try again : #{e.message}"
+        else
+          @@logger.an_event.debug "try again."
+        end
+      end
+
+      raise e if !e.nil? and exception == true
+
+    end
   end
+
+
 end
 require_relative 'firefox'
 require_relative 'internet_explorer'
 require_relative 'chrome'
 require_relative 'safari'
 require_relative 'opera'
-require_relative 'driver'
 require_relative 'edge'

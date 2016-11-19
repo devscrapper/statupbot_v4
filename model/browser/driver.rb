@@ -121,6 +121,8 @@ module Sahi
       win.print_steps = @print_steps
       win.popup_name = @popup_name
       win.domain_name = name
+      win.browser_type = @browser_type
+      win.browser_process_name = @browser_process_name
       win
     end
 
@@ -143,17 +145,24 @@ module Sahi
     end
 
     def focus_popup
-      windows = get_windows
+
       popup = nil
-      windows.each { |win|
-        if win["wasOpened"] == "1"
-          popup = popup(win["sahiWinId"])
-          break
-        end
-      }
+      if chrome?
+
+      else
+        get_windows.each { |win|
+          if win["wasOpened"] == "1"
+            popup = popup(win["sahiWinId"])
+            break
+          end
+        }
+      end
       popup
     end
 
+    def history_size
+      fetch("window.history.length")
+    end
 
     #-----------------------------------------------------------------------------------------------------------------
     # initialize
@@ -217,10 +226,22 @@ module Sahi
       links
     end
 
-    def new_popup_is_open? (url)
-      windows = get_windows
+    def new_popup_is_open? (url=nil)
+
       exist = false
-      windows.each { |win| exist = exist || (win["wasOpened"] == "1" && win["windowURL"] != url) }
+      if chrome?
+       # exist = popup_name != get_windows[0]["sahiWinId"]
+        exist = false
+      else
+        wait(10, false, 2) {
+          if url.nil?
+            get_windows.each { |win| exist = exist || (win["wasOpened"] == "1") }
+          else
+            get_windows.each { |win| exist = exist || (win["wasOpened"] == "1" and win["windowURL"] != url) }
+          end
+          exist
+        }
+      end
       exist
     end
 
@@ -313,6 +334,9 @@ module Sahi
       end
     end
 
+    def referrer
+      fetch("document.referrer")
+    end
 
     def reload
       fetch("location.reload(true)")
@@ -332,7 +356,7 @@ module Sahi
     end
 
     def take_screenshot_body_by_canvas(screenshot_flow)
-    count = 3
+      count = 3
 
       begin
         #----------------------------------------------------------------------------------------------------------------
@@ -496,6 +520,10 @@ module Sahi
       }
       raise "window.document.title return none title page" if title == "" or title.nil?
       title
+
+    end
+
+    def to_s
 
     end
 

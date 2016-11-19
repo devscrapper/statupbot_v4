@@ -173,7 +173,6 @@ module Mim
       file_custom = File.read(proxy_properties)
       file_custom.gsub!(/listening_ip_proxy/, @listening_ip_proxy.to_s)
       file_custom.gsub!(/listening_port_proxy/, @listening_port_proxy.to_s)
-      file_custom.gsub!(/start_page_server_ip/, @start_page_server_ip.to_s)
       File.write(proxy_properties, file_custom)
       @@logger.an_event.debug "proxy.properties for ie opera edge"
 

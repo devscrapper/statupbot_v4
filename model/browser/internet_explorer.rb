@@ -93,32 +93,25 @@ module Browsers
         window_parameters = "channelmode=0,fullscreen=0,left=0,menubar=1,resizable=1,scrollbars=1,status=1,titlebar=1,toolbar=1"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
 
+        url_start_page = url_start_page(start_url, visitor_id, ACCEPT_POPUP)
+        @@logger.an_event.debug "url_start_page : #{url_start_page}"
 
-        encode_start_url = Addressable::URI.encode_component(start_url, Addressable::URI::CharacterClasses::UNRESERVED)
-
-        start_page_visit_url = "http://#{$start_page_server_ip}:#{$start_page_server_port}/start_link?method=#{@method_start_page}&url=#{encode_start_url}&visitor_id=#{visitor_id}"
-        @@logger.an_event.debug "start_page_visit_url : #{start_page_visit_url}"
-
-        # internet explorer utilise le proxy syteme qui et parametré pour que les requetes locales au lan ne passe pas
-                # par le proxy sahi.
-                # il faut donc tester que l'url du serveur start_page est joignable avant d'y acceder sinon le navigateur
-                # se fige sur la page erreur du naviagetur "url non joignable"
-        if is_reachable_url?(start_page_visit_url)
-          @driver.display_start_page(start_page_visit_url, window_parameters)
+        # Internet explorer genere une page d'erreur directement et qui ne passe par Sahi donc elle n'est pas manipulable et bloque donc
+        # la visite.
+        if is_reachable_url?(url_start_page)
+          super(start_url, visitor_id, window_parameters, ACCEPT_POPUP)
 
         else
-          #pb de connection reseau par exemple
-          raise Errors::Error.new(BROWSER_NOT_CONNECT_TO_SERVER, :values => {:browser => name, :domain => $start_page_server_port})
+          raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url_start_page})
+
         end
 
       rescue Exception => e
-        @@logger.an_event.error "#{name} display start page #{start_url} : #{e.message}"
+        @@logger.an_event.error "browser display start page : #{e.message}"
         raise e
 
       else
-        @@logger.an_event.debug "#{name} display start page #{start_url}"
-
-      ensure
+        @@logger.an_event.debug "browser display start page"
 
       end
     end

@@ -78,22 +78,17 @@ module Browsers
         window_parameters = "fullscreen=no,left=0,menubar=yes,scrollbars=yes,status=yes,titlebar=yes,toolbar=yes"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
 
-        encode_start_url = Addressable::URI.encode_component(start_url, Addressable::URI::CharacterClasses::UNRESERVED)
+        url_start_page = url_start_page(start_url, visitor_id, ACCEPT_POPUP)
+        @@logger.an_event.debug "url_start_page : #{url_start_page}"
 
-        start_page_visit_url = "http://#{$start_page_server_ip}:#{$start_page_server_port}/start_link?method=#{@method_start_page}&url=#{encode_start_url}&visitor_id=#{visitor_id}"
-        @@logger.an_event.debug "start_page_visit_url : #{start_page_visit_url}"
-
-
-        super(start_page_visit_url, window_parameters)
+        super(start_url, visitor_id, window_parameters, ACCEPT_POPUP)
 
       rescue Exception => e
-        @@logger.an_event.error "#{name} display start page #{start_url} : #{e.message}"
+        @@logger.an_event.error "browser display start page : #{e.message}"
         raise e
 
       else
-        @@logger.an_event.debug "#{name} display start page #{start_url}"
-
-      ensure
+        @@logger.an_event.debug "browser display start page"
 
       end
     end
@@ -101,9 +96,11 @@ module Browsers
     def get_pid
       get_pid_by_title
     end
+
     def kill
       kill_by_pid
     end
+
     #-----------------------------------------------------------------------------------------------------------------
     # open
     #-----------------------------------------------------------------------------------------------------------------
@@ -145,7 +142,6 @@ module Browsers
       end
 
     end
-
 
 
     def running?

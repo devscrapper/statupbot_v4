@@ -9,7 +9,6 @@ development;windows;seven;Firefox;19.0;C:\Program Files (x86)\Mozilla Firefox\fi
 development;windows;seven;Internet Explorer;11.0;C:\Program Files\Internet Explorer\iexplore.exe;true
 development;windows;seven;Internet Explorer;9.0;C:\Program Files\Internet Explorer\iexplore.exe;true
 development;windows;seven;Opera;9.0;D:\Personnel\OperaPortable\App\Opera\36.0.2130.65\opera.exe;true
-development;windows;seven;Safari;16.0;D:\personnel\Safari\safari.exe;true
 test;windows;seven;Internet Explorer;11.0;C:\Program Files\Internet Explorer\iexplore.exe;true
 test;windows;seven;Internet Explorer;9.0;C:\Program Files\Internet Explorer\iexplore.exe;true
 test;windows;seven;Chrome;39.0.2139.3;D:\GoogleChromePortableBeta\38.0.2125.44\GoogleChromePortable.exe;false
