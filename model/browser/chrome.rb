@@ -80,11 +80,11 @@ module Browsers
         window_parameters = "menubar=1,status=1,titlebar=1,top=0"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
 
-        url_start_page = url_start_page(start_url, visitor_id, ACCEPT_POPUP)
+        url_start_page = url_start_page(start_url, visitor_id, NO_ACCEPT_POPUP)
         @@logger.an_event.debug "url_start_page : #{url_start_page}"
 
 
-        super(start_url, visitor_id, window_parameters, ACCEPT_POPUP)
+        super(start_url, visitor_id, window_parameters, NO_ACCEPT_POPUP)
 
       rescue Exception => e
         @@logger.an_event.debug "browser display start page : #{e.message}"
