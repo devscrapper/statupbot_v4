@@ -67,7 +67,6 @@ module Pages
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
 
 
-
         start_time = Time.now
 
         @body = browser.body
@@ -107,7 +106,7 @@ module Pages
         raise Errors::Error.new(PAGE_NONE_INSIDE_LINKS, :values => {:url => @uri.to_s}) if @links.empty?
 
       rescue Exception => e
-        @@logger.an_event.debug  "creation results search page : #{e.message}"
+        @@logger.an_event.debug "creation results search page : #{e.message}"
         if count_try > 0 and !Pages::Captcha.is_a?(browser)
           count_try -= 1
           #recharge la page courante
@@ -119,7 +118,7 @@ module Pages
         raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       else
-        @@logger.an_event.debug "#{self.to_s}"
+        @@logger.an_event.info self.to_s
 
 
       end
@@ -152,12 +151,20 @@ module Pages
     end
 
     def to_s
-      "Page : #{self.class.name}\n" +
-          super.to_s +
-          "next : #{@next}\n" +
-          "prev : #{@prev}\n" +
-          "links (#{@links.size}): \n#{@links.map { |t| "#{t}\n" }.join("")}\n" +
-          "body : #{}\n"
+      end_col0 = 145
+      res = super
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += "| Prev Url : #{@prev.nil? ? "none"[0..end_col0].ljust(end_col0 + 2) : @prev.url[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "| Next Url : #{@next.nil? ? "none"[0..end_col0].ljust(end_col0 + 2) : @next.url[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += "| Results Links (#{@links.size})                                                                                                                                |" + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += '| Window tab                | Text                                     | Url                                                                                    |' + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      @links.each{|l| res += l.to_s }
+      res += "|- END - DETAILS PAGE ------------------------------------------------------------------------------------------------------------------------------------------|"
+
+      res
     end
 
   end

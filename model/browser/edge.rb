@@ -33,7 +33,8 @@ module Browsers
         super(visitor_dir,
               browser_details,
               "#{browser_details[:name].gsub(" ", "_")}",
-              DATA_URI)
+              DATA_URI,
+              NO_ACCEPT_POPUP)
 
       rescue Exception => e
         @@logger.an_event.error "edge #{@version} initialize : #{e.message}"
@@ -89,14 +90,10 @@ module Browsers
         window_parameters = "channelmode=0,fullscreen=0,left=0,menubar=1,resizable=1,scrollbars=1,status=1,titlebar=1,toolbar=1"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
 
-
-        url_start_page = url_start_page(start_url, visitor_id, ACCEPT_POPUP)
-        @@logger.an_event.debug "url_start_page : #{url_start_page}"
-
         # edge genere une page d'erreur directement et qui ne passe par Sahi donc elle n'est pas manipulable et bloque donc
         # la visite.
-        if is_reachable_url?(url_start_page)
-          super(start_url, visitor_id, window_parameters, ACCEPT_POPUP)
+        if is_reachable_url?(url_start_page(start_url, visitor_id, @method_access_popup))
+          super(start_url, visitor_id, window_parameters)
 
         else
           raise Errors::Error.new(Pages::Page::URL_NOT_FOUND, :values => {:url => url_start_page})

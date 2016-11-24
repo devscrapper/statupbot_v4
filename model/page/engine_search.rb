@@ -39,7 +39,7 @@ module Pages
     #----------------------------------------------------------------------------------------------------------------
     # attribut
     #----------------------------------------------------------------------------------------------------------------
-    attr_reader :input, # zone de saisie des mot clés
+    attr_reader :input, # zone de saisie des mot clï¿½s
                 :type, #type de la zone de saisie
                 :submit_button # bouton de validation du formulaire de recherche
     #----------------------------------------------------------------------------------------------------------------
@@ -69,13 +69,13 @@ module Pages
         @type = browser.engine_search.type_search
         @submit_button = browser.engine_search.label_button_search
 
-        #teste la présence de la zone de saisie
-        #parfois la page n'est pas affichée mais l'url ipv4.google... est bien dans la zone de l'url
+        #teste la prï¿½sence de la zone de saisie
+        #parfois la page n'est pas affichï¿½e mais l'url ipv4.google... est bien dans la zone de l'url
         #dans ce cas on recharge la page
         raise Errors::Error.new(PAGE_NONE_ELEMENT,
-                        :values => {:url => browser.url,
-                                    :type => @type,
-                                    :id => @input}) unless browser.exist_element?(type, input)
+                                :values => {:url => browser.url,
+                                            :type => @type,
+                                            :id => @input}) unless browser.exist_element?(type, input)
 
         super(browser.url,
               browser.title,
@@ -83,7 +83,7 @@ module Pages
               Time.now - start_time)
 
       rescue Exception => e
-        @@logger.an_event.debug  "creation engine search page : #{e.message}"
+        @@logger.an_event.debug "creation engine search page : #{e.message}"
         if count_try > 0 and !Pages::Captcha.is_a?(browser)
           count_try -= 1
           #recharge la page courante
@@ -96,11 +96,20 @@ module Pages
         raise Errors::Error.new(PAGE_NOT_CREATE, :error => e)
 
       ensure
-        @@logger.an_event.debug "page engine search #{self.to_s}"
+        @@logger.an_event.info self.to_s
 
       end
     end
 
-
+    def to_s
+      end_col0 = 145
+      res = super
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += "| Input    : #{@input[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "| Type     : #{@type[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "| Button   : #{@submit_button[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "|- END - DETAILS PAGE ------------------------------------------------------------------------------------------------------------------------------------------|"
+      res
+    end
   end
 end

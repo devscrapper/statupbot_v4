@@ -88,7 +88,7 @@ module Monitoring
     end
   end
 
-  def page_browse(visit_id, actions, screenshot_path, count_finished_actions)
+  def page_browse(visit_id, actions, source_path, screenshot_path, count_finished_actions)
 
     # les actions sont optionnelles
     begin
@@ -116,11 +116,23 @@ module Monitoring
       resource = RestClient::Resource.new("http://#{@statupweb_server_ip}:#{@statupweb_server_port}/pages")
 
       wait(60, true, 5) {
-        if File.exist?(screenshot_path)
+        if File.exist?(screenshot_path) and File.exist?(source_path)
 
+          response = resource.post(:image => File.open(screenshot_path),
+                                   :source => File.open(source_path),
+                                   :visit_id => visit_id,
+                                   :index => count_finished_actions)
+
+        elsif File.exist?(screenshot_path)
           response = resource.post(:image => File.open(screenshot_path),
                                    :visit_id => visit_id,
                                    :index => count_finished_actions)
+
+        elsif File.exist?(source_path)
+          response = resource.post( :source => File.open(source_path),
+                                   :visit_id => visit_id,
+                                   :index => count_finished_actions)
+
         else
           response = resource.post(:visit_id => visit_id,
                                    :index => count_finished_actions)

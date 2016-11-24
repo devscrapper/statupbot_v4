@@ -61,8 +61,8 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     # constants
     #----------------------------------------------------------------------------------------------------------------
-    ACCEPT_POPUP = true      # autorise l'ouverture d'une nouvelle fentre ou tab pour executer la visite apres le display start page
-    NO_ACCEPT_POPUP = false  # execution de la viste dans la fenetre ou tab courante du display start page
+    ACCEPT_POPUP = true # autorise l'ouverture d'une nouvelle fentre ou tab pour executer la visite apres le display start page
+    NO_ACCEPT_POPUP = false # execution de la viste dans la fenetre ou tab courante du display start page
     NO_REFERER = "noreferrer"
     DATA_URI = "datauri"
     WITHOUT_LINKS = false #utiliser pour préciser que on ne recupere pas les links avec la fonction de l'extension javascript : get_details_cuurent_page
@@ -86,6 +86,7 @@ module Browsers
                 :current_page, #page/onglet visible du navigateur
                 :method_start_page, # pour cacher le referrer aux yeux de GA, on utiliser 2 methodes choisies en focntion
                 # du type de browser.
+                :method_access_popup, #determine si le display start page s'ouvre dans un nouvel onglet ou fenetre
                 :version, # la version du browser
                 :engine_search, #moteur de recherche associé par defaut au navigateur
                 :window #object windows contenant les proprietes
@@ -113,7 +114,7 @@ module Browsers
 
       begin
         results_hsh = JSON.parse(@driver.links)
-        @@logger.an_event.debug "results_hsh #{results_hsh}"
+        @@logger.an_event.debug format_links(results_hsh["links"])
 
         links_str = results_hsh["links"]
         @@logger.an_event.debug "links_str String ? #{links_str.is_a?(String)}"
@@ -124,7 +125,6 @@ module Browsers
         else
           links_arr = links_str
         end
-        @@logger.an_event.debug "links_str #{links_arr}"
 
         links_arr.each { |d|
           if d["text"] != "undefined"
@@ -134,14 +134,14 @@ module Browsers
           end
         }
 
-        @@logger.an_event.debug "links #{links}"
+        @@logger.an_event.debug format_links(links)
 
       rescue Exception => e
         @@logger.an_event.error e.message
         raise Errors::Error.new(BROWSER_NOT_FOUND_ALL_LINK, :values => {:browser => name}, :error => e)
 
       else
-        @@logger.an_event.debug "browser #{name} found all links #{links}"
+        @@logger.an_event.debug "browser found all links"
         links
 
       end
@@ -209,11 +209,11 @@ module Browsers
             raise Errors::Error.new(BROWSER_UNKNOWN, :values => {:browser => browser_name})
         end
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} create : #{e.message}"
+        @@logger.an_event.error "browser create : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_CREATE, :values => {:browser => browser_name}, :error => e)
 
       else
-        @@logger.an_event.debug "browser #{name} create"
+        @@logger.an_event.debug "browser create"
       ensure
 
       end
@@ -323,10 +323,10 @@ module Browsers
         raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
 
       else
-        @@logger.an_event.debug "browser #{name} found link #{link}" if link.is_a?(String)
-        @@logger.an_event.debug "browser #{name} found link #{link.url}" if link.is_a?(Pages::Link)
-        @@logger.an_event.debug "browser #{name} found link #{link.to_s}" if link.is_a?(URI)
-        @@logger.an_event.debug "browser #{name} found link #{link.identifiers}" if link.is_a?(Sahi::ElementStub)
+        @@logger.an_event.debug "browser found link #{link}" if link.is_a?(String)
+        @@logger.an_event.debug "browser found link #{link.url}" if link.is_a?(Pages::Link)
+        @@logger.an_event.debug "browser found link #{link.to_s}" if link.is_a?(URI)
+        @@logger.an_event.debug "browser found link #{link.identifiers}" if link.is_a?(Sahi::ElementStub)
 
         @@logger.an_event.debug "link_element #{link_element.to_s}"
 
@@ -376,18 +376,18 @@ module Browsers
         end
 
       rescue Exception => e
-        @@logger.an_event.warn "browser #{name} click on url, try #{count} : #{e.message}"
+        @@logger.an_event.warn "browser click on url, try #{count} : #{e.message}"
         count -= 1
         retry if count > 0
-        @@logger.an_event.error "browser #{name} click on url : #{e.message}"
+        @@logger.an_event.error "browser click on url : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_CLICK, :values => {:browser => name}, :error => e) if count > 0
         raise Errors::Error.new(BROWSER_CLICK_MAX_COUNT, :values => {:browser => name, :link => url_before}, :error => e) unless count > 0
 
       else
-        @@logger.an_event.debug "browser #{name} click on url #{link}" if link.is_a?(String)
-        @@logger.an_event.debug "browser #{name} click on url #{link.url}" if link.is_a?(Pages::Link)
-        @@logger.an_event.debug "browser #{name} click on url #{link.to_s}" if link.is_a?(URI)
-        @@logger.an_event.debug "browser #{name} click on url #{link.identifiers}" if link.is_a?(Sahi::ElementStub)
+        @@logger.an_event.debug "browser click on url #{link}" if link.is_a?(String)
+        @@logger.an_event.debug "browser click on url #{link.url}" if link.is_a?(Pages::Link)
+        @@logger.an_event.debug "browser click on url #{link.to_s}" if link.is_a?(URI)
+        @@logger.an_event.debug "browser click on url #{link.identifiers}" if link.is_a?(Sahi::ElementStub)
       ensure
 
       end
@@ -408,7 +408,7 @@ module Browsers
     # StandardError :
     # Si il est impossible de recuperer les propriétés de la page
     #----------------------------------------------------------------------------------------------------------------
-    def display_start_page (start_url, visitor_id, window_parameters, accept_popup = true)
+    def display_start_page (start_url, visitor_id, window_parameters)
 
       @@logger.an_event.debug "start_url : #{start_url}"
       @@logger.an_event.debug "visitor_id : #{visitor_id}"
@@ -419,14 +419,17 @@ module Browsers
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "window_parameters"}) if window_parameters.nil? or window_parameters == ""
 
-        @driver.display_start_page(url_start_page(start_url, visitor_id, accept_popup),
+        url_start_page = url_start_page(start_url, visitor_id, @method_access_popup)
+        @@logger.an_event.debug "url_start_page : #{url_start_page}"
+
+        @driver.display_start_page(url_start_page,
                                    window_parameters)
 
         case @method_start_page
           when NO_REFERER
             Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
-            click_on(start_url, accept_popup)
+            click_on(start_url, @method_start_page)
 
           when DATA_URI
             # on change d'onglet
@@ -437,8 +440,8 @@ module Browsers
             end
         end
 
-        @@logger.an_event.info "history_size #{@driver.history_size}"
-        @@logger.an_event.info "referrer #{@driver.referrer}"
+        @@logger.an_event.info "history_size <#{@driver.history_size}>"
+        @@logger.an_event.info "referrer <#{@driver.referrer}>"
 
         Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
@@ -525,12 +528,12 @@ module Browsers
         end
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} found link : #{e.message}"
+        @@logger.an_event.error "browser found link : #{e.message}"
 
         raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
 
       else
-        @@logger.an_event.debug "browser #{name} found link"
+        @@logger.an_event.debug "browser found link"
 
       ensure
 
@@ -640,12 +643,12 @@ module Browsers
         @driver.back
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} go back : #{e.message}"
+        @@logger.an_event.error "browser go back : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_GO_BACK, :values => {:browser => name}, :error => e)
 
       else
 
-        @@logger.an_event.debug "browser #{name} go back"
+        @@logger.an_event.debug "browser go back"
 
       ensure
 
@@ -665,12 +668,12 @@ module Browsers
         @driver.navigate_to(url)
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} go to #{url} : #{e.message}"
+        @@logger.an_event.error "browser go to #{url} : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_GO_TO, :values => {:browser => name, :url => url}, :error => e)
 
       else
 
-        @@logger.an_event.debug "browser #{name} go to #{url}"
+        @@logger.an_event.debug "browser go to #{url}"
 
       ensure
 
@@ -700,20 +703,23 @@ module Browsers
     #-----------------------------------------------------------------------------------------------------------------
     #
     #-----------------------------------------------------------------------------------------------------------------
-    def initialize(visitor_dir, browser_details, browser_type, method_start_page)
+    def initialize(visitor_dir, browser_details, browser_type, method_start_page, method_access_popup)
 
 
       begin
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if browser_details[:listening_port_proxy].nil? or browser_details[:listening_port_proxy] == ""
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "screen_resolution"}) if browser_details[:screen_resolution].nil? or browser_details[:screen_resolution] == ""
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "method_start_page"}) if method_start_page.nil? or method_start_page == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "method_access_popup"}) if method_access_popup.nil? or method_access_popup == ""
 
         @@logger.an_event.debug "listening_port_proxy #{browser_details[:listening_port_proxy]}"
         @@logger.an_event.debug "screen_resolution #{browser_details[:screen_resolution]}"
         @@logger.an_event.debug "method_start_page #{method_start_page}"
+        @@logger.an_event.debug "method_access_popup #{method_access_popup}"
 
         @id = UUID.generate
         @method_start_page = method_start_page
+        @method_access_popup = method_access_popup
         @listening_port_proxy = browser_details[:listening_port_proxy]
         @listening_ip_proxy = browser_details[:listening_ip_proxy]
         @width, @height = browser_details[:screen_resolution].split(/x/)
@@ -729,11 +735,11 @@ module Browsers
 
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{browser_type} initialize : #{e.message}"
+        @@logger.an_event.error "browser initialize : #{e.message}"
         raise e
 
       else
-        @@logger.an_event.debug "browser #{name} initialize"
+        @@logger.an_event.debug "browser initialize"
 
       ensure
 
@@ -893,10 +899,10 @@ module Browsers
         @driver.quit
 
       rescue Exception => e
-        @@logger.an_event.warn "browser #{name} close : #{e.message}"
+        @@logger.an_event.warn "browser close : #{e.message}"
 
       else
-        @@logger.an_event.debug "browser #{name} close"
+        @@logger.an_event.debug "browser close"
 
       end
 
@@ -904,11 +910,11 @@ module Browsers
         kill if running?
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} kill : #{e.message}"
+        @@logger.an_event.error "browser kill : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_CLOSE, :values => {:browser => name}, :error => e)
 
       else
-        @@logger.an_event.debug "browser #{name} kill"
+        @@logger.an_event.debug "browser kill"
 
       end
 
@@ -927,12 +933,12 @@ module Browsers
         @driver.reload
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} reload #{url}"
+        @@logger.an_event.error "browser reload #{url}"
         raise Errors::Error.new(BROWSER_NOT_RELOAD, :values => {:url => url}, :error => e)
 
       else
 
-        @@logger.an_event.debug "browser #{name} reload #{url}"
+        @@logger.an_event.debug "browser reload #{url}"
 
       ensure
 
@@ -1011,12 +1017,12 @@ module Browsers
         @window.minimize
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} resize : #{e.message}"
+        @@logger.an_event.error "browser resize : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_RESIZE, :values => {:browser => name}, :error => e)
 
       else
 
-        @@logger.an_event.debug "browser #{name} resize"
+        @@logger.an_event.debug "browser resize"
 
       ensure
 
@@ -1146,11 +1152,11 @@ module Browsers
         @driver.submit(form).click
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} submit form #{form} : #{ e.message}"
+        @@logger.an_event.error "browser submit form #{form} : #{ e.message}"
         raise Errors::Error.new(BROWSER_NOT_SUBMIT_FORM, :values => {:browser => name, :form => form}, :error => e)
 
       else
-        @@logger.an_event.debug "browser #{name} submit form #{form}"
+        @@logger.an_event.debug "browser submit form #{form}"
 
       ensure
 
@@ -1217,18 +1223,18 @@ module Browsers
             @window.minimize
             @@logger.an_event.debug "minimize de la fenetre du browser"
           rescue Exception => e
-            @@logger.an_event.error "browser #{name} take screen shot avec win32screenshot #{output_file.basename} : #{e.message}"
+            @@logger.an_event.error "browser take screen shot avec win32screenshot #{output_file.basename} : #{e.message}"
             @@logger.an_event.error Messages.instance[BROWSER_NOT_TAKE_SCREENSHOT, {:browser => name, :title => title}]
 
           else
-            @@logger.an_event.info "browser #{name} take screen shot #{output_file.basename}"
+            @@logger.an_event.info "browser take screen shot #{output_file.basename}"
 
           ensure
 
           end
         }
       else
-        @@logger.an_event.info "browser #{name} take screen shot avec canvas #{output_file.basename}"
+        @@logger.an_event.info "browser take screen shot avec canvas #{output_file.basename}"
 
       end
 
@@ -1279,7 +1285,7 @@ module Browsers
 
           else
 
-            @@logger.an_event.info "browser #{name} take captcha"
+            @@logger.an_event.info "browser take captcha"
 
           ensure
             #-------------------------------------------------------------------------------------------------------------
@@ -1292,7 +1298,7 @@ module Browsers
         }
 
       else
-        @@logger.an_event.info "browser #{name} take captcha"
+        @@logger.an_event.info "browser take captcha"
 
       end
     end
@@ -1327,12 +1333,12 @@ module Browsers
         title ||= @driver.title
 
       rescue Exception => e
-        @@logger.an_event.error "browser #{name} found title : #{e.message}"
+        @@logger.an_event.error "browser found title : #{e.message}"
         raise Errors::Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
 
       else
 
-        @@logger.an_event.debug "browser #{name} found title #{title}"
+        @@logger.an_event.debug "browser found title #{title}"
         title
 
       ensure
@@ -1365,6 +1371,27 @@ module Browsers
     end
 
     private
+    def format_links(links)
+      end_col0 = 145
+      end_col1 = 40
+      end_col2 = 83
+      end_col3 = 25
+      res = "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += "| Counts : #{links.size.to_s[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += '| Text                                      | Url                                                                                  | Target                     |' + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      links.each { |l|
+        res += "| #{URI.unescape(l["text"])[0..end_col1].ljust(end_col1 + 2)}"
+        res += "| #{l["href"][0..end_col2].ljust(end_col2 + 2)}"
+        res += "| #{(l["target"].nil? ? "none" : l["target"])[0..end_col3].ljust(end_col3 + 2)}"
+        res += "|\n"
+      }
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res
+    end
+
     def wait(timeout, exception = false, interval=0.2)
 
       if !block_given?

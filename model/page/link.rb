@@ -30,8 +30,8 @@ module Pages
     # attribut
     #----------------------------------------------------------------------------------------------------------------
     attr :uri, #URI object
-                :uri_escape, #URI object
-                :window_tab
+         :uri_escape, #URI object
+         :window_tab
     attr_accessor :text # le texte du lien
     #----------------------------------------------------------------------------------------------------------------
     # class methods
@@ -63,10 +63,6 @@ module Pages
     def initialize(url, window_tab=EMPTY, text=EMPTY)
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
-      @@logger.an_event.debug "url #{ url.to_s}"
-      @@logger.an_event.debug "text #{text}"
-      @@logger.an_event.debug "window_tab #{window_tab}"
-
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url"}) if url.nil?
 
       @window_tab = window_tab
@@ -86,7 +82,6 @@ module Pages
         @@logger.an_event.debug "url : #{e.message}"
         raise Errors::Error.new(LINK_NOT_CREATE, :values => {:link => url})
       else
-        @@logger.an_event.debug self.to_s
 
       ensure
 
@@ -121,11 +116,15 @@ module Pages
     end
 
     def to_s
-      "uri_escape #{@uri_escape} | " +
-          "uri #{@uri} | " +
-          "text #{@text} | " +
-          "window tab #{@window_tab}"
-
+      end_col1 = 24
+      end_col2 = 39
+      end_col3 = 85
+      res = ""
+      res += "| #{@window_tab[0..end_col1].ljust(end_col1 + 2)}"
+      res += "| #{@text.gsub(/\n\r/, ' ')[0..end_col2].ljust(end_col2 + 2)}"
+      res += "| #{url[0..end_col3].ljust(end_col3 + 2)}"
+      res += "|\n"
+      res
     end
   end
 end

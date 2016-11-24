@@ -67,7 +67,6 @@ module Pages
 
       url = browser.url
       body = browser.body
-      @@logger.an_event.debug "body : #{body}"
 
       sahi_connect_error = body.css("body > center > div > div > b").text
       @@logger.an_event.debug "sahi_connect_error : #{sahi_connect_error} => #{sahi_connect_error == "Sahi could not connect to the desired URL" }"

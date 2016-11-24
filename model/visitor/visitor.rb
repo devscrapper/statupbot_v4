@@ -392,8 +392,17 @@ module Visitors
             # les autres levent une exception dans le RESCUE donc ne passent pas par là. Elle seront captées par
             # les RESCUE qui englobele FOR
             @@logger.an_event.info @history.to_s
-            screenshot_path = take_screenshot(count_finished_actions, action)
-            Monitoring.page_browse(@visit.id, script, screenshot_path, count_finished_actions)
+            source_path, screenshot_path = take_screenshot(count_finished_actions, action)
+
+            Thread.new(@visit.id,
+                       script,
+                       source_path,
+                       screenshot_path,
+                       count_finished_actions) { |visit_id, script, source_path, screenshot_path, count_finished_actions|
+
+              Monitoring.page_browse(visit_id, script, source_path,screenshot_path, count_finished_actions)
+
+            }.join
             @@logger.an_event.info "visitor  executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
             count_finished_actions +=1
 
@@ -588,7 +597,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed advertiser website page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
@@ -652,7 +661,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed website landing page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -718,7 +727,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed unmanage page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -797,7 +806,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed unknown website page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -860,7 +869,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed unmanage page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -924,7 +933,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed website page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -985,7 +994,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed next results search page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1045,7 +1054,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed prev results search page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1106,7 +1115,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed referral website page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1200,7 +1209,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed #{@current_page.class.name} page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1226,7 +1235,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed landing page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
@@ -1253,7 +1262,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed referral page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
@@ -1313,7 +1322,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed enginesearch page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1372,7 +1381,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed enginesearch page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1413,7 +1422,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed website page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
       end
@@ -1457,10 +1466,12 @@ module Visitors
         #le nouveau screenshot est dans un nouveau volume du flow.
         #le captcha précédent peut être déclaré comme bad aupres de de-capcher.
         #TODO Captchas::bad_string(id_visitor)
-        Monitoring::captcha_browse(@visit.id,
-                                   captcha_page.image.absolute_path,
-                                   MAX_COUNT_SUBMITING_CAPTCHA - max_count_submiting_captcha + 1,
-                                   captcha_page.text)
+        Thread.new(@visit, captcha_page, max_count_submiting_captcha) { |visit, captcha_page, max_count_submiting_captcha|
+          Monitoring::captcha_browse(visit.id,
+                                     captcha_page.image.absolute_path,
+                                     MAX_COUNT_SUBMITING_CAPTCHA - max_count_submiting_captcha + 1,
+                                     captcha_page.text)
+        }.join
 
         raise Errors::Error.new(VISITOR_TOO_MANY_CAPTCHA, :error => e) if max_count_submiting_captcha == 0
 
@@ -1572,7 +1583,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed results search page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1654,7 +1665,7 @@ module Visitors
         @@logger.an_event.info "visitor browsed results search page"
         read(@current_page)
 
-      ensure
+
         @history.add(__method__, @browser.driver, @current_page)
         @@logger.an_event.debug "add current page to history"
 
@@ -1670,7 +1681,26 @@ module Visitors
     #-----------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------
     def take_screenshot(index, action)
-      @browser.take_screenshot(Flow.new(@home, index.to_s, action, Date.today, nil, ".png"))
+      #-------------------------------------------------------------------------------------------------------------
+      # save body au format text to fichier
+      #-------------------------------------------------------------------------------------------------------------
+      begin
+        source_file = Flow.new(@home, index.to_s, action, Date.today, nil, ".txt")
+        source_file.write(@browser.body)
+
+      rescue Exception => e
+        @@logger.an_event.debug "browser save body #{source_file.basename} : #{e.message}"
+
+      else
+        @@logger.an_event.debug "browser save body #{source_file.basename}"
+
+      end
+
+      #-------------------------------------------------------------------------------------------------------------
+      # prise d'un screenshot au format image
+      #-------------------------------------------------------------------------------------------------------------
+      [source_file.absolute_path, @browser.take_screenshot(Flow.new(@home, index.to_s, action, Date.today, nil, ".png"))]
+
     end
 
     def wait(timeout)
@@ -1710,11 +1740,11 @@ module Visitors
     attr_reader :cmds # hash des actions potentielles
 
     def initialize(commands)
-       @cmds = commands
+      @cmds = commands
     end
 
     def add(method, driver, page)
-      self << {:time => Time.now.strftime('%I:%M:%S %p') , :cmd => @cmds.key(method.to_s), :driver => driver, :page => page}
+      self << {:time => Time.now.strftime('%I:%M:%S %p'), :cmd => @cmds.key(method.to_s), :driver => driver, :page => page}
     end
 
     #retourn vrai ou faux si elt (= driver ou page) est before_last
@@ -1727,26 +1757,30 @@ module Visitors
       #@history[@history.size - 2][1].dup
       self[self.size - 2][:page].dup
     end
-        # retourn l'avant denriere driver
+
+    # retourn l'avant denriere driver
     def before_last_driver
       #@history[@history.size - 2][1].dup
       self[self.size - 2][:driver].dup
     end
+
     def to_s
       end_col0 = 11
       end_col1 = 2
       end_col2 = 11
       end_col3 = 18
       end_col4 = 98
-      res = "\n" + '|- BEGIN - HISTORY ---------------------------------------------------------------------------------------------------------------------------------------------|'  + "\n"
+      res = "\n" + '|- BEGIN - HISTORY ---------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
       res += '| Time         | Cmd | Driver       | Page                | Url                                                                                                 |' + "\n"
       res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-      self.each{|h| res +=
-          "| #{h[:time][0..end_col0].ljust(end_col0 + 2)}| \
-#{h[:cmd][0..end_col1].ljust(end_col1 + 2)}| \
-#{h[:driver].popup_name.to_s[0..end_col2].ljust(end_col2 + 2)}| \
-#{h[:page].class.name[0..end_col3].ljust(end_col3 + 2)}| \
-#{h[:page].url[0..end_col4].ljust(end_col4 + 2)}|" + "\n"}
+      self.each { |h|
+        res += "| #{h[:time][0..end_col0].ljust(end_col0 + 2)}"
+        res += "| #{h[:cmd][0..end_col1].ljust(end_col1 + 2)}"
+        res += "| #{h[:driver].popup_name.to_s[0..end_col2].ljust(end_col2 + 2)}"
+        res += "| #{h[:page].class.name[0..end_col3].ljust(end_col3 + 2)}"
+        res += "| #{h[:page].url[0..end_col4].ljust(end_col4 + 2)}"
+        res += "|\n"
+      }
       res += "|- END - HISTORY------------------------------------------------------------------------------------------------------------------------------------------------|"
       res
     end

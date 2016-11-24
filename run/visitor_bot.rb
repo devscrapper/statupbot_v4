@@ -131,6 +131,7 @@ ERR_SAHI_PROXY_NOT_CONNECT = 18
 ERR_GEO_PROXY = 19
 
 def visit_failed(visit_id, reason, logger)
+  Thread.new(visit_id, reason, logger){|visit_id, reason, logger|
   begin
 
     log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
@@ -141,9 +142,11 @@ def visit_failed(visit_id, reason, logger)
     logger.an_event.warn e.message
 
   end
+  }.join
 end
 
 def advert_not_found(visit_id, reason, logger)
+  Thread.new(visit_id, reason, logger){|visit_id, reason, logger|
   begin
 
     log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
@@ -154,8 +157,10 @@ def advert_not_found(visit_id, reason, logger)
     logger.an_event.warn e.message
 
   end
+  }.join
 end
 def visit_started(visit, visitor, logger)
+  Thread.new(visit, visitor, logger){|visit, visitor, logger|
   begin
     Monitoring.visit_started(visit.id,
                              visit.script,
@@ -164,9 +169,11 @@ def visit_started(visit, visitor, logger)
     logger.an_event.warn e.message
 
   end
+  }.join
 end
 
 def change_visit_state(visit_id, state, logger, reason=nil)
+  Thread.new(visit_id, state, logger, reason){|visit_id, state, logger, reason|
   begin
     Monitoring.change_state_visit(visit_id, state, reason)
 
@@ -174,6 +181,7 @@ def change_visit_state(visit_id, state, logger, reason=nil)
     logger.an_event.warn e.message
 
   end
+  }.join
 end
 
 def visitor_execute_visit(opts, logger)

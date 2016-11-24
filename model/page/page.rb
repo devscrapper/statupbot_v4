@@ -104,12 +104,6 @@ module Pages
 
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
-      @@logger.an_event.debug "href #{href}"
-      @@logger.an_event.debug "title #{title}"
-      @@logger.an_event.debug "duration search link #{duration_search_link}"
-      @@logger.an_event.debug "duration #{duration}"
-
-
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "href"}) if href.nil? or href == ""
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "title"}) if title.nil?
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "duration"}) if duration.nil?
@@ -124,8 +118,13 @@ module Pages
         @title = title
         @duration = duration.to_i
         @duration_search_link = duration_search_link.to_i
+
       rescue Exception => e
-        @@logger.an_event.info e
+        @@logger.an_event.debug "href #{href}"
+        @@logger.an_event.debug "title #{title}"
+        @@logger.an_event.debug "duration search link #{duration_search_link}"
+        @@logger.an_event.debug "duration #{duration}"
+        @@logger.an_event.debug e.message
       end
     end
 
@@ -151,11 +150,14 @@ module Pages
     #----------------------------------------------------------------------------------------------------------------
 
     def to_s
-      "uri : #{@uri}\n" +
-          "url : #{url}\n" +
-          "title : #{@title}\n" +
-          "duration : #{@duration}\n" +
-          "duration_search_link : #{@duration_search_link}\n"
+      end_col0 = 145
+      end_col1 = 5
+      end_col2 = 113
+      res = "\n" + '|- BEGIN - DETAILS PAGE ----------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += "| Type     : #{self.class.name[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "| Url      : #{url[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "| Title    : #{title[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += "| Duration : #{@duration.to_s[0..end_col1].ljust(end_col1 + 2)}| Duration search link : #{@duration_search_link.to_s[0..end_col2].ljust(end_col2 + 2)}|" + "\n"
     end
 
     def url

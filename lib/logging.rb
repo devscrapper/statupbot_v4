@@ -105,7 +105,7 @@ module Logging
         param_6(opts) if !@debugging and [STAGING_DEV].include?(@staging) and @main
         Logging::show_configuration
       end
-      @logger.debug "logging is available"
+
     end
 
 

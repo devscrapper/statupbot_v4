@@ -32,7 +32,9 @@ module Browsers
         super(visitor_dir,
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}_#{browser_details[:listening_ip_proxy]}_#{browser_details[:listening_port_proxy]}",
-              NO_REFERER)
+              NO_REFERER,
+              NO_ACCEPT_POPUP)
+
       rescue Exception => e
         @@logger.an_event.error "chrome #{@version} initialize : #{e.message}"
         raise e
@@ -80,11 +82,7 @@ module Browsers
         window_parameters = "menubar=1,status=1,titlebar=1,top=0"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
 
-        url_start_page = url_start_page(start_url, visitor_id, NO_ACCEPT_POPUP)
-        @@logger.an_event.debug "url_start_page : #{url_start_page}"
-
-
-        super(start_url, visitor_id, window_parameters, NO_ACCEPT_POPUP)
+        super(start_url, visitor_id, window_parameters)
 
       rescue Exception => e
         @@logger.an_event.debug "browser display start page : #{e.message}"

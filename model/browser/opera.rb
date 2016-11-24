@@ -32,7 +32,8 @@ module Browsers
         super(visitor_dir,
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}",
-              NO_REFERER)
+              NO_REFERER,
+              NO_ACCEPT_POPUP)
 
 
       rescue Exception => e
@@ -80,10 +81,7 @@ module Browsers
         window_parameters = "fullscreen=0,left=0,location=1,menubar=1,scrollbars=1,status=1,titlebar=1"
         @@logger.an_event.debug "windows parameters : #{window_parameters}"
 
-        url_start_page = url_start_page(start_url, visitor_id, ACCEPT_POPUP)
-        @@logger.an_event.debug "url_start_page : #{url_start_page}"
-
-        super(start_url, visitor_id, window_parameters, ACCEPT_POPUP)
+        super(start_url, visitor_id, window_parameters)
 
       rescue Exception => e
         @@logger.an_event.debug "browser display start page : #{e.message}"
