@@ -130,58 +130,44 @@ ERR_TOO_MANY_CAPTCHA = 17
 ERR_SAHI_PROXY_NOT_CONNECT = 18
 ERR_GEO_PROXY = 19
 
-def visit_failed(visit_id, reason, logger)
-  Thread.new(visit_id, reason, logger){|visit_id, reason, logger|
-  begin
 
-    log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
-    Monitoring.visit_failed(visit_id,
-                            reason,
-                            log_path)
-  rescue Exception => e
-    logger.an_event.warn e.message
-
-  end
-  }.join
-end
-
-def advert_not_found(visit_id, reason, logger)
-  Thread.new(visit_id, reason, logger){|visit_id, reason, logger|
-  begin
-
-    log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
-    Monitoring.advert_not_found(visit_id,
-                            reason,
-                            log_path)
-  rescue Exception => e
-    logger.an_event.warn e.message
-
-  end
-  }.join
-end
 def visit_started(visit, visitor, logger)
-  Thread.new(visit, visitor, logger){|visit, visitor, logger|
-  begin
-    Monitoring.visit_started(visit.id,
-                             visit.script,
-                             visitor.proxy.ip_geo_proxy)
-  rescue Exception => e
-    logger.an_event.warn e.message
+  Thread.new(visit, visitor, logger) { |visit, visitor, logger|
+    begin
+      Monitoring.visit_started(visit.id,
+                               visit.script,
+                               visitor.proxy.ip_geo_proxy)
+    rescue Exception => e
+      logger.an_event.warn e.message
 
-  end
+    end
   }.join
 end
 
-def change_visit_state(visit_id, state, logger, reason=nil)
-  Thread.new(visit_id, state, logger, reason){|visit_id, state, logger, reason|
-  begin
-    Monitoring.change_state_visit(visit_id, state, reason)
+def change_visit_state(visit_id, state, logger=nil, reason=nil)
+  Thread.new(visit_id, state, logger, reason) { |visit_id, state, logger, reason|
+    begin
+      Monitoring.change_state_visit(visit_id, state, reason)
 
-  rescue Exception => e
-    logger.an_event.warn e.message
+      case
+        when Monitoring::ADVERTNOTFOUND,
+            Monitoring::SUCESS,
+            Monitoring::FAIL,
+            Monitoring::OUTOFTIME,
+            Monitoring::OVERTTL
 
-  end
+          raise "log missing" if logger.nil?
+          log_path = File.join($dir_log || [File.dirname(__FILE__), "..", "log"], logger.basename)
+          Monitoring.send_log(visit_id, log_path)
+      end
+
+
+    rescue Exception => e
+      logger.an_event.warn e.message
+
+    end
   }.join
+
 end
 
 def visitor_execute_visit(opts, logger)
@@ -258,39 +244,39 @@ def visitor_execute_visit(opts, logger)
         case e.code
           when Visits::Visit::ARGUMENT_UNDEFINE
             exit_status = ERR_VISIT_DEFINITION
-            visit_failed(visit_details[:id], "visit definition", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit definition")
 
           when Visits::Visit::VISIT_NOT_LOAD
             exit_status = ERR_VISIT_LOADING
-            visit_failed(visit_details[:id], "visit loading", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit loading")
 
           when Visits::Visit::VISIT_NOT_CREATE
             exit_status = ERR_VISIT_CREATION
-            visit_failed(visit_details[:id], "visit creation", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit creation")
 
           when Visitors::Visitor::ARGUMENT_UNDEFINE
             exit_status = ERR_VISITOR_DEFINITON
-            visit_failed(visit_details[:id], "visitor definition", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor definition")
 
           when Visitors::Visitor::VISITOR_NOT_CREATE
             exit_status = ERR_VISITOR_CREATION
-            visit_failed(visit_details[:id], "visitor creation", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger,"visitor creation")
 
           when Visitors::Visitor::VISITOR_NOT_BORN
             exit_status = ERR_VISITOR_BIRTH
-            visit_failed(visit_details[:id], "visitor birth", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor birth")
 
           when Visitors::Visitor::VISITOR_NOT_DIE
             exit_status = ERR_VISITOR_DEATH
-            visit_failed(visit_details[:id], "visitor death", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor death")
 
           when Visitors::Visitor::VISITOR_NOT_INHUME
             exit_status = ERR_VISITOR_INHUMATION
-            visit_failed(visit_details[:id], "visitor inhumation", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor inhumation")
 
           when Visitors::Visitor::VISITOR_NOT_OPEN
             exit_status = ERR_BROWSER_OPENING
-            visit_failed(visit_details[:id], "browser opening", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger,"browser opening")
 
             begin
               visitor.close_browser if e.history.include?(Browsers::Browser::BROWSER_NOT_RESIZE)
@@ -303,7 +289,7 @@ def visitor_execute_visit(opts, logger)
           when Visitors::Visitor::VISITOR_NOT_CLOSE
             # le browser est tj actif
             exit_status = ERR_BROWSER_CLOSING
-            visit_failed(visit_details[:id], "browser closing", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "browser closing")
             begin
               visitor.die
 
@@ -313,40 +299,40 @@ def visitor_execute_visit(opts, logger)
 
           when Visitors::Visitor::VISITOR_NOT_FULL_EXECUTE_VISIT
             if e.history.include?(Browsers::Browser::BROWSER_NOT_FOUND_LINK)
-              visit_failed(visit_details[:id], "link tracking", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "link tracking")
               exit_status = ERR_LINK_TRACKING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_CHOOSE_ADVERT)
-              advert_not_found(visit_details[:id], "advert tracking", logger)
+              change_visit_state(visit_details[:id], Monitoring::ADVERTNOTFOUND, logger, "advert tracking")
               exit_status = ERR_ADVERT_TRACKING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_CLOSE)
-              visit_failed(visit_details[:id], "browser closing", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "browser closing")
               exit_status = ERR_BROWSER_CLOSING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_DIE)
-              visit_failed(visit_details[:id], "visitor death", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visitor death")
               exit_status = ERR_VISITOR_DEATH
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_NOT_SUBMIT_CAPTCHA)
-              visit_failed(visit_details[:id], "captcha submitting", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "captcha submitting")
               exit_status = ERR_CAPTCHA_SUBMITTING
 
             elsif e.history.include?(Visitors::Visitor::VISITOR_TOO_MANY_CAPTCHA)
-              visit_failed(visit_details[:id], "too many captcha", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "too many captcha")
               exit_status = ERR_TOO_MANY_CAPTCHA
 
             elsif e.history.include?(Pages::Page::URL_NOT_FOUND)
-              visit_failed(visit_details[:id], "sahi cannot connect", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "sahi cannot connect")
               exit_status = ERR_SAHI_PROXY_NOT_CONNECT
 
             elsif e.history.include?(Pages::Page::PROXY_GEOLOCATION)
-              visit_failed(visit_details[:id], "geo proxy error", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "geo proxy error")
               exit_status = ERR_GEO_PROXY
 
             else
               exit_status = ERR_VISIT_EXECUTION
-              visit_failed(visit_details[:id], "visit execution", logger)
+              change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "visit execution")
             end
 
             begin
@@ -360,7 +346,7 @@ def visitor_execute_visit(opts, logger)
             exit_status
 
           else
-            visit_failed(visit_details[:id], "error not catch", logger)
+            change_visit_state(visit_details[:id], Monitoring::FAIL, logger, "error not catch")
             exit_status = KO
 
         end

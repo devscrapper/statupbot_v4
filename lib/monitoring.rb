@@ -52,17 +52,9 @@ module Monitoring
       @@logger.an_event.debug "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
 
     end
+
   end
 
-  def visit_failed(visit_id, reason, log_path)
-    change_state_visit(visit_id, FAIL, reason)
-    send_log(visit_id, log_path)
-  end
-
-  def advert_not_found(visit_id, reason, log_path)
-    change_state_visit(visit_id, ADVERTNOTFOUND, reason)
-    send_log(visit_id, log_path)
-  end
 
   def visit_started(visit_id, actions, ip_geo_proxy)
     begin
@@ -129,7 +121,7 @@ module Monitoring
                                    :index => count_finished_actions)
 
         elsif File.exist?(source_path)
-          response = resource.post( :source => File.open(source_path),
+          response = resource.post(:source => File.open(source_path),
                                    :visit_id => visit_id,
                                    :index => count_finished_actions)
 
@@ -253,9 +245,8 @@ module Monitoring
 
   end
 
-  module_function :advert_not_found
+
   module_function :visit_started
-  module_function :visit_failed
   module_function :change_state_visit
   module_function :page_browse
   module_function :captcha_browse
