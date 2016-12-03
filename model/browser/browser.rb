@@ -61,6 +61,8 @@ module Browsers
     #----------------------------------------------------------------------------------------------------------------
     # constants
     #----------------------------------------------------------------------------------------------------------------
+    WINDOW_NAME = "main_tab" #nom de la fenetre ou de longlet ouvert dans le navigateur pour la visit exclusivement
+    #afin de demarrer avec un history vide (sans display start page, ...)
     ACCEPT_POPUP = true # autorise l'ouverture d'une nouvelle fentre ou tab pour executer la visite apres le display start page
     NO_ACCEPT_POPUP = false # execution de la viste dans la fenetre ou tab courante du display start page
     NO_REFERER = "noreferrer"
@@ -356,7 +358,7 @@ module Browsers
         #restent dans leur fenetre.
         # est ce qu'uen nouvelle fenetre ou onlget a été créé qui est difféerent de celui sur lequel on est qd on est
         # déjà sur une nouvelle fenetre ou onglet
-        if @driver.new_popup_is_open?(url)
+        if @driver.new_popup_is_open?(window_url: url)
           if accept_popup
             # si popup est ouverte sur au click d'une pub alors on remplace le driver principal par celui de la nouvelle fenetre
             @driver = @driver.focus_popup
@@ -419,26 +421,29 @@ module Browsers
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "window_parameters"}) if window_parameters.nil? or window_parameters == ""
 
-        url_start_page = url_start_page(start_url, visitor_id, @method_access_popup)
+        url_start_page = url_start_page(start_url, visitor_id)
         @@logger.an_event.debug "url_start_page : #{url_start_page}"
 
         @driver.display_start_page(url_start_page,
                                    window_parameters)
 
-        case @method_start_page
-          when NO_REFERER
-            Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
+        if @method_start_page == NO_REFERER
+          Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
-            click_on(start_url, @method_start_page)
+          link_element = @driver.link(start_url)
+          raise "browser not found String #{start_url}" unless link_element.exists?
 
-          when DATA_URI
-            # on change d'onglet
-            if @driver.new_popup_is_open?()
-              # on remplace le driver principal par celui de la nouvelle fenetre
-              @driver = @driver.focus_popup
-              @@logger.an_event.debug "replace driver by popup driver"
-            end
+          url_before = url
+          @@logger.an_event.debug "url before #{url_before}"
+
+          link_element.click
+          @@logger.an_event.debug "click on #{link_element}"
+
+          #click_on(start_url, @method_access_popup)
+
         end
+
+        @driver = focus_popup if @method_access_popup
 
         @@logger.an_event.info "history_size <#{@driver.history_size}>"
         @@logger.an_event.info "referrer <#{@driver.referrer}>"
@@ -446,7 +451,7 @@ module Browsers
         Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
       rescue Exception => e
-        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page(start_url, visitor_id, accept_popup)}, :error => e)
+        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page(start_url, visitor_id)}, :error => e)
 
       ensure
 
@@ -1089,10 +1094,16 @@ module Browsers
       end
     end
 
-    def url_start_page(start_url, visitor_id, accept_popup)
+    def url_start_page(start_url, visitor_id)
       encode_start_url = Addressable::URI.encode_component(start_url, Addressable::URI::CharacterClasses::UNRESERVED)
 
-      "http://#{$start_page_server_ip}:#{$start_page_server_port}/start_link?method=#{@method_start_page}&url=#{encode_start_url}&visitor_id=#{visitor_id}&popup=#{accept_popup}"
+      url = "http://#{$start_page_server_ip}:#{$start_page_server_port}/start_link?"
+      url += "method=#{@method_start_page}&"
+      url += "url=#{encode_start_url}&"
+      url += "visitor_id=#{visitor_id}&"
+      url += "popup=#{@method_access_popup}&"
+      url += "window=#{WINDOW_NAME}"
+      url
     end
 
     #----------------------------------------------------------------------------------------------------------------

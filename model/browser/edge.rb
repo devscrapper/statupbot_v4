@@ -34,7 +34,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name].gsub(" ", "_")}",
               DATA_URI,
-              NO_ACCEPT_POPUP)
+              ACCEPT_POPUP)
 
       rescue Exception => e
         @@logger.an_event.error "edge #{@version} initialize : #{e.message}"
@@ -92,7 +92,7 @@ module Browsers
 
         # edge genere une page d'erreur directement et qui ne passe par Sahi donc elle n'est pas manipulable et bloque donc
         # la visite.
-        if is_reachable_url?(url_start_page(start_url, visitor_id, @method_access_popup))
+        if is_reachable_url?(url_start_page(start_url, visitor_id))
           super(start_url, visitor_id, window_parameters)
 
         else
@@ -109,7 +109,20 @@ module Browsers
 
       end
     end
-
+    def focus_popup
+      popup = nil
+      wait(10, false, 2) {
+        @driver.get_windows.each { |win|
+          if win["windowName"] == WINDOW_NAME
+            popup = @driver.popup(win["sahiWinId"])
+            break
+          end
+        }
+        !popup.nil?
+      }
+      @@logger.an_event.debug "replace driver by popup driver"
+      popup
+    end
     def get_pid
       get_pid_by_process_name
     end

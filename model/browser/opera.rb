@@ -33,7 +33,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}",
               NO_REFERER,
-              NO_ACCEPT_POPUP)
+              ACCEPT_POPUP)
 
 
       rescue Exception => e
@@ -93,7 +93,20 @@ module Browsers
       end
 
     end
-
+    def focus_popup
+      popup = nil
+      wait(10, false, 2) {
+        @driver.get_windows.each { |win|
+          if win["windowName"] == WINDOW_NAME and win["wasOpened"] == "0"
+            popup = @driver.popup(win["sahiWinId"])
+            break
+          end
+        }
+        !popup.nil?
+      }
+      @@logger.an_event.debug "replace driver by popup driver"
+      popup
+    end
     def get_pid
       get_pid_by_process_name
     end

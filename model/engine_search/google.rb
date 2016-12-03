@@ -33,6 +33,10 @@ module EngineSearches
       body.css('ol > li.mnr-c > div.ads-ad > h3 > a:nth-child(2)').each { |l|
         adverts << {:href => l["href"], :text => l.text}
       }
+      # body.css('ol > li:nth-child(2) > div.ads-visurl > cite').each { |l|
+      #   adverts << {:href => l["href"], :text => l.text}
+      # }
+
       adverts
     end
 

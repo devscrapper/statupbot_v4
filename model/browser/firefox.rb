@@ -30,7 +30,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}_#{browser_details[:listening_ip_proxy]}_#{browser_details[:listening_port_proxy]}",
               DATA_URI,
-              NO_ACCEPT_POPUP)
+              ACCEPT_POPUP)
 
 
       rescue Exception => e
@@ -89,6 +89,18 @@ module Browsers
         @@logger.an_event.debug "browser display start page"
 
       end
+    end
+
+    def focus_popup
+      popup = nil
+      @driver.get_windows.each { |win|
+        if win["windowName"] == WINDOW_NAME
+          popup = @driver.popup(win["sahiWinId"])
+          break
+        end
+      }
+      @@logger.an_event.debug "replace driver by popup driver"
+      popup
     end
 
     def get_pid

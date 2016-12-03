@@ -33,7 +33,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}_#{browser_details[:listening_ip_proxy]}_#{browser_details[:listening_port_proxy]}",
               NO_REFERER,
-              NO_ACCEPT_POPUP)
+              ACCEPT_POPUP)
 
       rescue Exception => e
         @@logger.an_event.error "chrome #{@version} initialize : #{e.message}"
@@ -94,6 +94,10 @@ module Browsers
       end
 
 
+    end
+
+    def focus_popup
+      @driver
     end
 
     def get_pid

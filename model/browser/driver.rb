@@ -145,18 +145,15 @@ module Sahi
     end
 
     def focus_popup
-
+      # si window_name <>nil alors c'est la nouvelle fenetre "main_tab" qui permet de demarrer avec un history vide
+      # si window_name est nil alors c'est une nouvelle fenetre ouverte par un lien par une pub
       popup = nil
-      if chrome?
-
-      else
-        get_windows.each { |win|
-          if win["wasOpened"] == "1"
-            popup = popup(win["sahiWinId"])
-            break
-          end
-        }
-      end
+      get_windows.each { |win|
+        if win["wasOpened"] == "1"
+          popup = popup(win["sahiWinId"])
+          break
+        end
+      }
       popup
     end
 
@@ -226,22 +223,21 @@ module Sahi
       links
     end
 
-    def new_popup_is_open? (url=nil)
-
+    def new_popup_is_open? (param)
+      url = param.fetch(:window_url, nil)
+      name = param.fetch(:window_name, nil)
       exist = false
-      if chrome?
-       # exist = popup_name != get_windows[0]["sahiWinId"]
-        exist = false
-      else
-        wait(10, false, 2) {
-          if url.nil?
-            get_windows.each { |win| exist = exist || (win["wasOpened"] == "1") }
-          else
-            get_windows.each { |win| exist = exist || (win["wasOpened"] == "1" and win["windowURL"] != url) }
-          end
-          exist
-        }
-      end
+
+      wait(10, false, 2) {
+        unless name.nil?
+          get_windows.each { |win| exist = exist || (win["wasOpened"] == "1" and win["windowName"] == name) }
+        end
+        unless url.nil?
+          get_windows.each { |win| exist = exist || (win["wasOpened"] == "1" and win["windowURL"] != url) }
+        end
+        exist
+      }
+
       exist
     end
 

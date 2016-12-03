@@ -121,7 +121,7 @@ module Pages
       end_col3 = 85
       res = ""
       res += "| #{@window_tab[0..end_col1].ljust(end_col1 + 2)}"
-      res += "| #{@text.gsub(/\n\r/, ' ')[0..end_col2].ljust(end_col2 + 2)}"
+      res += "| #{@text.gsub(/[\n\r\t]/, ' ')[0..end_col2].ljust(end_col2 + 2)}"
       res += "| #{url[0..end_col3].ljust(end_col3 + 2)}"
       res += "|\n"
       res
