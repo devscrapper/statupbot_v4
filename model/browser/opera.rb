@@ -97,6 +97,7 @@ module Browsers
       popup = nil
       wait(60, true, 2) {
         @driver.get_windows.each { |win|
+          @@logger.an_event.debug win.inspect
           if win["windowName"] == WINDOW_NAME and win["wasOpened"] == "0"
             popup = @driver.popup(win["sahiWinId"])
             @@logger.an_event.debug "window found <#{!popup.nil?}>"
