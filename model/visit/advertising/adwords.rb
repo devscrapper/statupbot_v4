@@ -33,10 +33,10 @@ module Visits
           # ou bien il ny a vraimenet pas d'awords sur la page Google.
           wait(30, true, 1.3) {
             body = browser.body
-            @@logger.an_event.debug "body : #{body}"
             adwords = browser.engine_search.adverts(body)
             !adwords.empty?
           }
+          #TODO faire un affichage comme pour les links
           adwords.each { |adword| @@logger.an_event.debug "adword : #{adword}" }
 
           #TODO remplacer @fqdns par @fqdn
@@ -45,11 +45,11 @@ module Visits
 
           # suppression des adwords dont le href n'est pas dans liste de fqdn
           href_adwords =[]
-          adwords.map { |adword| adword[:href] }.each { |href|
-            tmp_fqdns.each { |fqdn|
-              href_adwords << href if href.include?(fqdn)
-            }
+          adwords.map { |adword| adword[:href] }.each { |hrefs| hrefs.each { |href|
+            tmp_fqdns.each { |fqdn| href_adwords << href if href.include?(fqdn) }
           }
+          }
+
 
           raise "none fqdn advertising #{@fqdns} found in adwords list #{adwords}" if href_adwords.empty?
 

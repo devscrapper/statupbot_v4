@@ -95,7 +95,7 @@ module Browsers
     end
     def focus_popup
       popup = nil
-      wait(10, true, 2) {
+      wait(60, true, 2) {
         @driver.get_windows.each { |win|
           if win["windowName"] == WINDOW_NAME and win["wasOpened"] == "0"
             popup = @driver.popup(win["sahiWinId"])
