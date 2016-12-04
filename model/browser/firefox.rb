@@ -92,15 +92,19 @@ module Browsers
     end
 
     def focus_popup
-      popup = nil
+      popup = ""
       wait(60, true, 2) {
         @driver.get_windows.each { |win|
+          @@logger.an_event.debug win.inspect
           if win["windowName"] == WINDOW_NAME
             popup = @driver.popup(win["sahiWinId"])
+            @@logger.an_event.debug "window found <#{!popup.nil?}>"
             break
           end
         }
-        raise "popup not found" if popup.nil?
+
+        raise "window not found" if popup.nil?
+        !popup.nil?
       }
       @@logger.an_event.debug "replace driver by popup driver"
       @@logger.an_event.debug popup.inspect

@@ -115,10 +115,12 @@ module Browsers
         @driver.get_windows.each { |win|
           if win["windowName"] == WINDOW_NAME
             popup = @driver.popup(win["sahiWinId"])
+            @@logger.an_event.debug "window found <#{!popup.nil?}>"
             break
           end
         }
-        raise "popup not found" if popup.nil?
+        raise "window not found" if popup.nil?
+        !popup.nil?
       }
       @@logger.an_event.debug "replace driver by popup driver"
       @@logger.an_event.debug popup.inspect
