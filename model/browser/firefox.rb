@@ -92,7 +92,7 @@ module Browsers
     end
 
     def focus_popup
-      popup = ""
+      popup = nil
       wait(60, true, 2) {
         @driver.get_windows.each { |win|
           @@logger.an_event.debug win.inspect

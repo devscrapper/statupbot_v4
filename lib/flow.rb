@@ -558,7 +558,7 @@ class Flow
 
   def write(data)
     open("w:UTF-8") if @descriptor.nil?
-    @descriptor.write(data); @logger.an_event.debug "write data <#{data}> to flow <#{basename}>" if $debugging
+    @descriptor.write(data)
   end
 
   def zero?
