@@ -284,113 +284,55 @@ module Browsers
       begin
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "link"}) if link.nil?
 
+        # recherche du link dans la page courante
+        link_element = search_link?(link)
 
-        if link.is_a?(Sahi::ElementStub)
-          link_element = link
-          raise "browser not found Sahi::ElementStub #{link_element.to_s}" unless link_element.exists?
-
-          # on sait que le link exist, mais on ne sait pas avec element il a été identifié
-          # alors on re-test l'existance pour trouver le bon find_element
-        elsif link.is_a?(Pages::Link)
-          found = false
-          [link.text, link.url, link.url_escape].each { |l|
-            @@logger.an_event.debug "link #{l}"
-            unless l == Pages::Link::EMPTY
-              link_element = @driver.link(l)
-
-              begin # pour eviter les exception sahi
-                if found = link_element.exists?
-                  break
-                else
-                  @@logger.an_event.warn "browser not found Pages::Link #{link_element.to_s}"
-                end
-              rescue Exception => e
-              end
-            end
-          }
-          raise "browser not found Pages::Link #{link_element.to_s}" unless found
-
-        elsif link.is_a?(URI)
-          link_element = @driver.link(link.to_s)
-          raise "browser not found URI #{link_element.to_s}" unless link_element.exists?
-
-        elsif link.is_a?(String)
-          link_element = @driver.link(link)
-          raise "browser not found String #{link_element.to_s}" unless link_element.exists?
-
-        end
-      rescue Exception => e
-        @@logger.an_event.error "link_element : #{e.message}"
-
-        raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
-
-      else
-        @@logger.an_event.debug "browser found link #{link}" if link.is_a?(String)
-        @@logger.an_event.debug "browser found link #{link.url}" if link.is_a?(Pages::Link)
-        @@logger.an_event.debug "browser found link #{link.to_s}" if link.is_a?(URI)
-        @@logger.an_event.debug "browser found link #{link.identifiers}" if link.is_a?(Sahi::ElementStub)
-
-        @@logger.an_event.debug "link_element #{link_element.to_s}"
-
-      end
-
-
-      # limite du nombre d'essaie de click à 5
-      # si nombre max atteint, leve une exception  : BROWSER_CLICK_MAX_COUNT
-      count = 5
-      begin
         # on interdit les ouvertures de fenetre pour rester dans la fenetre courante.
         if !accept_popup and link_element.fetch("target") == "_blank"
           link_element.setAttribute("target", "")
-          @@logger.an_event.debug "target of #{link_element} change to ''"
+          @@logger.an_event.debug "target of #{link_element.identifiers} change to ''"
         end
 
 
         url_before = url
         @@logger.an_event.debug "url before #{url_before}"
 
-        # on attend tq que les url_before et url courante sont identiques, au max 10s.
         link_element.click
         @@logger.an_event.debug "click on #{link_element}"
 
+        # on attend tq que les url_before et url courante sont identiques, au max 20s.
+        url_after = ""
+        wait(20, true, 2) {
+          raise "page not refresh with url #{link_element.identifiers}" if url_before == (url_after = url)
+          url_before != url_after
+        }
+        @@logger.an_event.debug "url after #{url_after}"
 
         # on autorise d'ouvrir un nouvel onglet ou fenetre que pour les pub qui le demande sinon les autres liens
-        #restent dans leur fenetre.
-        # est ce qu'uen nouvelle fenetre ou onlget a été créé qui est difféerent de celui sur lequel on est qd on est
+        # restent dans leur fenetre.
+        # est ce qu'une nouvelle fenetre ou onglet a été créé qui est difféerent de celui sur lequel on est qd on est
         # déjà sur une nouvelle fenetre ou onglet
-        if @driver.new_popup_is_open?(window_url: url)
+        if @driver.new_popup_is_open?(url_after)
           if accept_popup
             # si popup est ouverte sur au click d'une pub alors on remplace le driver principal par celui de la nouvelle fenetre
-            @driver = @driver.focus_popup
+            @driver = @driver.focus_popup(url_after)
             @@logger.an_event.debug "replace driver by popup driver"
+
           else
             # si un bout de code javascript ouvre une nouvelle fenetre <=> impossible de l'identifier et de corriger le
             #comportement avant de cliquer sur le lien
             # => clos les fenetres apres le click.
-            @driver.close_popups
+            @driver.close_popups(url_after)
             @@logger.an_event.debug "close popup"
           end
-
-        else
-          @driver.wait(20) { url_before != url }
-          #raise "same url after click : #{url_before}" if url_before == url
-
         end
 
       rescue Exception => e
-        @@logger.an_event.warn "browser click on url, try #{count} : #{e.message}"
-        count -= 1
-        retry if count > 0
         @@logger.an_event.error "browser click on url : #{e.message}"
-        raise Errors::Error.new(BROWSER_NOT_CLICK, :values => {:browser => name}, :error => e) if count > 0
-        raise Errors::Error.new(BROWSER_CLICK_MAX_COUNT, :values => {:browser => name, :link => url_before}, :error => e) unless count > 0
+        raise Errors::Error.new(BROWSER_NOT_CLICK, :values => {:browser => name}, :error => e)
 
       else
-        @@logger.an_event.debug "browser click on url #{link}" if link.is_a?(String)
-        @@logger.an_event.debug "browser click on url #{link.url}" if link.is_a?(Pages::Link)
-        @@logger.an_event.debug "browser click on url #{link.to_s}" if link.is_a?(URI)
-        @@logger.an_event.debug "browser click on url #{link.identifiers}" if link.is_a?(Sahi::ElementStub)
-      ensure
+        @@logger.an_event.debug "browser click on url #{link_element.identifiers}"
 
       end
     end
@@ -486,64 +428,6 @@ module Browsers
 
     end
 
-    #----------------------------------------------------------------------------------------------------------------
-    # exist_link
-    #----------------------------------------------------------------------------------------------------------------
-    # test l'existance du link
-    #----------------------------------------------------------------------------------------------------------------
-    # input : Object Link, Objet URI, String url   , elementStub,
-    # output : RAS si trouvé, sinon une exception Browser not found link
-    #
-    #----------------------------------------------------------------------------------------------------------------
-    def exist_link?(link)
-      @@logger.an_event.debug "link #{link}"
-
-      begin
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "link"}) if link.nil?
-
-        exist = false
-        if link.is_a?(Browsers::Sahi::ElementStub)
-          link_element = link
-          raise "link #{link.to_s} not exist" unless link_element.exists?
-
-        else
-          if link.is_a?(Pages::Link)
-            exist = false
-            [link.text, link.url, link.url_escape].each { |l|
-              link_element = @driver.link(l)
-              begin # pour eviter les exception sahi
-                if link_element.exists?
-                  exist = true
-                  break
-                end
-              rescue Exception => e
-              end
-              raise "link #{link.to_s} not exist" unless exist
-            }
-          elsif link.is_a?(URI)
-            link_element = @driver.link(link.url)
-            raise "link #{link.to_s} not exist" unless link_element.exists?
-
-          elsif link.is_a?(String)
-            link_element = @driver.link(link)
-            raise "link #{link.to_s} not exist" unless link_element.exists?
-
-          end
-
-        end
-
-      rescue Exception => e
-        @@logger.an_event.error "browser found link : #{e.message}"
-
-        raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link.to_s}, :error => e)
-
-      else
-        @@logger.an_event.debug "browser found link"
-
-      ensure
-
-      end
-    end
 
     def get_window_by_pid
 
@@ -1382,58 +1266,114 @@ module Browsers
     end
 
     private
-    def format_links(links)
-      end_col0 = 145
-      end_col1 = 40
-      end_col2 = 83
-      end_col3 = 25
-      res = "\n"
-      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-      res += "| Counts : #{links.size.to_s[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
-      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-      res += '| Text                                      | Url                                                                                  | Target                     |' + "\n"
-      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-      links.each { |l|
-        res += "| #{URI.unescape(l["text"])[0..end_col1].ljust(end_col1 + 2)}"
-        res += "| #{l["href"][0..end_col2].ljust(end_col2 + 2)}"
-        res += "| #{(l["target"].nil? ? "none" : l["target"])[0..end_col3].ljust(end_col3 + 2)}"
-        res += "|\n"
-      }
-      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-      res
-    end
 
-    def wait(timeout, exception = false, interval=0.2)
+    #----------------------------------------------------------------------------------------------------------------
+    # exist_link
+    #----------------------------------------------------------------------------------------------------------------
+    # test l'existance du link
+    #----------------------------------------------------------------------------------------------------------------
+    # input : Object Link, Objet URI, String url   , elementStub,
+    # output : RAS si trouvé, sinon une exception Browser not found link
+    #
+    #----------------------------------------------------------------------------------------------------------------
+    def search_link?(link)
 
-      if !block_given?
-        sleep(timeout)
-        return
-      end
+      begin
+        @@logger.an_event.debug "link is a #{link.class.name}"
+        links = []
+        if link.is_a?(Pages::Link)
+          links += [link.text, link.url, link.url_escape].map! { |l| @driver.create_link(l) }
+          link_url = link.url
 
-      #timeout = interval if $staging == "development" # on execute une fois
-
-      while (timeout > 0)
-        sleep(interval)
-        timeout -= interval
-        begin
-          return if yield
-        rescue Exception => e
-          @@logger.an_event.warn "try again : #{e.message}"
         else
-          @@logger.an_event.debug "try again."
+          links << @driver.create_link(link)
+          link_url = links[0].identifiers
+
         end
-      end
+        @@logger.an_event.debug "search links : "; links.each { |l| @@logger.an_event.debug l.inspect}
 
-      raise e if !e.nil? and exception == true
+        exist = false
+        link_found = nil
+        links.each { |l|
+          begin # pour eviter les exception sahi
+            if exist = l.exists?
+              link_found = l
+              break
+            end
+          rescue Exception => e
+            @@logger.an_event.debug "l.exists?(#{l.inspect}) : #{e.message}"
 
-    end
-  end
+          end
+        }
+
+        raise "none link found" unless exist
+
+        rescue Exception => e
+        @@logger.an_event.error "search_link?: #{e.message}"
+
+        raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link_url}, :error => e)
+
+        else
+        @@logger.an_event.debug "search_link? success"
+
+        link_found
+
+        end
+        end
+
+        def format_links(links)
+          end_col0 = 145
+          end_col1 = 40
+          end_col2 = 83
+          end_col3 = 25
+          res = "\n"
+          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+          res += "| Counts : #{links.size.to_s[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+          res += '| Text                                      | Url                                                                                  | Target                     |' + "\n"
+          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+          links.each { |l|
+            res += "| #{URI.unescape(l["text"]).gsub(/[\n\r\t]/, ' ')[0..end_col1].ljust(end_col1 + 2)}"
+            res += "| #{l["href"][0..end_col2].ljust(end_col2 + 2)}"
+            res += "| #{(l["target"].nil? ? "none" : l["target"])[0..end_col3].ljust(end_col3 + 2)}"
+            res += "|\n"
+          }
+          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+          res
+        end
+
+        def wait(timeout, exception = false, interval=0.2)
+
+          if !block_given?
+            sleep(timeout)
+            return
+          end
+
+          #timeout = interval if $staging == "development" # on execute une fois
+
+          while (timeout > 0)
+            sleep(interval)
+            timeout -= interval
+            begin
+              return if yield
+            rescue Exception => e
+              @@logger.an_event.warn "try again : #{e.message}"
+            else
+              @@logger.an_event.debug "try again."
+            end
+          end
+
+          raise e if !e.nil? and exception == true
+
+        end
+
+        end
 
 
-end
-require_relative 'firefox'
-require_relative 'internet_explorer'
-require_relative 'chrome'
-require_relative 'safari'
-require_relative 'opera'
-require_relative 'edge'
+        end
+        require_relative 'firefox'
+        require_relative 'internet_explorer'
+        require_relative 'chrome'
+        require_relative 'safari'
+        require_relative 'opera'
+        require_relative 'edge'

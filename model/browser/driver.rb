@@ -79,10 +79,10 @@ module Sahi
     end
 
 
-    def close_popups
+    def close_popups(url)
       windows = get_windows
       windows.each { |win|
-        if win["wasOpened"] == "1"
+        if (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
           popup(win["sahiWinId"]).close
         end
       }
@@ -94,6 +94,12 @@ module Sahi
       else
         return fetch("_sahi._collect(#{Utils.quoted(attr)}, #{Utils.quoted(els.to_type())}, #{els.to_identifiers()})").split(",___sahi___")
       end
+    end
+
+    def create_link(link)
+      return link if link.is_a?(Sahi::ElementStub)
+      return link(link.to_s) if link.is_a?(URI)
+      return link(link) if link.is_a?(String)
     end
 
     def current_url
@@ -144,16 +150,18 @@ module Sahi
       return check_nil(exec_command("getVariable", {"key" => key}))
     end
 
-    def focus_popup
-      # si window_name <>nil alors c'est la nouvelle fenetre "main_tab" qui permet de demarrer avec un history vide
-      # si window_name est nil alors c'est une nouvelle fenetre ouverte par un lien par une pub
+    def focus_popup(url)
+      # on s'est assuré avant que un popup avait été créé => new_popup_is_open?
       popup = nil
+
       get_windows.each { |win|
-        if win["wasOpened"] == "1"
+        @@logger.an_event.debug win.inspect
+        if  (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
           popup = popup(win["sahiWinId"])
           break
         end
       }
+
       popup
     end
 
@@ -223,18 +231,16 @@ module Sahi
       links
     end
 
-    def new_popup_is_open? (param)
-      url = param.fetch(:window_url, nil)
-      name = param.fetch(:window_name, nil)
+    def new_popup_is_open? (url)
       exist = false
-
       wait(10, false, 2) {
-        unless name.nil?
-          get_windows.each { |win| exist = exist || (win["wasOpened"] == "1" and win["windowName"] == name) }
-        end
-        unless url.nil?
-          get_windows.each { |win| exist = exist || (win["wasOpened"] == "1" and win["windowURL"] != url) }
-        end
+        get_windows.each { |win|
+          @@logger.an_event.debug win.inspect
+          if exist = (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
+            break
+          end
+        }
+        raise "new popup window not found" unless exist
         exist
       }
 
