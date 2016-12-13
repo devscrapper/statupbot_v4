@@ -34,7 +34,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name].gsub(" ", "_")}",
               DATA_URI,
-              ACCEPT_POPUP)
+              NO_ACCEPT_POPUP)
 
       rescue Exception => e
         @@logger.an_event.error "edge #{@version} initialize : #{e.message}"

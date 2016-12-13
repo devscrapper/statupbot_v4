@@ -33,7 +33,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}_#{browser_details[:listening_ip_proxy]}_#{browser_details[:listening_port_proxy]}",
               NO_REFERER,
-              ACCEPT_POPUP)
+              NO_ACCEPT_POPUP)
 
       rescue Exception => e
         @@logger.an_event.error "chrome #{@version} initialize : #{e.message}"

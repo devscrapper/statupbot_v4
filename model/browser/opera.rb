@@ -33,7 +33,7 @@ module Browsers
               browser_details,
               "#{browser_details[:name]}_#{browser_details[:version]}",
               NO_REFERER,
-              ACCEPT_POPUP)
+              NO_ACCEPT_POPUP)
 
 
       rescue Exception => e
