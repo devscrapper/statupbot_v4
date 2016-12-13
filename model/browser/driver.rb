@@ -156,7 +156,7 @@ module Sahi
 
       get_windows.each { |win|
         @@logger.an_event.debug win.inspect
-        if  (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
+        if (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
           popup = popup(win["sahiWinId"])
           break
         end
@@ -279,7 +279,7 @@ module Sahi
 
       begin
         @sahisid = Time.now.to_f
-        start_url = "http://sahi.example.com/_s_/dyn/Driver_initialized"
+        start_url =""
         param = {"browserType" => @browser_type, "startUrl" => start_url}
 
         @@logger.an_event.debug "param #{param}"
@@ -310,7 +310,28 @@ module Sahi
       else
         @@logger.an_event.debug "driver ready"
 
+
+=begin
+        add_url_mock("accounts[.]google[.]com")
+        add_url_mock("apis[.]google[.]com")
+        add_url_mock("clients5[.]google[.]com")
+        add_url_mock("csi[.]google[.]com")
+        add_url_mock("lh3[.]googleusercontent[.]com")
+        add_url_mock("plus[.]google[.]com")
+        add_url_mock("ogs[.]google[.]com")
+        add_url_mock("www[.]gstatic[.]com")
+=end
+
+=begin
+
+  add_url_image("*[.]png")
+=end
       end
+    end
+
+
+    def add_url_image(url_pattern)
+      execute_step("_sahi._mockImage(#{Utils.quoted(url_pattern)}, null)")
     end
 
     # represents a popup window. The name is either the window name or its title.
@@ -342,6 +363,10 @@ module Sahi
 
     def reload
       fetch("location.reload(true)")
+    end
+
+    def replace(url)
+      fetch("location.replace(\"#{url}\")")
     end
 
     def resize (width, height)

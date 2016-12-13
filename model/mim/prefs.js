@@ -56,6 +56,7 @@ user_pref("extensions.update.autoUpdateEnabled", false);
 user_pref("extensions.update.notifyUser", false);
 user_pref("intl.charsetmenu.browser.cache", "ISO-8859-1, UTF-8");
 user_pref("network.cookie.prefsMigrated", true);
+user_pref("network.cookie.lifetimePolicy", 2);
 user_pref("network.proxy.http", "listening_ip_proxy");
 user_pref("network.proxy.http_port", listening_port_proxy);
 user_pref("network.proxy.no_proxies_on", "");

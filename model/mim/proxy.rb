@@ -130,6 +130,13 @@ module Mim
       FileUtils.cp_r(File.join(File.dirname(__FILE__), 'inject_top.txt'), File.join(@visitor_dir, 'config'))
 
       #-----------------------------------------------------------------------------------------------------------
+      # copie & maj dans /htdocs/spr/initialized.htm qui remplace la page de lancement de sahi. Cela permet
+      # de ne pas afficher dan sl'history la page de lancement de sahi. Cette page sera remplacée par le
+      # MDR par défaut du navigateur définit dans la visite
+      #-----------------------------------------------------------------------------------------------------------
+      FileUtils.cp_r(File.join(File.dirname(__FILE__), 'initialized.htm'), File.join(@visitor_dir, 'htdocs', 'spr'))
+
+      #-----------------------------------------------------------------------------------------------------------
       # publie le repository des browsers (repository.csv) vers le fichier contenant les browser types
       #-----------------------------------------------------------------------------------------------------------
       bt = Mim::BrowserTypes::from_csv
@@ -216,6 +223,8 @@ module Mim
       File.open(File.join(@visitor_dir, 'config', "sahi.properties"), 'w') { |out| out.write(sahi.to_s) }
 
       @@logger.an_event.debug "customized sahi.properties"
+
+
     end
 
 

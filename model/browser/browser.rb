@@ -623,6 +623,13 @@ module Browsers
                                     @listening_port_proxy)
 
 
+        initialized_htm = File.join(visitor_dir, "htdocs", "spr", 'initialized.htm')
+        file_custom = File.read(initialized_htm)
+        file_custom.gsub!(/start_url/, @engine_search.fqdn_search + @engine_search.path_search)
+
+        File.write(initialized_htm, file_custom)
+        @@logger.an_event.debug "update start url in htdocs/spr/initialized.htm"
+
       rescue Exception => e
         @@logger.an_event.error "browser initialize : #{e.message}"
         raise e
