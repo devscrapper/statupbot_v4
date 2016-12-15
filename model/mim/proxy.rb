@@ -19,7 +19,7 @@ module Mim
     ARGUMENT_NOT_DEFINE = 100
     PROXY_NOT_START = 101
     PROXY_NOT_STOP = 102
-    PROXY_LICENSE_NOT_VALID = 103
+    PROXY_NOT_VALID = 103
 #----------------------------------------------------------------------------------------------------------------
 # attributs
 #----------------------------------------------------------------------------------------------------------------
@@ -321,18 +321,22 @@ module Mim
           license = Licence.get
 
         rescue Exception => e
-          @@logger.an_event.debug "le server de license est joignable #{}"
+          @@logger.an_event.debug "le server de license non joignable"
           raise Errors::Error.new(PROXY_NOT_VALID, :error => "server not joinable")
 
         else
+          @@logger.an_event.debug "license recupere du serveur de licence"
+
           #TODO tester la validité de la license sahi telechargée du sereur de licence maison
           # @@logger.an_event.debug "check la date validite du fichier de license : license.data"
           # raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
+          @@logger.an_event.debug "validite de la licence confirmee"
 
-          File.open(File.join(@visitor_dir, "userdata", "config", "licence.data"), 'wb') do |file|
+          File.open(File.join(@visitor_dir, "userdata", "config", "license.data"), 'wb') do |file|
             file.write(license)
             file.close
           end
+          @@logger.an_event.debug "license sauvegardee dans visitor_dir userdata config"
         end
 
       else
