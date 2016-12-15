@@ -1,0 +1,14 @@
+development:
+  :debugging:  false
+  :license_server_host: 127.0.0.1
+  :license_server_port: 4000
+
+test:
+  :debugging:  true
+  :license_server_host: 192.168.1.88
+  :license_server_port: 4000
+
+production:
+  :debugging:  false
+  :license_server_host: 192.168.1.88
+  :license_server_port: 4000

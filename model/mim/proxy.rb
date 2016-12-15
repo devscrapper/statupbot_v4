@@ -2,6 +2,7 @@ require 'yaml'
 require 'dot-properties'
 
 require_relative '../../lib/parameter'
+require_relative '../../lib/licence'
 
 module Mim
 
@@ -79,8 +80,7 @@ module Mim
       @java_key_tool_path = parameters.java_key_tool_path
       @start_page_server_ip = parameters.start_page_server_ip
       @license_server_enabled = parameters.license_server_enabled
-      @license_server_host = parameters.license_server_host
-      @license_server_port = parameters.license_server_port
+
 
       @@logger.an_event.debug "parameters loaded"
       @@logger.an_event.debug "install_sahi_dir #{@install_sahi_dir}"
@@ -88,8 +88,6 @@ module Mim
       @@logger.an_event.debug "java_key_tool_path #{@java_key_tool_path}"
       @@logger.an_event.debug "start_page_server_ip #{@start_page_server_ip}"
       @@logger.an_event.debug "license_server_enabled #{@license_server_enabled}"
-      @@logger.an_event.debug "license_server_host #{@license_server_host}"
-      @@logger.an_event.debug "license_server_port #{@license_server_port}"
 
       #-----------------------------------------------------------------------------------------------------------
       # copie le contenu du repertoire d'installation de sahi vers le repertoire d'execution du visitor :
@@ -204,12 +202,6 @@ module Mim
 
       userdata['browser_launch.delay_after_proxy_change'] = 1500.to_s
 
-      userdata['sahi.license_server.enabled'] = @license_server_enabled.to_s
-      if @license_server_enabled
-        userdata['sahi.license_server.host'] = @license_server_host.to_s
-        userdata['sahi.license_server.port'] = @license_server_port.to_s
-      end
-
       File.open(File.join(@userdata, 'config', "userdata.properties"), 'w') { |out| out.write(userdata.to_s) }
 
       @@logger.an_event.debug "customized userdata.properties"
@@ -227,9 +219,9 @@ module Mim
       @@logger.an_event.debug "customized sahi.properties"
 
       #-----------------------------------------------------------------------------------------------------------
-      # controle que la validité de la license sahi
+      # controle de la validité de la license sahi
       #-----------------------------------------------------------------------------------------------------------
-      check_license_server
+      check_license
     end
 
 # controle que l'instance lanc�e est active.
@@ -315,25 +307,41 @@ module Mim
 
     private
 
-    def check_license_server
-=begin
+    def check_license
+      # TODO desinstanller le serveurde licence SAHI sur la machine 192.168.1.88
+      # le serveur de licence SAHI n'est pas utilisé car il fonctionne avec des licences PRO achétées, les licences de 30j
+      # ne fonctionnent pas avec le serveur de licence SAHI.
+      # mise en place d'un server de licence proprietaire qui permet d'uploader des fichiers de licence et de le
+      # downloader à la demande par statupbot
+
       if @license_server_enabled
-        #TODO tester l'acces au server de license
+        license = ""
 
-        @@logger.an_event.debug "le server de license est joignable #{}"
-        raise Errors::Error.new(PROXY_NOT_VALID, :error => "server not joinable")
+        begin
+          license = Licence.get
 
-        #TODO tester la validité de la license
-        @@logger.an_event.debug "check la date validite du fichier de license : license.data"
-        raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
+        rescue Exception => e
+          @@logger.an_event.debug "le server de license est joignable #{}"
+          raise Errors::Error.new(PROXY_NOT_VALID, :error => "server not joinable")
+
+        else
+          #TODO tester la validité de la license sahi telechargée du sereur de licence maison
+          # @@logger.an_event.debug "check la date validite du fichier de license : license.data"
+          # raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
+
+          File.open(File.join(@visitor_dir, "userdata", "config", "licence.data"), 'wb') do |file|
+            file.write(license)
+            file.close
+          end
+        end
 
       else
-        #TODO tester la validité du fichier de licence  : \userdata\config\license.data
-        @@logger.an_event.debug "check la date validite du fichier de license : license.data"
-        raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
+        #TODO tester la validité du fichier de licence sahi : \userdata\config\license.data
+        # @@logger.an_event.debug "check la date validite du fichier de license : license.data"
+        # raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
 
       end
-=end
+
     end
 
     def load_parameters
