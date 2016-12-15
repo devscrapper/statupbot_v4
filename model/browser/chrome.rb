@@ -47,55 +47,6 @@ module Browsers
       end
     end
 
-
-    #----------------------------------------------------------------------------------------------------------------
-    # display_start_page
-    #----------------------------------------------------------------------------------------------------------------
-    # ouvre un nouvelle fenetre du navigateur adaptée aux propriété du naviagateur et celle de la visit
-    # affiche la root page du site https pour initialisé le référer à non défini
-    #@driver.navigate_to "http://jenn.kyrnin.com/about/showreferer.html"
-    #fullscreen=yes|no|1|0 	Whether or not to display the browser in full-screen mode. Default is no. A window in full-screen mode must also be in theater mode. IE only
-    #height=pixels 	The height of the window. Min. value is 100
-    #left=pixels 	The left position of the window. Negative values not allowed
-    #menubar=yes|no|1|0 	Whether or not to display the menu bar
-    #status=yes|no|1|0 	Whether or not to add a status bar
-    #titlebar=yes|no|1|0 	Whether or not to display the title bar. Ignored unless the calling application is an HTML Application or a trusted dialog box
-    #top=pixels 	The top position of the window. Negative values not allowed
-    #width=pixels 	The width of the window. Min. value is 100
-    #@driver.open_start_page("width=#{@width},height=#{@height},fullscreen=0,left=0,menubar=1,status=1,titlebar=1,top=0")
-    # pour maitriser le referer on passe par un site local en https qui permet de ne pas affecter le referer
-    # incontournable sinon Google analityc enregistre la page de lancement de Sahi initializer
-    #----------------------------------------------------------------------------------------------------------------
-    # input : url (String)
-    # output : RAS
-    # exception : RAS
-    #----------------------------------------------------------------------------------------------------------------
-    def display_start_page(start_url, visitor_id)
-      @@logger.an_event.debug "start_url : #{start_url}"
-      @@logger.an_event.debug "visitor_id : #{visitor_id}"
-
-
-      begin
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url ==""
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
-
-        window_parameters = "menubar=1,status=1,titlebar=1,top=0"
-        @@logger.an_event.debug "windows parameters : #{window_parameters}"
-
-        super(start_url, visitor_id, window_parameters)
-
-      rescue Exception => e
-        @@logger.an_event.debug "browser display start page : #{e.message}"
-        raise e
-
-      else
-        @@logger.an_event.debug "browser display start page"
-
-      end
-
-
-    end
-
     def focus_popup
       @driver
     end

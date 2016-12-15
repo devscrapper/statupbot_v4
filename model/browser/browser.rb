@@ -352,50 +352,24 @@ module Browsers
     # StandardError :
     # Si il est impossible de recuperer les propriétés de la page
     #----------------------------------------------------------------------------------------------------------------
-    def display_start_page (start_url, visitor_id, window_parameters)
+    def display_start_page (start_url)
 
       @@logger.an_event.debug "start_url : #{start_url}"
-      @@logger.an_event.debug "visitor_id : #{visitor_id}"
-      @@logger.an_event.debug "window_parameters : #{window_parameters}"
 
       begin
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url_start_page"}) if start_url.nil? or start_url == ""
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visitor_id"}) if visitor_id.nil? or visitor_id == ""
-        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "window_parameters"}) if window_parameters.nil? or window_parameters == ""
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "start_url"}) if start_url.nil? or start_url == ""
 
-        url_start_page = url_start_page(start_url, visitor_id)
-        @@logger.an_event.debug "url_start_page : #{url_start_page}"
-
-        @driver.display_start_page(url_start_page,
-                                   window_parameters)
-
-        if @method_start_page == NO_REFERER
-          Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
-
-          link_element = @driver.link(start_url)
-          raise "browser not found String #{start_url}" unless link_element.exists?
-
-          url_before = url
-          @@logger.an_event.debug "url before #{url_before}"
-
-          link_element.click
-          @@logger.an_event.debug "click on #{link_element}"
-
-          #click_on(start_url, @method_access_popup)
-
-        end
-
-        @driver = focus_popup if @method_access_popup
-
-        @@logger.an_event.info "history_size <#{@driver.history_size}>"
-        @@logger.an_event.info "referrer <#{@driver.referrer}>"
+        @driver.replace(start_url)
 
         Pages::Error.is_a?(self) # leve automatiquement une exception si erreur connue
 
       rescue Exception => e
-        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE, :values => {:browser => name, :page => url_start_page(start_url, visitor_id)}, :error => e)
-
-      ensure
+        raise Errors::Error.new(BROWSER_NOT_DISPLAY_START_PAGE,
+                                :values => {:browser => name, :page => start_url},
+                                :error => e)
+      else
+        @@logger.an_event.info "history_size <#{@driver.history_size}>"
+        @@logger.an_event.info "referrer <#{@driver.referrer}>"
 
       end
     end
@@ -1297,7 +1271,7 @@ module Browsers
           link_url = links[0].identifiers
 
         end
-        @@logger.an_event.debug "search links : "; links.each { |l| @@logger.an_event.debug l.inspect}
+        @@logger.an_event.debug "search links : "; links.each { |l| @@logger.an_event.debug l.inspect }
 
         exist = false
         link_found = nil
@@ -1315,72 +1289,72 @@ module Browsers
 
         raise "none link found" unless exist
 
-        rescue Exception => e
+      rescue Exception => e
         @@logger.an_event.error "search_link?: #{e.message}"
 
         raise Errors::Error.new(BROWSER_NOT_FOUND_LINK, :values => {:domain => "", :identifier => link_url}, :error => e)
 
-        else
+      else
         @@logger.an_event.debug "search_link? success"
 
         link_found
 
+      end
+    end
+
+    def format_links(links)
+      end_col0 = 145
+      end_col1 = 40
+      end_col2 = 83
+      end_col3 = 25
+      res = "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += "| Counts : #{links.size.to_s[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res += '| Text                                      | Url                                                                                  | Target                     |' + "\n"
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      links.each { |l|
+        res += "| #{URI.unescape(l["text"]).gsub(/[\n\r\t]/, ' ')[0..end_col1].ljust(end_col1 + 2)}"
+        res += "| #{l["href"][0..end_col2].ljust(end_col2 + 2)}"
+        res += "| #{(l["target"].nil? ? "none" : l["target"])[0..end_col3].ljust(end_col3 + 2)}"
+        res += "|\n"
+      }
+      res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      res
+    end
+
+    def wait(timeout, exception = false, interval=0.2)
+
+      if !block_given?
+        sleep(timeout)
+        return
+      end
+
+      #timeout = interval if $staging == "development" # on execute une fois
+
+      while (timeout > 0)
+        sleep(interval)
+        timeout -= interval
+        begin
+          return if yield
+        rescue Exception => e
+          @@logger.an_event.warn "try again : #{e.message}"
+        else
+          @@logger.an_event.debug "try again."
         end
-        end
+      end
 
-        def format_links(links)
-          end_col0 = 145
-          end_col1 = 40
-          end_col2 = 83
-          end_col3 = 25
-          res = "\n"
-          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-          res += "| Counts : #{links.size.to_s[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
-          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-          res += '| Text                                      | Url                                                                                  | Target                     |' + "\n"
-          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-          links.each { |l|
-            res += "| #{URI.unescape(l["text"]).gsub(/[\n\r\t]/, ' ')[0..end_col1].ljust(end_col1 + 2)}"
-            res += "| #{l["href"][0..end_col2].ljust(end_col2 + 2)}"
-            res += "| #{(l["target"].nil? ? "none" : l["target"])[0..end_col3].ljust(end_col3 + 2)}"
-            res += "|\n"
-          }
-          res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-          res
-        end
+      raise e if !e.nil? and exception == true
 
-        def wait(timeout, exception = false, interval=0.2)
+    end
 
-          if !block_given?
-            sleep(timeout)
-            return
-          end
-
-          #timeout = interval if $staging == "development" # on execute une fois
-
-          while (timeout > 0)
-            sleep(interval)
-            timeout -= interval
-            begin
-              return if yield
-            rescue Exception => e
-              @@logger.an_event.warn "try again : #{e.message}"
-            else
-              @@logger.an_event.debug "try again."
-            end
-          end
-
-          raise e if !e.nil? and exception == true
-
-        end
-
-        end
+  end
 
 
-        end
-        require_relative 'firefox'
-        require_relative 'internet_explorer'
-        require_relative 'chrome'
-        require_relative 'safari'
-        require_relative 'opera'
-        require_relative 'edge'
+end
+require_relative 'firefox'
+require_relative 'internet_explorer'
+require_relative 'chrome'
+require_relative 'safari'
+require_relative 'opera'
+require_relative 'edge'

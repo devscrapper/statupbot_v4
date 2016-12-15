@@ -112,11 +112,6 @@ module Sahi
       url
     end
 
-    def display_start_page (url, window_parameters)
-
-      fetch("window.open(\"#{url}\", \"_self\", \"#{window_parameters}\")")
-
-    end
 
     def domain(name)
       win = Browser.new(@browser_type, @browser_process_name, @proxy_host, @proxy_port)

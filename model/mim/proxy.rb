@@ -15,7 +15,10 @@ module Mim
 #----------------------------------------------------------------------------------------------------------------
 # constants
 #----------------------------------------------------------------------------------------------------------------
-
+    ARGUMENT_NOT_DEFINE = 100
+    PROXY_NOT_START = 101
+    PROXY_NOT_STOP = 102
+    PROXY_LICENSE_NOT_VALID = 103
 #----------------------------------------------------------------------------------------------------------------
 # attributs
 #----------------------------------------------------------------------------------------------------------------
@@ -35,27 +38,14 @@ module Mim
          :install_sahi_dir,
          :java_runtime_dir,
          :java_key_tool_path,
-         :start_page_server_ip
+         :start_page_server_ip,
+         :license_server_enabled, :license_server_host, :license_server_port
 
-
-# controle que l'instance lanc�e est active.
-# utilise le pid
-    def running?
-      require 'csv'
-      #TODO remplacer tasklist par ps pour linux
-      res = IO.popen('tasklist /V /FI "PID eq ' + @pid + '" /FO CSV /NH').read
-
-      @@logger.an_event.debug "tasklist for java.exe : #{res}"
-
-      CSV.parse(res) do |row|
-        return true if row[1].include?(@pid.to_s)
-      end
-
-      false
-    end
 
 #TODO supprimer listening_ip_proxy qui est l'ip du proxy sahi car cela ne fonctionne pas sur un serveur distant
-    def initialize(visitor_dir, listening_ip_proxy, listening_port_proxy, ip_geo_proxy, port_geo_proxy, user_geo_proxy, pwd_geo_proxy)
+    def initialize(visitor_dir,
+                   listening_ip_proxy, listening_port_proxy,
+                   ip_geo_proxy, port_geo_proxy, user_geo_proxy, pwd_geo_proxy)
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_port_proxy"}) if listening_port_proxy.nil?
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "listening_ip_proxy"}) if listening_ip_proxy.nil?
@@ -79,7 +69,6 @@ module Mim
       @@logger.an_event.debug "user_geo_proxy #{@user_geo_proxy}"
       @@logger.an_event.debug "pwd_geo_proxy #{@pwd_geo_proxy}"
 
-
       @userdata = File.join(@visitor_dir, 'userdata')
       @@logger.an_event.debug "userdata #{@userdata}"
 
@@ -89,11 +78,18 @@ module Mim
       @java_runtime_dir = parameters.java_runtime_dir
       @java_key_tool_path = parameters.java_key_tool_path
       @start_page_server_ip = parameters.start_page_server_ip
+      @license_server_enabled = parameters.license_server_enabled
+      @license_server_host = parameters.license_server_host
+      @license_server_port = parameters.license_server_port
+
       @@logger.an_event.debug "parameters loaded"
       @@logger.an_event.debug "install_sahi_dir #{@install_sahi_dir}"
       @@logger.an_event.debug "java_runtime_dir #{@java_runtime_dir}"
       @@logger.an_event.debug "java_key_tool_path #{@java_key_tool_path}"
       @@logger.an_event.debug "start_page_server_ip #{@start_page_server_ip}"
+      @@logger.an_event.debug "license_server_enabled #{@license_server_enabled}"
+      @@logger.an_event.debug "license_server_host #{@license_server_host}"
+      @@logger.an_event.debug "license_server_port #{@license_server_port}"
 
       #-----------------------------------------------------------------------------------------------------------
       # copie le contenu du repertoire d'installation de sahi vers le repertoire d'execution du visitor :
@@ -208,6 +204,12 @@ module Mim
 
       userdata['browser_launch.delay_after_proxy_change'] = 1500.to_s
 
+      userdata['sahi.license_server.enabled'] = @license_server_enabled.to_s
+      if @license_server_enabled
+        userdata['sahi.license_server.host'] = @license_server_host.to_s
+        userdata['sahi.license_server.port'] = @license_server_port.to_s
+      end
+
       File.open(File.join(@userdata, 'config', "userdata.properties"), 'w') { |out| out.write(userdata.to_s) }
 
       @@logger.an_event.debug "customized userdata.properties"
@@ -224,9 +226,27 @@ module Mim
 
       @@logger.an_event.debug "customized sahi.properties"
 
-
+      #-----------------------------------------------------------------------------------------------------------
+      # controle que la validité de la license sahi
+      #-----------------------------------------------------------------------------------------------------------
+      check_license_server
     end
 
+# controle que l'instance lanc�e est active.
+# utilise le pid
+    def running?
+      require 'csv'
+      #TODO remplacer tasklist par ps pour linux
+      res = IO.popen('tasklist /V /FI "PID eq ' + @pid + '" /FO CSV /NH').read
+
+      @@logger.an_event.debug "tasklist for java.exe : #{res}"
+
+      CSV.parse(res) do |row|
+        return true if row[1].include?(@pid.to_s)
+      end
+
+      false
+    end
 
     def start
       begin
@@ -257,7 +277,7 @@ module Mim
 
       rescue Exception => e
         @@logger.an_event.error "proxy started on machine #{@listening_ip_proxy} on port #{@listening_port_proxy} : #{e.message}"
-        raise "proxy not start : #{e.message}"
+        raise Errors::Error.new(PROXY_NOT_START, :error => e)
 
       else
         @@logger.an_event.info "proxy started on machine #{@listening_ip_proxy} on port #{@listening_port_proxy}"
@@ -283,7 +303,7 @@ module Mim
 
       rescue Exception => e
         @@logger.an_event.error "proxy stopped on machine #{@listening_ip_proxy} on port #{@listening_port_proxy} : #{e.message}"
-        raise "proxy not stop : #{e.message}"
+        raise Errors::Error.new(PROXY_NOT_STOP, :error => e)
 
       else
         @@logger.an_event.info "proxy stopped on machine #{@listening_ip_proxy} on port #{@listening_port_proxy}"
@@ -295,6 +315,26 @@ module Mim
 
     private
 
+    def check_license_server
+=begin
+      if @license_server_enabled
+        #TODO tester l'acces au server de license
+
+        @@logger.an_event.debug "le server de license est joignable #{}"
+        raise Errors::Error.new(PROXY_NOT_VALID, :error => "server not joinable")
+
+        #TODO tester la validité de la license
+        @@logger.an_event.debug "check la date validite du fichier de license : license.data"
+        raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
+
+      else
+        #TODO tester la validité du fichier de licence  : \userdata\config\license.data
+        @@logger.an_event.debug "check la date validite du fichier de license : license.data"
+        raise Errors::Error.new(PROXY_NOT_VALID, :error => "license out of date")
+
+      end
+=end
+    end
 
     def load_parameters
       #--------------------------------------------------------------------------------------------------------------------

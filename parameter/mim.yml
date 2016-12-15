@@ -6,7 +6,9 @@ development:
   :java_key_tool_path: ["C:", "Program Files", "Java", "jre6", "bin", "keytool.exe"]
   :start_page_server_ip: "127.0.0.1"
   :start_page_server_port: 8080
-
+  :license_server_enabled: false
+  :license_server_host: 127.0.0.1
+  :license_server_port: 8888
 
 test:
   :debugging:  true
@@ -16,7 +18,9 @@ test:
   :java_key_tool_path: ["d:", "java", "bin", "keytool.exe"]
   :start_page_server_ip: "192.168.1.88"
   :start_page_server_port: 8080
-
+  :license_server_enabled: false
+  :license_server_host: 192.168.1.88
+  :license_server_port: 8888
 
 production:
   :debugging:  false
@@ -26,3 +30,6 @@ production:
   :java_key_tool_path: ["C:", "Program Files", "Java", "jre1.8.0_77", "bin", "keytool.exe"]
   :start_page_server_ip: "192.168.1.88"
   :start_page_server_port: 8080
+  :license_server_enabled: false
+  :license_server_host: 192.168.1.88
+  :license_server_port: 8888

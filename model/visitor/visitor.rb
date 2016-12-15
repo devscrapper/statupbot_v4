@@ -1339,8 +1339,7 @@ module Visitors
 
         url = @browser.engine_search.page_url
 
-        @browser.driver.replace(url)
-        #@browser.display_start_page(url, @id)
+        @browser.display_start_page(url)
 
       rescue Exception => e
         @@logger.an_event.error "visitor went to engine search page <#{url}> : #{e.message}"
@@ -1348,8 +1347,7 @@ module Visitors
 
       else
         @@logger.an_event.info "visitor went to engine search page <#{url}>"
-        @@logger.an_event.info "history_size <#{@browser.driver.history_size}>"
-        @@logger.an_event.info "referrer <#{@browser.driver.referrer}>"
+
       end
 
       max_count_submiting_captcha = MAX_COUNT_SUBMITING_CAPTCHA
@@ -1397,8 +1395,7 @@ module Visitors
 
         url = @visit.landing_link.url
 
-        @browser.driver.replace(url)
-        #@browser.display_start_page(url, @id)
+        @browser.display_start_page(url)
 
       rescue Exception => e
         @@logger.an_event.error "visitor went to landing page <#{url}> : #{e.message}"
