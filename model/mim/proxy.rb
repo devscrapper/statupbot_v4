@@ -322,7 +322,7 @@ module Mim
 
         rescue Exception => e
           @@logger.an_event.debug "le server de license non joignable"
-          raise Errors::Error.new(PROXY_NOT_VALID, :error => "server not joinable")
+          raise Errors::Error.new(PROXY_NOT_VALID, :error => e)
 
         else
           @@logger.an_event.debug "license recupere du serveur de licence"

@@ -441,7 +441,7 @@ module Visitors
         # supprime dir /visitors/visitor_id
         #-----------------------------------------------------------------------------------------------------------
         wait(10) {
-          FileUtils.rm_r(File.join(@home)) if File.exist?(File.join(@home))
+          FileUtils.rm_rf(File.join(@home)) if File.exist?(File.join(@home))
         }
         @@logger.an_event.debug "delete dir visitor_id <#{@home}>"
 
