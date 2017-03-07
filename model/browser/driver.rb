@@ -226,20 +226,8 @@ module Sahi
       links
     end
 
-    def new_popup_is_open? (url)
-      exist = false
-      wait(10, false, 2) {
-        get_windows.each { |win|
-          @@logger.an_event.debug win.inspect
-          if exist = (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
-            break
-          end
-        }
-        raise "new popup window not found" unless exist
-        exist
-      }
-
-      exist
+    def new_popup_open_url
+      get_windows.select{|win|win["wasOpened"] == "1" }[0]['windowURL']
     end
 
     #-----------------------------------------------------------------------------------------------------------------
@@ -557,6 +545,10 @@ module Sahi
       @@logger.an_event.debug "title #{title}"
 
       exec_command("windowAction", {"action" => action, "title" => title})
+    end
+
+    def windows_count
+      get_windows.count{|w| !w["windowTitle"].empty?}
     end
 
     private

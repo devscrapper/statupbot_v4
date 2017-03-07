@@ -4,7 +4,7 @@ module Visits
   module Advertisings
     class Adsense < Advertising
 
-      DOMAINS = ["googleads.g.doubleclick.net", "tpc.googlesyndication.com"]
+      DOMAINS = ["www.googleadservices.com", "googleads.g.doubleclick.net"]
 
       include Errors
 
@@ -28,19 +28,12 @@ module Visits
             frame = browser.driver.domain(domain)
 
             if frame.domain_exist?
-              adverts += frame.link("/.*googleads.g.doubleclick.net.*/").collect_similar
-              adverts += frame.link("/.*googleadservices.*/").collect_similar
+              adverts += frame.link("/.*#{domain}.*/").collect_similar
               adverts.each{|a|  @@logger.an_event.debug "advert : #{a.text}"}
               links += adverts
             else
               @@logger.an_event.debug "frame with domain <#{domain}> not exist"
             end
-=begin
-            adverts.map! { |f|
-              href = f.fetch("href")
-              frame.link(href) unless /.*googleads.g.doubleclick.net.*/.match(href).nil?
-            }.compact!
-=end
           }
           raise "no advert link found" if links.empty?
 

@@ -293,26 +293,41 @@ module Browsers
           @@logger.an_event.debug "target of #{link_element.identifiers} change to ''"
         end
 
-
         url_before = url
         @@logger.an_event.debug "url before #{url_before}"
+
+        windows_count_before_click = @driver.windows_count
+        @@logger.an_event.debug "windows count before click #{windows_count_before_click}"
 
         link_element.click
         @@logger.an_event.debug "click on #{link_element}"
 
-        # on attend tq que les url_before et url courante sont identiques, au max 20s.
-        url_after = ""
-        wait(20, true, 2) {
-          raise "page not refresh with url #{link_element.identifiers}" if url_before == (url_after = url)
-          url_before != url_after
+        @driver.get_windows.each { |win| @@logger.an_event.debug win.inspect }
+
+        windows_count_after_click = 0
+        wait(20, false, 2) {
+          windows_count_after_click = @driver.windows_count
+          windows_count_before_click != windows_count_after_click
         }
-        @@logger.an_event.debug "url after #{url_after}"
+        @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
 
         # on autorise d'ouvrir un nouvel onglet ou fenetre que pour les pub qui le demande sinon les autres liens
         # restent dans leur fenetre.
         # est ce qu'une nouvelle fenetre ou onglet a été créé qui est difféerent de celui sur lequel on est qd on est
         # déjà sur une nouvelle fenetre ou onglet
-        if @driver.new_popup_is_open?(url_after)
+        if windows_count_before_click == windows_count_after_click
+          # on attend tq que les url_before et url courante sont identiques, au max 20s.
+          url_after = ""
+          wait(20, true, 2) {
+            raise "page not refresh with url #{link_element.identifiers}" if url_before == (url_after = url)
+            url_before != url_after
+          }
+          @@logger.an_event.debug "url after #{url_after}"
+
+        else
+          url_after = @driver.new_popup_open_url
+          @@logger.an_event.debug "new tab open with url #{url_after}"
+
           if accept_popup
             # si popup est ouverte sur au click d'une pub alors on remplace le driver principal par celui de la nouvelle fenetre
             @driver = @driver.focus_popup(url_after)
@@ -325,6 +340,7 @@ module Browsers
             @driver.close_popups(url_after)
             @@logger.an_event.debug "close popup"
           end
+
         end
 
       rescue Exception => e
@@ -874,6 +890,15 @@ module Browsers
     #-----------------------------------------------------------------------------------------------------------------
     def resize
       begin
+        unless $staging == "development"
+          # resize l'ecran en choisissant une des dimension possible superireu à celle du naviagteur
+          max_width, max_height = set_resolution(@width.to_i, @height.to_i)
+          # Si aucun dimension superieure possible alors, on resize la fenetre du browser avecla resolution max, qui a été retouenée
+          if max_width.to_i < @width.to_i or max_height.to_i < @height.to_i
+            @width = max_width
+            @height = max_height
+          end
+        end
         #Rautomation ne sait pas resizé
         @driver.resize(@width.to_i, @height.to_i)
 
@@ -1300,6 +1325,69 @@ module Browsers
         link_found
 
       end
+    end
+
+    # utilisation de l'outil Qres.exe
+    # QRES [/X:[px]] [/Y:[px]] [/C:[bits] [/R:[rr]] [/S] [/L] [/D] [/V] [/?] [/H]
+    #
+    #   /X    Width in pixels.
+    #   /Y    Height in pixels.
+    #   /C    Color depth.
+    #   /R    Refresh rate.
+    #   /S    Show current display settings.
+    #   /L    List all display modes.
+    #   /D    Does NOT save display settings in the registry..
+    #   /V    Does NOT display version information.
+    #   /?    Displays usage information.
+    #   /H    Displays more help.
+    #
+    # Ex: "QRes.exe /x:640 /c:8" Changes resolution to 640 x 480 and the color depth to 256 colors.
+
+    # 1-choisir une resolution parmi la liste des resolutions disponibles fournies par Qres.
+    # 2-ce choix est conditionné en fonction de la taille de la fenetre du browser => screen resolution > window browser size
+    # 3-appliquer le choix
+
+
+    def set_resolution(width, height)
+      qres = File.join([File.dirname(__FILE__), '..', '..', 'tool'], "QRes.exe")
+      res =[]
+
+
+      resolutions = File.popen("#{qres} /l").read.split(/\n/)
+      if resolutions.empty?
+        @@logger.an_event.fatal "set resolution screen : none resolution screen"
+
+      else
+        for resol in resolutions
+          r = /(?<width>\d+)x(?<height>\d+), (?<depth>\d+)/.match(resol)
+
+          if !r.nil? and r[:width].to_i >= width and r[:height].to_i >= height
+            res << [r[:width], r[:height], r[:depth]]
+
+          end
+        end
+
+        unless res.empty?
+          # choisit une resolution au hasard
+          width, height, depth = res.sample
+
+        else
+          # les reolutions sont classees par ordre croissant de resolution, on prend donc la derniere.
+          # retourne cette derniere pour retailler la fenetre du browser avec cette dimension, pour ne pas que la fenetresoit
+          # plus grande que l'ecran
+          @@logger.an_event.warn "set resolution screen : none resolution screen compatible with #{[width, height]}"
+          r = /(?<width>\d+)x(?<height>\d+), (?<depth>\d+)/.match(resolutions[resolutions.size - 1])
+          width = r[:width]
+          height = r[:height]
+          depth = r[:depth]
+
+        end
+        ok = File.popen("#{qres} /x:#{width} /y:#{height} /c:#{depth}").read =="QRes v1.1\nCopyright (C) Anders Kjersem.\n\nMode Ok...\n"
+
+        @@logger.an_event.info "set resolution screen to #{[width, height, depth]} : #{ok}"
+
+      end
+      [width, height]
     end
 
     def format_links(links)
