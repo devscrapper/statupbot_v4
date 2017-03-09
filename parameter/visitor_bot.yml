@@ -1,6 +1,7 @@
 development:
   :java_runtime_path: ["\"c:", "Program Files", "Java", "jre6", "bin", "java.exe\""]
   :java_key_tool_path: ["\"C:", "Program Files", "Java", "jre6", "bin", "keytool.exe\""]
+  :qres_path: ["d:", "Personnel", "qres"]
   :image_magick_path: ["d:", "Personnel", "imagemagick"]
   :start_page_server_ip: "127.0.0.1"
   :start_page_server_port: 8080
@@ -14,6 +15,7 @@ development:
 test:
   :java_runtime_path: ["d:", "java", "bin", "java.exe"]
   :java_key_tool_path: ["d:", "java", "bin", "keytool.exe"]
+  :qres_path: ["d:", "qres"]
   :image_magick_path: ["d:", "imagemagick"]
   :start_page_server_ip: "192.168.1.88"
   :start_page_server_port: 8080
@@ -26,6 +28,7 @@ test:
 production:
   :java_runtime_path: ["\"c:", "Program Files (x86)", "Java", "jre6", "bin", "java.exe\""]
   :java_key_tool_path: ["\"C:", "Program Files", "Java", "jre6", "bin", "keytool.exe\""]
+  :qres_path: ["d:", "qres"]
   :image_magick_path: ["d:", "Personnel", "imagemagick"]
   :start_page_server_ip: "127.0.0.1"
   :start_page_server_port: 8080

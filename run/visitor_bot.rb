@@ -399,6 +399,7 @@ else
   $java_runtime_path = parameters.java_runtime_path.join(File::SEPARATOR)
   $java_key_tool_path = parameters.java_key_tool_path.join(File::SEPARATOR)
   $image_magick_path = parameters.image_magick_path.join(File::SEPARATOR)
+  $qres_path = parameters.qres_path.join(File::SEPARATOR)
   $start_page_server_ip = parameters.start_page_server_ip
   $start_page_server_port = parameters.start_page_server_port
   $dir_archive = parameters.archive
@@ -413,6 +414,7 @@ else
   logger.a_log.info "java runtime path : #{$java_runtime_path}"
   logger.a_log.info "java key tool path : #{$java_key_tool_path}"
   logger.a_log.info "image magick path : #{$image_magick_path}"
+  logger.a_log.info "qres path : #{$qres_path}"
   logger.a_log.info "start page server ip : #{$start_page_server_ip}"
   logger.a_log.info "start page server port: #{$start_page_server_port}"
   logger.a_log.info "debugging : #{$debugging}"

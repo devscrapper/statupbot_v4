@@ -1349,10 +1349,13 @@ module Browsers
 
 
     def set_resolution(width, height)
-      qres = File.join([File.dirname(__FILE__), '..', '..', 'tool'], "QRes.exe")
+      qres = File.join([$qres_path, "QRes.exe"])
       res =[]
 
-
+      unless File.exist?(qres)
+        @@logger.an_event.fatal "qres not exist : #{qres}"
+        raise "qres.exe not exist"
+      end
       resolutions = File.popen("#{qres} /l").read.split(/\n/)
       if resolutions.empty?
         @@logger.an_event.fatal "set resolution screen : none resolution screen"
