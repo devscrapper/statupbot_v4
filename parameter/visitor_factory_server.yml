@@ -9,6 +9,10 @@ development:
   :max_time_to_live_visit: 15 #en minute
   :debugging:  true
   :proxy_ip_list: ["localhost"]
+  :archive: ["d:",  "personnel", "temp", "statupbot", "archive"]
+  :log: ["d:",  "personnel", "temp","statupbot", "log"]
+  :tmp: ["d:",  "personnel", "temp","statupbot", "tmp"]
+  :visitors: ["d:",  "personnel", "temp","statupbot", "visitors"]
 
 test:
   :runtime_ruby: ["d:", "ruby223", "bin", "ruby.exe"]

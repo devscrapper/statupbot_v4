@@ -4,7 +4,7 @@ development:
   :launcher_runtime_dir: ["d:", "Personnel", "referentiel","dev" , "statupbot.v4", "tmp", "launcher"]
   :java_runtime_dir: ["c:", "Program Files", "Java", "jre6", "bin"]
   :java_key_tool_path: ["C:", "Program Files", "Java", "jre6", "bin", "keytool.exe"]
-  :start_page_server_ip: "127.0.0.1"
+  :start_page_server_ip: "192.168.1.88"
   :start_page_server_port: 8080
   :license_server_enabled: true
 
