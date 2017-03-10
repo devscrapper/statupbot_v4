@@ -47,7 +47,7 @@
 401:  "link [link] not activate"
 402:  "link [link] not exist"
 403:  "link [link] not create"
-500:  "argument not define"
+500:  "argument [variable] not define"
 501:  "page not create"
 502:  "around [around] unknown"
 503:  "proxy sahi cannot connect to url [url]"
