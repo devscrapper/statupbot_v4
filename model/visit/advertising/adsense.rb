@@ -27,8 +27,14 @@ module Visits
 
         begin
           links = browser.driver.get_windows.map { |w|
+            @@logger.an_event.debug "window : #{w.to_s}"
             if DOMAINS.include?(w["domain"])
-              browser.driver.domain(w["domain"]).link("/.*#{w["domain"]}.*/").collect_similar
+              @@logger.an_event.debug "domain : #{w["domain"]}"
+              links = browser.driver.domain(w["domain"]).link("/.*#{w["domain"]}.*/").collect_similar
+              links.each { |l|
+                @@logger.an_event.debug "link : #{l}"
+              }
+              links
             end
           }.compact.flatten
           links.each { |l|
