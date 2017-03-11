@@ -1293,7 +1293,7 @@ module Browsers
 
         else
           links << @driver.create_link(link)
-          link_url = links[0].identifiers
+          link_url = links[0].fetch("href")
 
         end
         @@logger.an_event.debug "search links : "; links.each { |l| @@logger.an_event.debug l.inspect }
@@ -1364,7 +1364,8 @@ module Browsers
         for resol in resolutions
           r = /(?<width>\d+)x(?<height>\d+), (?<depth>\d+)/.match(resol)
 
-          if !r.nil? and r[:width].to_i >= width and r[:height].to_i >= height
+          #elmine les resoltion inferieure à 8bit couleur => illisible
+          if !r.nil? and r[:width].to_i >= width and r[:height].to_i >= height and r[:depth].to_i > 8
             res << [r[:width], r[:height], r[:depth]]
 
           end

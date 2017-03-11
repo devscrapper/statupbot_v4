@@ -23,17 +23,16 @@ module Visits
         links = []
         count_try = 0
         adverts = []
-        begin
-          DOMAINS.each { |domain|
-            frame = browser.driver.domain(domain)
 
-            if frame.domain_exist?
-              adverts += frame.link("/.*#{domain}.*/").collect_similar
-              adverts.each{|a|  @@logger.an_event.debug "advert : #{a.text}"}
-              links += adverts
-            else
-              @@logger.an_event.debug "frame with domain <#{domain}> not exist"
+
+        begin
+          links = browser.driver.get_windows.map { |w|
+            if DOMAINS.include?(w["domain"])
+              browser.driver.domain(w["domain"]).link("/.*#{w["domain"]}.*/").collect_similar
             end
+          }.compact.flatten
+          links.each { |l|
+            @@logger.an_event.debug "link : #{{"href" => l.fetch("href"), "text" => l.fetch("text")}}"
           }
           raise "no advert link found" if links.empty?
 
