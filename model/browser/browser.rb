@@ -307,15 +307,15 @@ module Browsers
         windows_count_after_click = 0
         wait(20, false, 2) {
           windows_count_after_click = @driver.windows_count
-          windows_count_before_click != windows_count_after_click
+          @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
+          windows_count_before_click < windows_count_after_click
         }
-        @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
 
         # on autorise d'ouvrir un nouvel onglet ou fenetre que pour les pub qui le demande sinon les autres liens
         # restent dans leur fenetre.
         # est ce qu'une nouvelle fenetre ou onglet a été créé qui est difféerent de celui sur lequel on est qd on est
         # déjà sur une nouvelle fenetre ou onglet
-        if windows_count_before_click == windows_count_after_click
+        if windows_count_before_click >= windows_count_after_click
           # on attend tq que les url_before et url courante sont identiques, au max 20s.
           url_after = ""
           wait(20, true, 2) {
