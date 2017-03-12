@@ -30,11 +30,19 @@ module Visits
             @@logger.an_event.debug "window : #{w.to_s}"
             if DOMAINS.include?(w["domain"])
               @@logger.an_event.debug "domain : #{w["domain"]}"
-              links = browser.driver.domain(w["domain"]).link("/.*#{w["domain"]}.*/").collect_similar
-              links.each { |l|
-                @@logger.an_event.debug "link : #{l}"
+              frame = browser.driver.domain(w["domain"])
+              @@logger.an_event.debug "frame : #{frame}"
+              adverts = frame.link("/.*#{w["domain"]}.*/").collect_similar
+              @@logger.an_event.debug "adverts : adverts"
+              adverts.each { |l|
+                @@logger.an_event.debug "adverts : #{l}"
               }
-              links
+              adverts2 = frame.link("/.*.*/").collect_similar
+              @@logger.an_event.debug "adverts2 : adverts2"
+              adverts2.each { |l|
+                @@logger.an_event.debug "adverts2 : #{l}"
+              }
+              adverts
             end
           }.compact.flatten
           links.each { |l|
