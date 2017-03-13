@@ -84,30 +84,32 @@ Trollop::die :proxy_port, "is require with proxy" if opts[:proxy_type] != "none"
 # visitor_bot retourne à la fois un CR à visitor_factory et envoie une raison de l'erreur à statupweb
 # tableau d'alignement des CR et des raisons :
 #-----------------------------------------------------------------------------------------------------------------------
-# ERROR                          | CR                      | RAISON
+# ERROR                          | CR                         | RAISON
 #-----------------------------------------------------------------------------------------------------------------------
-# no error                       | OK                      | no reason
-# error not identifie            | KO                      | "error not catch"
+# no error                       | OK                         | no reason
+# error not identifie            | KO                         | "error not catch"
 #-----------------------------------------------------------------------------------------------------------------------
-# ARGUMENT_UNDEFINE              | ERR_VISIT_DEFINITION    | "visit definition"
-# VISIT_NOT_LOAD                 | ERR_VISIT_LOADING       | "visit loading"
-# VISIT_NOT_CREATE               | ERR_VISIT_CREATION      | "visit creation"
-# VISITOR_NOT_FULL_EXECUTE_VISIT | ERR_VISIT_EXECUTION     | "visit execution"
-# Timeout::Error                 | ERR_VISIT_OVER_TTL      | "visit over ttl"
+# ARGUMENT_UNDEFINE              | ERR_VISIT_DEFINITION       | "visit definition"
+# VISIT_NOT_LOAD                 | ERR_VISIT_LOADING          | "visit loading"
+# VISIT_NOT_CREATE               | ERR_VISIT_CREATION         | "visit creation"
+# VISITOR_NOT_FULL_EXECUTE_VISIT | ERR_VISIT_EXECUTION        | "visit execution"
+# Timeout::Error                 | ERR_VISIT_OVER_TTL         | "visit over ttl"
 #-----------------------------------------------------------------------------------------------------------------------
-# ARGUMENT_UNDEFINE              | ERR_VISITOR_DEFINITON   | "visitor definition"
-# VISITOR_NOT_CREATE             | ERR_VISITOR_CREATION    | "visitor creation"
-# VISITOR_NOT_BORN               | ERR_VISITOR_BIRTH       | "visitor birth"
-# VISITOR_NOT_DIE                | ERR_VISITOR_DEATH       | "visitor death"
-# VISITOR_NOT_INHUME             | ERR_VISITOR_INHUMATION  | "visitor inhumation"
+# ARGUMENT_UNDEFINE              | ERR_VISITOR_DEFINITON      | "visitor definition"
+# VISITOR_NOT_CREATE             | ERR_VISITOR_CREATION       | "visitor creation"
+# VISITOR_NOT_BORN               | ERR_VISITOR_BIRTH          | "visitor birth"
+# VISITOR_NOT_DIE                | ERR_VISITOR_DEATH          | "visitor death"
+# VISITOR_NOT_INHUME             | ERR_VISITOR_INHUMATION     | "visitor inhumation"
 #-----------------------------------------------------------------------------------------------------------------------
-# VISITOR_NOT_OPEN               | ERR_BROWSER_OPENING     | "browser opening"
-# VISITOR_NOT_CLOSE              | ERR_BROWSER_CLOSING     | "browser closing"
+# VISITOR_NOT_OPEN               | ERR_BROWSER_OPENING        | "browser opening"
+# VISITOR_NOT_CLOSE              | ERR_BROWSER_CLOSING        | "browser closing"
 #-----------------------------------------------------------------------------------------------------------------------
-# BROWSER_NOT_FOUND_LINK         | ERR_LINK_TRACKING       | "link tracking"
-# NONE_ADVERT                    | ERR_ADVERT_TRACKING     | "advert tracking"
-# VISITOR_NOT_SUBMIT_CAPTCHA     | ERR_CAPTCHA_SUBMITTING  | "captcha sumitting"
-# VISITOR_TOO_MANY_CAPTCHA       | ERR_TOO_MANY_CAPTCHA    | "too many captcha"
+# BROWSER_NOT_FOUND_LINK         | ERR_LINK_TRACKING          | "link tracking"
+# NONE_ADVERT                    | ERR_ADVERT_TRACKING        | "advert tracking"
+# VISITOR_NOT_SUBMIT_CAPTCHA     | ERR_CAPTCHA_SUBMITTING     | "captcha sumitting"
+# VISITOR_TOO_MANY_CAPTCHA       | ERR_TOO_MANY_CAPTCHA       | "too many captcha"
+# URL_NOT_FOUND                  | ERR_SAHI_PROXY_NOT_CONNECT | "sahi cannot connect"
+# PROXY_GEOLOCATION              | ERR_GEO_PROXY              | "geo proxy error"
 #-----------------------------------------------------------------------------------------------------------------------
 OK = 0
 KO = 1

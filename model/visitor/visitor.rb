@@ -617,7 +617,7 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor clicked on landing link #{link.url} on results page : #{e.message}."
+        @@logger.an_event.error "visitor clicked on landing link on results page : #{e.message}."
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LANDING, :error => e)
 
       else
@@ -682,7 +682,7 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose link <#{link.url}> on advertiser website : #{e.message}"
+        @@logger.an_event.error "visitor  chose link on advertiser website : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
@@ -744,7 +744,7 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose link <#{link.url}> on results search : #{e.message}"
+        @@logger.an_event.error "visitor  chose link on results search : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
@@ -824,7 +824,7 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor chose link <#{link.url}> on unknown website : #{e.message}"
+        @@logger.an_event.error "visitor chose link  on unknown website : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
@@ -888,7 +888,7 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose link <#{link.url}> on website : #{e.message}"
+        @@logger.an_event.error "visitor  chose link on website : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
@@ -1074,7 +1074,7 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor clicked on referral link #{link.url} on results page : #{e.message}."
+        @@logger.an_event.error "visitor clicked on referral link on results page : #{e.message}."
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_REFERRAL, :error => e)
 
       else
@@ -1280,7 +1280,7 @@ module Visitors
         @browser.go_to(url)
 
       rescue Exception => e
-        @@logger.an_event.error "visitor went to engine search page <#{url}> : #{e.message}"
+        @@logger.an_event.error "visitor went to engine search page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_GO_TO_ENGINE_SEARCH, :error => e)
 
       else
@@ -1342,7 +1342,7 @@ module Visitors
         @browser.display_start_page(url)
 
       rescue Exception => e
-        @@logger.an_event.error "visitor went to engine search page <#{url}> : #{e.message}"
+        @@logger.an_event.error "visitor went to engine search page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_START_ENGINE_SEARCH, :error => e)
 
       else
@@ -1398,7 +1398,7 @@ module Visitors
         @browser.display_start_page(url)
 
       rescue Exception => e
-        @@logger.an_event.error "visitor went to landing page <#{url}> : #{e.message}"
+        @@logger.an_event.error "visitor went to landing page : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_START_LANDING, :error => e)
 
       else
