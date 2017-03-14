@@ -1,6 +1,7 @@
 require_relative '../../lib/error'
 require_relative '../../lib/os'
 require 'yaml'
+require 'csv'
 
 module Mim
   class BrowserTypes

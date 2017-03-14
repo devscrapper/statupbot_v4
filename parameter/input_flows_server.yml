@@ -3,6 +3,8 @@ development:
   :listening_port: 9201
   :periodicity_supervision: 15m  #(minute)
   :debugging:  true
+  :log: ["d:", "Personnel", "temp", "statupbot", "log"]
+  :tmp: ["d:", "Personnel", "temp", "statupbot", "tmp"]
 
 
 test:

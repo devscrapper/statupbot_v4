@@ -5,10 +5,8 @@ require 'em/threaded_resource'
 require 'em/pool'
 require 'timeout'
 require_relative '../../lib/flow'
-require_relative '../../lib/logging'
-require_relative '../../lib/error'
-require_relative '../../lib/monitoring'
 require_relative '../geolocation/geolocation_factory'
+
 
 class VisitorFactory
   #----------------------------------------------------------------------------------------------------------------
@@ -46,6 +44,9 @@ class VisitorFactory
   ERR_ADVERT_TRACKING = 14
   ERR_CAPTCHA_SUBMITTING = 15
   ERR_VISIT_EXECUTION = 16
+  ERR_TOO_MANY_CAPTCHA = 17
+  ERR_SAHI_PROXY_NOT_CONNECT = 18
+  ERR_GEO_PROXY = 19
   #----------------------------------------------------------------------------------------------------------------
   # attribut
   #----------------------------------------------------------------------------------------------------------------
@@ -238,10 +239,12 @@ class VisitorFactory
   # sandbox = "#{@runtime_start_sandbox} /box:#{@sand_box_id}  /nosbiectrl  /silent  /elevate /env:VariableName=VariableValueWithoutSpace /wait"
   # cmd = "#{sandbox} #{@runtime_ruby} -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift)  #{VISITOR_BOT} -v #{details[:visit_file]} -t #{details[:port_proxy_sahi]} -p #{@use_proxy_system} #{geolocation}"
   #-----------------------------------------------------------------------------------------------------------------
-  def start_visitor_bot(details)
+  def start_visitor_bot(details, try_count = 0)
+    exit_status = 0
+
     begin
 
-      @@logger.an_event.info "start visitor_bot with browser #{details[:pattern]} and visit file #{details[:visit_file]}"
+      @@logger.an_event.info "try #{try_count} => visitor_bot with browser #{details[:pattern]} and visit file #{details[:visit_file]}"
 
       # si pas d'avert alors :  [:advert][:advertising] = "none"
       # sinon le nom de l'advertising, exemple adsense
@@ -260,8 +263,8 @@ class VisitorFactory
       # -p      http
       # -r      muz11-wbsswsg.ca-technologies.fr
       # -o      8080
-      # -x      et00752
-      # -y      Bremb@18"
+      # -x      e??????
+      # -y      B??????"
 
       cmd = "#{@@runtime_ruby} -e $stdout.sync=true;$stderr.sync=true;load($0=ARGV.shift)"
       cmd += " #{VISITOR_BOT}"
@@ -274,12 +277,11 @@ class VisitorFactory
       @@logger.an_event.debug "cmd : #{cmd}"
 
       visitor_bot_pid = nil
-
-
       visitor_bot_pid = Timeout::timeout((@@max_time_to_live_visit + 2) * 60) {
         @@logger.an_event.debug "start visitor_bot"
         visitor_bot_pid = Process.spawn(cmd)
         visitor_bot_pid, status = Process.wait2(visitor_bot_pid, 0)
+        exit_status = status.exitstatus
         visitor_bot_pid
       }
     rescue Timeout::Error => e
@@ -296,7 +298,7 @@ class VisitorFactory
       end
 
     else
-      @@logger.an_event.debug "start visitor_bot, status : #{status.exitstatus}"
+      @@logger.an_event.debug "start visitor_bot, status stop: #{exit_status}"
 
       delete_log_file(visitor[:id])
       @@logger.an_event.debug "delete log visitor_bot"
@@ -307,6 +309,20 @@ class VisitorFactory
         # par sécurité => nettoyage.
         @@logger.an_event.info "kill visitor_bot"
         kill_by_pid(visitor_bot_pid)
+      end
+    end
+
+    #si une erreur de proxy geolocalisation est survenue alors on réessaie un nombre de fois limité <= 3
+    if exit_status == 19
+      @@logger.an_event.info "#{details[:pattern]} and visit file #{details[:visit_file]} : error geo proxy"
+
+      if try_count < 3
+        @@logger.an_event.info "#{details[:pattern]} and visit file #{details[:visit_file]} : try again"
+        start_visitor_bot(details, try_count + 1)
+
+      else
+        @@logger.an_event.info "#{details[:pattern]} and visit file #{details[:visit_file]} : no more try #{try_count}"
+
       end
     end
   end
@@ -375,8 +391,7 @@ class VisitorFactory
 
   def delete_log_file(visitor_id)
     begin
-      dir = Pathname(File.join(File.dirname(__FILE__), "..", '..', "log")).realpath
-      files = File.join(dir, "visitor_bot_#{visitor_id}.{*}")
+      files = File.join($dir_log, "visitor_bot_#{visitor_id}.{*}")
       FileUtils.rm_r(Dir.glob(files))
 
     rescue Exception => e
