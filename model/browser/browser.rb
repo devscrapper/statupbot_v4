@@ -296,9 +296,16 @@ module Browsers
         url_before = url
         @@logger.an_event.debug "url before #{url_before}"
 
-        windows_count_before_click = @driver.windows_count
+        windows_count_before_click = 0
+        wait(20, false, 2) {
+          windows_count_before_click = @driver.windows_count
+          @@logger.an_event.debug "windows count before click #{windows_count_before_click}"
+          windows_count_before_click > 0
+        }
+        windows_count_before_click = (windows_count_before_click == 0) ? 1 : windows_count_before_click
         @@logger.an_event.debug "windows count before click #{windows_count_before_click}"
 
+        #click on link
         link_element.click
         @@logger.an_event.debug "click on #{link_element}"
 
@@ -308,23 +315,14 @@ module Browsers
         wait(20, false, 2) {
           windows_count_after_click = @driver.windows_count
           @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
-          windows_count_before_click < windows_count_after_click
+          windows_count_after_click > windows_count_before_click
         }
-
+        @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
         # on autorise d'ouvrir un nouvel onglet ou fenetre que pour les pub qui le demande sinon les autres liens
         # restent dans leur fenetre.
         # est ce qu'une nouvelle fenetre ou onglet a été créé qui est difféerent de celui sur lequel on est qd on est
         # déjà sur une nouvelle fenetre ou onglet
-        if windows_count_before_click >= windows_count_after_click
-          # on attend tq que les url_before et url courante sont identiques, au max 20s.
-          url_after = ""
-          wait(20, true, 2) {
-            raise "page not refresh with url #{link_element.identifiers}" if url_before == (url_after = url)
-            url_before != url_after
-          }
-          @@logger.an_event.debug "url after #{url_after}"
-
-        else
+        if windows_count_before_click < windows_count_after_click
           url_after = @driver.new_popup_open_url
           @@logger.an_event.debug "new tab open with url #{url_after}"
 
@@ -341,6 +339,15 @@ module Browsers
             @@logger.an_event.debug "close popup"
           end
 
+        else
+          # on attend tq que les url_before et url courante sont identiques, au max 20s.
+          url_after = ""
+          wait(20, true, 2) {
+            raise "page not refresh with url" if url_before == (url_after = url)
+            url_before != url_after
+          }
+          @@logger.an_event.debug "url after #{url_after}"
+
         end
 
       rescue Exception => e
@@ -348,7 +355,7 @@ module Browsers
         raise Errors::Error.new(BROWSER_NOT_CLICK, :values => {:browser => name}, :error => e)
 
       else
-        @@logger.an_event.debug "browser click on url #{link_element.identifiers}"
+        @@logger.an_event.debug "browser clicked on url"
 
       end
     end
