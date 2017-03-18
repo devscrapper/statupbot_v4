@@ -22,7 +22,7 @@ module Visits
         link = nil
         links = []
         count_try = 0
-        adverts = []
+
 
 
         begin
@@ -32,13 +32,18 @@ module Visits
               @@logger.an_event.debug "domain : #{w["domain"]}"
               frame = browser.driver.domain(w["domain"])
               @@logger.an_event.debug "frame : #{frame.inspect}"
+              adverts = []
               adverts = frame.link("/.*#{w["domain"]}.*/").collect_similar
-              @@logger.an_event.debug "adverts : adverts"
+              adverts += frame.link("/.*www.googleadservices.com.*/").collect_similar
+              @@logger.an_event.debug "#{adverts.size} adverts found"
+
               adverts.each { |l|
                 @@logger.an_event.debug "adverts : #{l} => #{l.fetch('href')}"
               }
+
               adverts2 = frame.link("/.*.*/").collect_similar
-              @@logger.an_event.debug "adverts2 : adverts2"
+              @@logger.an_event.debug "#{adverts2.size} adverts found"
+
               adverts2.each { |l|
                 @@logger.an_event.debug "adverts2 : #{l} => #{l.fetch('href')}"
               }
