@@ -31,16 +31,16 @@ module Visits
             if DOMAINS.include?(w["domain"])
               @@logger.an_event.debug "domain : #{w["domain"]}"
               frame = browser.driver.domain(w["domain"])
-              @@logger.an_event.debug "frame : #{frame}"
+              @@logger.an_event.debug "frame : #{frame.inspect}"
               adverts = frame.link("/.*#{w["domain"]}.*/").collect_similar
               @@logger.an_event.debug "adverts : adverts"
               adverts.each { |l|
-                @@logger.an_event.debug "adverts : #{l}"
+                @@logger.an_event.debug "adverts : #{l} => #{l.fetch('href')}"
               }
               adverts2 = frame.link("/.*.*/").collect_similar
               @@logger.an_event.debug "adverts2 : adverts2"
               adverts2.each { |l|
-                @@logger.an_event.debug "adverts2 : #{l}"
+                @@logger.an_event.debug "adverts2 : #{l} => #{l.fetch('href')}"
               }
               adverts
             end
