@@ -174,14 +174,11 @@ module Visits
     end
 
     def to_s
-      "id : #{@id} \n" +
-          "landing link : #{@landing_link} \n" +
-          "regexp : #{@regexp} \n" +
-          "actions : #{@actions} \n" +
-          "referrer : #{@referrer} \n" +
-          "durations : #{@durations} \n" +
-          "start date time : #{@start_date_time} \n" +
-          "around : #{@around} \n"
+      res = super.to_s
+      res += "landing_link".ljust(25) + ": #{@landing_link}"
+      res += "durations(#{@durations.size})".ljust(25) + ": #{@durations}\n"
+      res += "around".ljust(25) + ": #{@around}\n"
+      res
     end
   end
 

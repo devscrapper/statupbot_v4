@@ -53,7 +53,7 @@ module Visits
         # il faut en generer une autre aléatoirement
         # car le nombre de duration est calculé par engine bot (doit conserver cela) car il calcule le nombre de page
         # il faut peut être faire calculer le nombre de page mais pas le tableau des durations
-        @durations.empty? ?  Array.new(MAX_DURATION) { |i| i + MIN_DURATION }.sample : @durations.shift
+        @durations.empty? ? Array.new(MAX_DURATION) { |i| i + MIN_DURATION }.sample : @durations.shift
       end
 
       def next_around
@@ -64,8 +64,8 @@ module Visits
       end
 
       def to_s
-        "durations : #{@durations}\n" +
-            "arounds : #{@arounds}\n"
+        "advertiser".ljust(25) + ": durations(#{@durations.size}) : #{@durations}, arounds(#{@arounds.size}) : #{@arounds}\n"
+
       end
     end
   end

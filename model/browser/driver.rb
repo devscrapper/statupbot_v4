@@ -381,7 +381,7 @@ module Sahi
         @@logger.an_event.debug "waiting screenshot ..."
         screenshot_base64 = ""
 
-        wait(60, false, 2) {
+        wait(60, false, 10) {
           # on va chercher le resultat dans le local storage du bronwser
           screenshot_base64 = fetch("localStorage.screenshot_base64")
 

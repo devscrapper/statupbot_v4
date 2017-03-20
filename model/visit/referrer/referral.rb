@@ -37,8 +37,8 @@ module Visits
            :keywords, # String : keyword dont la recherche aboutie forcément la présence d'une url pointant vers le site referral dans les results
            :fake_keywords,
            :referral_uri_search # string contenant une url pointant vers le site referral dans les results peut être egal à page_uri.to_s
-            # si referral_uri_search == page_uri.to_s alors selectionne directement le landing link sur la page du referral.
-            # si referral_uri_search != page_uri.to_s alors surf qq page sur le site referral avant de se debrancher vers la page du referral qui contient le landing link(page_url)
+      # si referral_uri_search == page_uri.to_s alors selectionne directement le landing link sur la page du referral.
+      # si referral_uri_search != page_uri.to_s alors surf qq page sur le site referral avant de se debrancher vers la page du referral qui contient le landing link(page_url)
 
       include Errors
 
@@ -76,7 +76,7 @@ module Visits
 
           @duration = referer_details[:duration]
           @durations = referer_details[:durations]
-          @referral_uri_search =  Pages::Link.new(referer_details[:referral_uri_search])
+          @referral_uri_search = Pages::Link.new(referer_details[:referral_uri_search])
 
         rescue Exception => e
           @@logger.an_event.error e.message
@@ -110,19 +110,18 @@ module Visits
       end
 
       def to_s
-        super.to_s +
-            "page url : #{@page_url} \n" +
-            "durations : #{@durations} \n" +
-            "duration : #{@duration} \n" +
-            "referral_uri_search : #{@referral_uri_search} \n" +
-            "keywords : #{@keywords} \n" +
-            "fake_keywords : #{@fake_keywords} \n" +
-            "random_search_min : #{@random_search_min} \n" +
-            "random_search_max : #{@random_search_max} \n" +
-            "random_surf_min : #{@random_surf_min} \n" +
-            "random_surf_max : #{@random_surf_max} \n"
-
-
+        res = super.to_s + "\n"
+        res += "page url ".ljust(25) + ": #{@page_url}\n"
+        res += "durations".ljust(25) + ": #{@durations}\n"
+        res += "duration".ljust(25) + ": #{@duration}\n"
+        res += "referral_uri_search".ljust(25) + ": #{@referral_uri_search}\n"
+        res += "keywords".ljust(25) + ": #{@keywords}\n"
+        res += "fake_keywords".ljust(25) + ": #{@fake_keywords}\n"
+        res += "random_search_min".ljust(25) + ": #{@random_search_min}\n"
+        res += "random_search_max".ljust(25) + ": #{@random_search_max}\n"
+        res += "random_surf_min".ljust(25) + ": #{@random_surf_min}\n"
+        res += "random_surf_max".ljust(25) + ": #{@random_surf_max}\n"
+        res
       end
     end
   end

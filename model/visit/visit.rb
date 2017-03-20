@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'uuid'
 require 'uri'
+require 'pp' #formatage display visit file
 require_relative '../../lib/error'
 require_relative '../../lib/logging'
 require_relative 'advertising/advertising'
@@ -151,7 +152,7 @@ module Visits
         details = YAML::load(visit_file.read)
         visit_file.close
 
-        @@logger.an_event.debug "visit_details #{details}"
+        @@logger.an_event.debug "visit_details : \n#{PP.pp(details, "")}"
 
       rescue Exception => e
         @@logger.an_event.error e.message
@@ -198,12 +199,12 @@ module Visits
         end
 
       rescue Exception => e
-        @@logger.an_event.error "visit  has none action : #{e.message}"
+        @@logger.an_event.error "visit built : #{e.message}"
         raise Errors::Error.new(VISIT_NOT_CREATE, :values => {:id => visit_details[:id]}, :error => e)
 
       else
-        @@logger.an_event.info "visit #{visit.id} has #{visit.actions.size} actions : #{visit.actions}"
-        @@logger.an_event.debug "visit #{visit.to_s}"
+        @@logger.an_event.info "visit built"
+        @@logger.an_event.debug visit.to_s
         visit
 
       ensure
@@ -266,6 +267,14 @@ module Visits
       @durations.shift
     end
 
+    def to_s
+      res = "id".ljust(25) + ": #{@id}\n"
+      res += "start_date_time".ljust(25) + ": #{@start_date_time}\n"
+      res += "regexp".ljust(25) + ": #{@regexp}\n"
+      res += "actions(#{@actions.size})".ljust(25) + ": #{@actions}\n"
+      res += "referrer".ljust(25) + ": #{@referrer}\n"
+      res
+    end
 
   end
 end

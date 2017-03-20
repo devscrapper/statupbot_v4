@@ -63,7 +63,7 @@ module Visits
         raise e
 
       else
-        @@logger.an_event.debug "visit advert #{@id} initialize"
+        @@logger.an_event.debug "visit advert #{@id} initialized"
 
       ensure
 
@@ -72,9 +72,9 @@ module Visits
 
 
     def to_s
-      super.to_s +
-          "advertising : #{@advertising}\n"
-
+      res = super.to_s
+      res += @advertising.to_s
+      res
     end
 
   end

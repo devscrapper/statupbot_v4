@@ -77,6 +77,12 @@ module Visits
 
       end
 
+      def to_s
+        res = super.to_s
+        res += "fqdns".ljust(25) + ": #{@fqdns}\n"
+        res
+      end
+
       private
 
       def wait(timeout, exception = false, interval=0.2)

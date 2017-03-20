@@ -5,6 +5,9 @@ module Visits
       def advert (&block)
         nil
       end
+      def to_s
+        "\n"
+      end
     end
   end
 end

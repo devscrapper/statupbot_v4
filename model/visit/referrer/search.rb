@@ -105,14 +105,15 @@ module Visits
       end
 
       def to_s
-        super.to_s +
-            "keywords : #{@keywords} \n" +
-            "fake_keywords : #{@fake_keywords} \n" +
-            "durations : #{@durations} \n" +
-            "random_search_min : #{@random_search_min} \n" +
-            "random_search_max : #{@random_search_max} \n" +
-            "random_surf_min : #{@random_surf_min} \n" +
-            "random_surf_max : #{@random_surf_max} \n"
+        res = super.to_s + "\n"
+        res += "keywords".ljust(25) + ": #{@keywords}\n"
+        res += "fake_keywords".ljust(25) + ": #{@fake_keywords}\n"
+        res += "durations".ljust(25) + ": #{@durations}\n"
+        res += "random_search_min".ljust(25) + ": #{@random_search_min}\n"
+        res += "random_search_max".ljust(25) + ": #{@random_search_max}\n"
+        res += "random_surf_min".ljust(25) + ": #{@random_surf_min}\n"
+        res += "random_surf_max".ljust(25) + ": #{@random_surf_max}\n"
+        res
 
       end
 

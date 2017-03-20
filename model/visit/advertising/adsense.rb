@@ -74,6 +74,10 @@ module Visits
 
       end
 
+      def to_s
+        super.to_s
+
+      end
     end
   end
 

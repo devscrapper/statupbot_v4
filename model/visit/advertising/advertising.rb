@@ -78,8 +78,9 @@ module Visits
       end
 
       def to_s
-        "domain : #{@domain}\n" +
-            "advertiser : #{@advertiser}\n"
+        res = "advertising".ljust(25) + ": #{self.class.name}\n"
+        res += @advertiser.to_s
+        res
       end
 
 

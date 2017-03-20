@@ -113,7 +113,7 @@ module Visits
         end
       end
       def to_s
-        "#{self.class.name}\n"
+        "#{self.class.name}"
       end
     end
   end
