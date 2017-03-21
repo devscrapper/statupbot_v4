@@ -204,7 +204,7 @@ module Visits
 
       else
         @@logger.an_event.info "visit built"
-        @@logger.an_event.debug visit.to_s
+        @@logger.an_event.info visit.to_s
         visit
 
       ensure

@@ -132,7 +132,7 @@ module Visitors
         raise Errors::Error.new(VISITOR_NOT_BORN, :error => e)
 
       else
-        @@logger.an_event.info "visitor  is born"
+        @@logger.an_event.info "visitor is born"
 
       ensure
 
@@ -234,11 +234,11 @@ module Visitors
         @browser.quit
 
       rescue Exception => e
-        @@logger.an_event.error "visitor  close browser : #{e.message}"
+        @@logger.an_event.error "visitor close browser : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CLOSE, :error => e)
 
       else
-        @@logger.an_event.info "visitor  close browser"
+        @@logger.an_event.info "visitor close browser"
       ensure
 
       end
@@ -261,10 +261,10 @@ module Visitors
         @proxy.stop
 
       rescue Exception => e
-        @@logger.an_event.error "visitor  die : #{e.message}"
+        @@logger.an_event.error "visitor die : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_DIE, :error => e)
       else
-        @@logger.an_event.info "visitor  die"
+        @@logger.an_event.info "visitor die"
       ensure
 
       end
@@ -290,11 +290,11 @@ module Visitors
         FileUtils.rm_r(Dir.glob(files), :force => true)
 
       rescue Exception => e
-        @@logger.an_event.error "visitor  delete log  : #{e.message}"
+        @@logger.an_event.error "visitor delete log  : #{e.message}"
         raise Errors::Error.new(LOG_VISITOR_NOT_DELETE, :error => e)
 
       else
-        @@logger.an_event.info "visitor  delete log"
+        @@logger.an_event.info "visitor delete log"
 
       ensure
 
@@ -340,14 +340,14 @@ module Visitors
                 # force l'accès au referral par un accès direct
                 act = "e"
                 script.insert(count_finished_actions + 1, act)
-                @@logger.an_event.info "visitor  make action <#{COMMANDS[act]}> instead of  <#{COMMANDS[action]}>"
+                @@logger.an_event.info "visitor make action <#{COMMANDS[act]}> instead of  <#{COMMANDS[action]}>"
                 @@logger.an_event.debug "script #{script}"
 
               when VISITOR_NOT_READ_PAGE
                 # ajout dans le script d'action pour revenir à la page précédent pour refaire l'action qui a planté.
                 # ceci s'arretera quand il n'y aura plus de lien sur lesquel clickés ; lien choisi dans les 3 actions
                 script.insert(count_finished_actions + 1, ["c", action]).flatten!
-                @@logger.an_event.info "visitor  go back to make action #{COMMANDS[action]} again"
+                @@logger.an_event.info "visitor go back to make action #{COMMANDS[action]} again"
                 @@logger.an_event.debug "script #{script}"
 
               when VISITOR_NOT_CLICK_ON_RESULT,
@@ -357,7 +357,7 @@ module Visitors
                 # ajout dand le script d'une action pour choisir un autres results  ou un autre lien
                 #  ceci s'arretera quand il n'y aura plus de lien sur lesquels clickés
                 script.insert(count_finished_actions + 1, action)
-                @@logger.an_event.info "visitor  make action <#{COMMANDS[action]}> again"
+                @@logger.an_event.info "visitor make action <#{COMMANDS[action]}> again"
                 @@logger.an_event.debug "script #{script}"
 
               when VISITOR_NOT_SUBMIT_CAPTCHA, VISITOR_TOO_MANY_CAPTCHA
@@ -368,16 +368,16 @@ module Visitors
                 raise e #stop la visite
 
               else
-                @@logger.an_event.error "visitor  make action  <#{COMMANDS[action]}> : #{e.message}"
+                @@logger.an_event.error "visitor make action  <#{COMMANDS[action]}> : #{e.message}"
                 raise e #stop la visite
             end
 
           rescue Exception => e
-            @@logger.an_event.error "visitor  make action <#{COMMANDS[action]}> : #{e.message}"
+            @@logger.an_event.error "visitor make action <#{COMMANDS[action]}> : #{e.message}"
             raise e #stop la visit
 
           else
-            @@logger.an_event.info "visitor  executed action <#{COMMANDS[action]}>."
+            @@logger.an_event.info "visitor executed action <#{COMMANDS[action]}>."
 
 
           ensure
@@ -392,7 +392,7 @@ module Visitors
             # les autres levent une exception dans le RESCUE donc ne passent pas par là. Elle seront captées par
             # les RESCUE qui englobele FOR
             @@logger.an_event.info @history.to_s
-            source_path, screenshot_path = take_screenshot(count_finished_actions, action)
+            source_path, screenshot_path = take_screenshot(count_finished_actions + 1, action)
 
             Thread.new(@visit.id,
                        script,
@@ -403,7 +403,7 @@ module Visitors
               Monitoring.page_browse(visit_id, script, source_path,screenshot_path, count_finished_actions)
 
             }.join
-            @@logger.an_event.info "visitor  executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
+            @@logger.an_event.info "visitor executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
             count_finished_actions +=1
 
           end
@@ -446,11 +446,11 @@ module Visitors
         @@logger.an_event.debug "delete dir visitor_id <#{@home}>"
 
       rescue Exception => e
-        @@logger.an_event.error "visitor  inhume : #{e.message}"
+        @@logger.an_event.error "visitor inhume : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_INHUME, :error => e)
 
       else
-        @@logger.an_event.info "visitor  inhume"
+        @@logger.an_event.info "visitor inhume"
 
       end
     end
@@ -478,11 +478,11 @@ module Visitors
           @browser.resize
 
         rescue Exception => e
-          @@logger.an_event.error "visitor  open and resize browser : #{e.message}"
+          @@logger.an_event.error "visitor open and resize browser : #{e.message}"
           raise Errors::Error.new(VISITOR_NOT_OPEN, :error => e)
 
         else
-          @@logger.an_event.info "visitor  open and resize browser"
+          @@logger.an_event.info "visitor open and resize browser"
 
 
         end
@@ -534,11 +534,11 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose advert on website : #{e.message}"
+        @@logger.an_event.error "visitor chose advert on website : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_ADVERT, :error => e)
 
       else
-        @@logger.an_event.info "visitor  chose advert on website."
+        @@logger.an_event.info "visitor chose advert on website."
 
       end
 
@@ -551,11 +551,11 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  clicked on link advert on website : #{e.message}."
+        @@logger.an_event.error "visitor clicked on link advert on website : #{e.message}."
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_ADVERT, :error => e)
 
       else
-        @@logger.an_event.info "visitor  clicked on link advert on website."
+        @@logger.an_event.info "visitor clicked on link advert on website."
 
       end
 
@@ -621,7 +621,7 @@ module Visitors
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LANDING, :error => e)
 
       else
-        @@logger.an_event.info "visitor  clicked on link #{link.url} on results page."
+        @@logger.an_event.info "visitor clicked on link #{link.url} on results page."
 
       end
 
@@ -682,11 +682,11 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose link on advertiser website : #{e.message}"
+        @@logger.an_event.error "visitor chose link on advertiser website : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
-        @@logger.an_event.info "visitor  chose link <#{link.url}> on advertiser website."
+        @@logger.an_event.info "visitor chose link <#{link.url}> on advertiser website."
 
       end
 
@@ -703,7 +703,7 @@ module Visitors
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER, :error => e)
 
       else
-        @@logger.an_event.info "visitor  clicked on link #{link.url}> on advertiser website."
+        @@logger.an_event.info "visitor clicked on link #{link.url}> on advertiser website."
 
       end
 
@@ -744,11 +744,11 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose link on results search : #{e.message}"
+        @@logger.an_event.error "visitor chose link on results search : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
-        @@logger.an_event.info "visitor  chose link <#{link.url}> on results search."
+        @@logger.an_event.info "visitor chose link <#{link.url}> on results search."
 
       end
 
@@ -845,7 +845,7 @@ module Visitors
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_UNKNOWN, :error => e)
 
       else
-        @@logger.an_event.info "visitor  clicked on link <#{link.url}> on unknown website."
+        @@logger.an_event.info "visitor clicked on link <#{link.url}> on unknown website."
 
       end
 
@@ -888,11 +888,11 @@ module Visitors
 
       rescue Exception => e
 
-        @@logger.an_event.error "visitor  chose link on website : #{e.message}"
+        @@logger.an_event.error "visitor chose link on website : #{e.message}"
         raise Errors::Error.new(VISITOR_NOT_CHOOSE_LINK, :error => e)
 
       else
-        @@logger.an_event.info "visitor  chose link <#{link.url}> on website."
+        @@logger.an_event.info "visitor chose link <#{link.url}> on website."
 
       end
 
@@ -909,7 +909,7 @@ module Visitors
         raise Errors::Error.new(VISITOR_NOT_CLICK_ON_LINK_ON_WEBSITE, :error => e)
 
       else
-        @@logger.an_event.info "visitor  clicked on link #{link.url} on website."
+        @@logger.an_event.info "visitor clicked on link #{link.url} on website."
 
       end
 
@@ -1284,7 +1284,7 @@ module Visitors
         raise Errors::Error.new(VISITOR_NOT_GO_TO_ENGINE_SEARCH, :error => e)
 
       else
-        @@logger.an_event.info "visitor  went to engine search page <#{url}>"
+        @@logger.an_event.info "visitor went to engine search page <#{url}>"
 
       end
 
@@ -1765,21 +1765,27 @@ module Visitors
     end
 
     def to_s
-      end_col0 = 11
-      end_col1 = 2
-      end_col2 = 11
-      end_col3 = 18
-      end_col4 = 98
+      end_col0 = 3
+      end_col1 = 11
+      end_col2 = 3
+      end_col3 = 2
+      end_col4 = 11
+      end_col5 = 18
+      end_col6 = 84
       res = "\n" + '|- BEGIN - HISTORY ---------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
-      res += '| Time         | Cmd | Driver       | Page                | Url                                                                                                 |' + "\n"
+      res += '| Pos. | Time         | Dur. | Cmd | Driver       | Page                | Url                                                                                   |' + "\n"
       res += '|---------------------------------------------------------------------------------------------------------------------------------------------------------------|' + "\n"
+      pos = 1
       self.each { |h|
-        res += "| #{h[:time][0..end_col0].ljust(end_col0 + 2)}"
-        res += "| #{h[:cmd][0..end_col1].ljust(end_col1 + 2)}"
-        res += "| #{h[:driver].popup_name.to_s[0..end_col2].ljust(end_col2 + 2)}"
-        res += "| #{h[:page].class.name[0..end_col3].ljust(end_col3 + 2)}"
-        res += "| #{h[:page].url[0..end_col4].ljust(end_col4 + 2)}"
+        res += "| #{pos.to_s[0..end_col0].ljust(end_col0 + 2)}"
+        res += "| #{h[:time][0..end_col1].ljust(end_col1 + 2)}"
+        res += "| #{h[:page].duration.to_s[0..end_col2].ljust(end_col2 + 2)}"
+        res += "| #{h[:cmd][0..end_col3].ljust(end_col3 + 2)}"
+        res += "| #{h[:driver].popup_name.to_s[0..end_col4].ljust(end_col4 + 2)}"
+        res += "| #{h[:page].class.name[0..end_col5].ljust(end_col5 + 2)}"
+        res += "| #{h[:page].url[0..end_col6].ljust(end_col6 + 2)}"
         res += "|\n"
+        pos +=1
       }
       res += "|- END - HISTORY------------------------------------------------------------------------------------------------------------------------------------------------|"
       res

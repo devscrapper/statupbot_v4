@@ -157,6 +157,7 @@ module Pages
       res += "| Url      : #{url[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
       res += "| Title    : #{title[0..end_col0].ljust(end_col0 + 2)}|" + "\n"
       res += "| Duration : #{@duration.to_s[0..end_col1].ljust(end_col1 + 2)}| Duration search link : #{@duration_search_link.to_s[0..end_col2].ljust(end_col2 + 2)}|" + "\n"
+      res
     end
 
     def url

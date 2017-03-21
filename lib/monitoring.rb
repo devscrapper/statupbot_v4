@@ -45,7 +45,7 @@ module Monitoring
       }
 
     rescue Exception => e
-      @@logger.an_event.error "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.warn "change state to #{state} of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
 
@@ -70,7 +70,7 @@ module Monitoring
 
       }
     rescue Exception => e
-      @@logger.an_event.error "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.warn "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
       @@logger.an_event.debug "change state to started state of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
@@ -95,7 +95,7 @@ module Monitoring
 
       }
     rescue Exception => e
-      @@logger.an_event.error "change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.warn "change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
       @@logger.an_event.debug "change count browse page of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
@@ -133,7 +133,7 @@ module Monitoring
 
       }
     rescue Exception => e
-      @@logger.an_event.error "send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.warn "send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
       @@logger.an_event.debug "send screenshot of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
@@ -164,7 +164,7 @@ module Monitoring
       }
 
     rescue Exception => e
-      @@logger.an_event.error "send captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.warn "send captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
       @@logger.an_event.debug "send captcha of visit #{visit_id} (#{@statupweb_server_ip}:#{@statupweb_server_port})"
@@ -206,7 +206,7 @@ module Monitoring
         end
       }
     rescue Exception => e
-      @@logger.an_event.error "send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
+      @@logger.an_event.warn "send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port}) => #{e.message}"
 
     else
       @@logger.an_event.debug "send log file of visit #{visit_id} to (#{@statupweb_server_ip}:#{@statupweb_server_port})"

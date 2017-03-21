@@ -312,7 +312,7 @@ module Browsers
         @driver.get_windows.each { |win| @@logger.an_event.debug win.inspect }
 
         windows_count_after_click = 0
-        wait(20, false, 2) {
+        wait(40, false, 10) {
           windows_count_after_click = @driver.windows_count
           @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
           windows_count_after_click > windows_count_before_click
