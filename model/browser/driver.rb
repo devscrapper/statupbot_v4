@@ -216,11 +216,11 @@ module Sahi
     end
 
 
-    def links
+    def links(with_frame = true)
       links = nil
-      wait(60, false, 1) {
-        links = fetch("_sahi.links()")
-        !links.nil?
+      wait(60, false, 5) {
+        links = fetch("_sahi.links()") if with_frame
+        !links.nil? and links != ""
       }
       raise "_sahi.links() return none link of page" if links == "" or links.nil?
       links

@@ -138,8 +138,7 @@ module Pages
 
     def sleeping_time
       #on deduit le temps passé à chercher les liens dans la page
-      #  (@duration - @duration_search_link <= 0) ? 0 : @duration - @duration_search_link
-      @duration
+      (@duration - @duration_search_link <= 0) ? 0 : @duration - @duration_search_link
     end
 
     #----------------------------------------------------------------------------------------------------------------
