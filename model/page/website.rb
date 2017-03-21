@@ -63,6 +63,9 @@ module Pages
     def initialize(visit, browser)
       count_try = 3
 
+      # sort le calcule de la priochaine duration car si il y a reload de la page en cas d'erreur, on perd
+      # autant de duration que de reload => il manque alors des durations pour des prochaines page => ERROR et goback en boucle => overttl
+      next_duration = visit.next_duration
       begin
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "visit"}) if visit.nil?
         raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "browser"}) if browser.nil?
@@ -73,7 +76,7 @@ module Pages
 
         super(browser.url,
               browser.title,
-              visit.next_duration,
+              next_duration,
               Time.now - start_time)
 
         ar = @uri.hostname.split(".")
