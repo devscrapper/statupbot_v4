@@ -4,7 +4,9 @@ module Visits
   module Advertisings
     class Adsense < Advertising
 
-      DOMAINS = ["www.googleadservices.com", "googleads.g.doubleclick.net"]
+      DOMAINS = ["tpc.googlesyndication.com", #w3school
+                 "www.googleadservices.com",
+                 "googleads.g.doubleclick.net"]
 
       include Errors
 
@@ -24,35 +26,43 @@ module Visits
         count_try = 0
 
 
-
         begin
           links = browser.driver.get_windows.map { |w|
+
             @@logger.an_event.debug "window : #{w.to_s}"
+
             if DOMAINS.include?(w["domain"])
+
               @@logger.an_event.debug "domain : #{w["domain"]}"
+
               frame = browser.driver.domain(w["domain"])
               @@logger.an_event.debug "frame : #{frame.inspect}"
+
               adverts = []
-              adverts = frame.link("/.*#{w["domain"]}.*/").collect_similar
-              adverts += frame.link("/.*www.googleadservices.com.*/").collect_similar
+
+              # on recupere les liens qui sont dans les DOMAIN
+              for d in DOMAINS
+                adverts += frame.link("/.*#{d}.*/").collect_similar
+              end
               @@logger.an_event.debug "#{adverts.size} adverts found"
+              adverts.each { |a| @@logger.an_event.debug "adverts fetched : #{a} => #{a.fetch('href')}" }
 
-              adverts.each { |l|
-                @@logger.an_event.debug "adverts : #{l} => #{l.fetch('href')}"
-              }
+              adverts.select!{|a| !a.fetch('href').include?('whythisad')}
+              adverts.each { |a| @@logger.an_event.debug "adverts selected : #{a} => #{a.fetch('href')}" }
 
+              # trace tous les liens pour savoir ce qui se passe.
               adverts2 = frame.link("/.*.*/").collect_similar
               @@logger.an_event.debug "#{adverts2.size} adverts found"
+              adverts2.each { |l| @@logger.an_event.debug "adverts2 : #{l} => #{l.fetch('href')}" }
 
-              adverts2.each { |l|
-                @@logger.an_event.debug "adverts2 : #{l} => #{l.fetch('href')}"
-              }
               adverts
             end
+
           }.compact.flatten
-          links.each { |l|
-            @@logger.an_event.debug "link : #{{"href" => l.fetch("href"), "text" => l.fetch("text")}}"
-          }
+
+          links.each { |l| @@logger.an_event.debug "link : #{{"href" => l.fetch("href"),
+                                                              "text" => l.fetch("text")}}" }
+
           raise "no advert link found" if links.empty?
 
         rescue Exception => e

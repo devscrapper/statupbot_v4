@@ -547,7 +547,7 @@ module Visitors
       #--------------------------------------------------------------------------------------------------------
       begin
 
-        @browser.click_on(advert, true)
+        @browser.click_on(advert, false) #on n'autorise pas à ouvrir une nuovelle fenetre
 
       rescue Exception => e
 

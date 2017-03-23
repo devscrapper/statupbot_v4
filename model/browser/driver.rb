@@ -79,15 +79,6 @@ module Sahi
     end
 
 
-    def close_popups(url)
-      windows = get_windows
-      windows.each { |win|
-        if (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
-          popup(win["sahiWinId"]).close
-        end
-      }
-    end
-
     def collect(els, attr=nil)
       if (attr == nil)
         return els.collect_similar()
@@ -127,13 +118,6 @@ module Sahi
       win
     end
 
-    def domain_exist?
-      windows = get_windows
-      exist = false
-      windows.each { |win| exist = exist || (win["domain"] == @domain_name) }
-      exist
-    end
-
 
     # evaluates a javascript expression on the browser and fetches its value
     def fetch(expression)
@@ -145,20 +129,6 @@ module Sahi
       return check_nil(exec_command("getVariable", {"key" => key}))
     end
 
-    def focus_popup(url)
-      # on s'est assuré avant que un popup avait été créé => new_popup_is_open?
-      popup = nil
-
-      get_windows.each { |win|
-        @@logger.an_event.debug win.inspect
-        if (win["wasOpened"] == "1" and win["windowURL"] == url and win["windowName"] != "main_tab")
-          popup = popup(win["sahiWinId"])
-          break
-        end
-      }
-
-      popup
-    end
 
     def history_size
       fetch("window.history.length")
@@ -226,9 +196,6 @@ module Sahi
       links
     end
 
-    def new_popup_open_url
-      get_windows.select{|win|win["wasOpened"] == "1" }[0]['windowURL']
-    end
 
     #-----------------------------------------------------------------------------------------------------------------
     # open
@@ -537,6 +504,7 @@ module Sahi
 
     end
 
+    #execute une action sur une window
     def window_action(action)
       @@logger.an_event.debug "action #{action}"
       title = fetch("window.top.document.title")
@@ -547,9 +515,6 @@ module Sahi
       exec_command("windowAction", {"action" => action, "title" => title})
     end
 
-    def windows_count
-      get_windows.count{|w| !w["windowTitle"].empty?}
-    end
 
     private
     def get_body_height
@@ -704,12 +669,12 @@ module Sahi
 
   end
 
-# Browser
+  # Browser
 
 
-#-------------------------------------------------------------------------------------------------------------
-# ElementStub
-#-------------------------------------------------------------------------------------------------------------
+  #-------------------------------------------------------------------------------------------------------------
+  # ElementStub
+  #-------------------------------------------------------------------------------------------------------------
 
 
   class ElementStub

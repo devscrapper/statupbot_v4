@@ -278,7 +278,7 @@ module Browsers
     #-----------------------------------------------------------------------------------------------------------------
     #
     #-----------------------------------------------------------------------------------------------------------------
-    def click_on(link, accept_popup = false)
+    def click_on(link, accept_new_window = false)
       @@logger.an_event.debug "link to click #{link}"
 
       begin
@@ -288,7 +288,7 @@ module Browsers
         link_element = search_link?(link)
 
         # on interdit les ouvertures de fenetre pour rester dans la fenetre courante.
-        if !accept_popup and link_element.fetch("target") == "_blank"
+        if !accept_new_window and link_element.fetch("target") == "_blank"
           link_element.setAttribute("target", "")
           @@logger.an_event.debug "target of #{link_element.identifiers} change to ''"
         end
@@ -296,59 +296,28 @@ module Browsers
         url_before = url
         @@logger.an_event.debug "url before #{url_before}"
 
-        windows_count_before_click = 0
-        wait(20, false, 2) {
-          windows_count_before_click = @driver.windows_count
-          @@logger.an_event.debug "windows count before click #{windows_count_before_click}"
-          windows_count_before_click > 0
-        }
-        windows_count_before_click = (windows_count_before_click == 0) ? 1 : windows_count_before_click
-        @@logger.an_event.debug "windows count before click #{windows_count_before_click}"
-
-        #click on link
+        #------------------------------------------------------------------------------------------------------------
+        # click on link
+        #------------------------------------------------------------------------------------------------------------
         link_element.click
         @@logger.an_event.debug "click on #{link_element}"
-
-        @driver.get_windows.each { |win| @@logger.an_event.debug win.inspect }
-
-        windows_count_after_click = 0
-        wait(40, false, 10) {
-          windows_count_after_click = @driver.windows_count
-          @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
-          windows_count_after_click > windows_count_before_click
-        }
-        @@logger.an_event.debug "windows count after click #{windows_count_after_click}"
+        #------------------------------------------------------------------------------------------------------------
+        # click on link
+        #------------------------------------------------------------------------------------------------------------
         # on autorise d'ouvrir un nouvel onglet ou fenetre que pour les pub qui le demande sinon les autres liens
         # restent dans leur fenetre.
         # est ce qu'une nouvelle fenetre ou onglet a été créé qui est difféerent de celui sur lequel on est qd on est
         # déjà sur une nouvelle fenetre ou onglet
-        if windows_count_before_click < windows_count_after_click
-          url_after = @driver.new_popup_open_url
-          @@logger.an_event.debug "new tab open with url #{url_after}"
+        #23/03/2012 : on autorise plus à ouvrir de nouvel onglet
 
-          if accept_popup
-            # si popup est ouverte sur au click d'une pub alors on remplace le driver principal par celui de la nouvelle fenetre
-            @driver = @driver.focus_popup(url_after)
-            @@logger.an_event.debug "replace driver by popup driver"
+        # on attend tq que les url_before et url courante sont identiques, au max 20s.
+        url_after = ""
+        wait(60, true, 10) {
+          raise "page not refresh with url" if url_before == (url_after = url)
+          url_before != url_after
+        }
+        @@logger.an_event.debug "url after #{url_after}"
 
-          else
-            # si un bout de code javascript ouvre une nouvelle fenetre <=> impossible de l'identifier et de corriger le
-            #comportement avant de cliquer sur le lien
-            # => clos les fenetres apres le click.
-            @driver.close_popups(url_after)
-            @@logger.an_event.debug "close popup"
-          end
-
-        else
-          # on attend tq que les url_before et url courante sont identiques, au max 20s.
-          url_after = ""
-          wait(20, true, 2) {
-            raise "page not refresh with url" if url_before == (url_after = url)
-            url_before != url_after
-          }
-          @@logger.an_event.debug "url after #{url_after}"
-
-        end
 
       rescue Exception => e
         @@logger.an_event.error "browser click on url : #{e.message}"
