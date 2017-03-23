@@ -9,6 +9,28 @@ development;windows;seven;Internet Explorer;9.0;C:\Program Files\Internet Explor
 development;windows;seven;Opera;9.0;D:\Personnel\OperaPortable\App\Opera\36.0.2130.65\opera.exe;true
 test;windows;seven;Internet Explorer;11.0;C:\Program Files\Internet Explorer\iexplore.exe;true
 test;windows;seven;Internet Explorer;9.0;C:\Program Files\Internet Explorer\iexplore.exe;true
+test;windows;seven;Chrome;48.0.2564.109;D:\chrome64_48.0.2564.109\chrome.exe;false
+test;windows;seven;Chrome;49.0.2623.75;D:\chrome64_49.0.2623.75\chrome.exe;false
+test;windows;seven;Chrome;50.0.2661.75;D:\chrome64_50.0.2661.75\chrome.exe;false
+test;windows;seven;Chrome;51.0.2704.84;D:\Chrome64_51.0.2704.84\chrome.exe;false
+test;windows;seven;Chrome;53.0.2785.116;D:\chrome64_53.0.2785.116\chrome.exe;false
+test;windows;seven;Chrome;54.0.2840.71;D:\chrome64_54.0.2840.71\chrome.exe;false
+test;windows;seven;Chrome;55.0.2883.75;D:\chrome64_55.0.2883.75\chrome.exe;false
+test;windows;seven;Chrome;56.0.2924.87;D:\chrome64_56.0.2924.87\chrome.exe;false
+test;windows;seven;Firefox;48.0.2;d:\firefox_48.0.2\firefox.exe;false
+test;windows;seven;Firefox;49.0.2;d:\firefox_49.0.2\firefox.exe;false
+test;windows;seven;Firefox;50.0.2;d:\firefox_50.0.2\firefox.exe;false
+test;windows;seven;Firefox;51.0.1;d:\firefox_51.0.1\firefox.exe;false
+test;windows;seven;Firefox;52.0.1;d:\firefox_52.0.1\firefox.exe;false
+test;windows;seven;Opera;39.0.2256.48.0;D:\Opera\39.0.2256.48\opera.exe;true
+test;windows;seven;Opera;44.0.2510.857.0;D:\Opera\44.0.2510.857\opera.exe;true
+test;windows;seven;Safari;16.0;d:\safari\safari.exe;true
+test;windows;ten;Internet Explorer;11.0;C:\Program Files\Internet Explorer\iexplore.exe;true
+test;windows;ten;Chrome;39.0.2139.3;D:\GoogleChromePortableBeta\38.0.2125.44\GoogleChromePortable.exe;false
+test;windows;ten;Firefox;24.0;d:\firefox\firefox.exe;false
+test;windows;ten;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
+test;windows;ten;Safari;16.0;d:\safari\safari.exe;true
+test;windows;ten;Edge;none;;true
 test;windows;seven;Chrome;39.0.2139.3;D:\GoogleChromePortableBeta\38.0.2125.44\GoogleChromePortable.exe;false
 test;windows;seven;Chrome;36.0.1985.143;D:\GoogleChromePortable\36.0.1985.143\GoogleChromePortable.exe;false
 test;windows;seven;Chrome;37.0.2062.103;D:\GoogleChromePortable\37.0.2062.103\GoogleChromePortable.exe;false
@@ -17,10 +39,3 @@ test;windows;seven;Chrome;23.0.1271.97;D:\GoogleChromePortable\37.0.2062.124\Goo
 test;windows;seven;Firefox;24.0;d:\firefox\firefox.exe;false
 test;windows;seven;Firefox;19.0;d:\firefox\firefox.exe;false
 test;windows;seven;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
-test;windows;seven;Safari;16.0;d:\safari\safari.exe;true
-test;windows;ten;Internet Explorer;11.0;C:\Program Files\Internet Explorer\iexplore.exe;true
-test;windows;ten;Chrome;39.0.2139.3;D:\GoogleChromePortableBeta\38.0.2125.44\GoogleChromePortable.exe;false
-test;windows;ten;Firefox;24.0;d:\firefox\firefox.exe;false
-test;windows;ten;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
-test;windows;ten;Safari;16.0;d:\safari\safari.exe;true
-test;windows;ten;Edge;none;;true
