@@ -42,26 +42,36 @@ module Visits
 
               # on recupere les liens qui sont dans les DOMAIN
               for d in DOMAINS
-                adverts += frame.link("/.*#{d}.*/").collect_similar
-              end
-              @@logger.an_event.debug "#{adverts.size} adverts found"
-              adverts.each { |a| @@logger.an_event.debug "adverts fetched : #{a} => #{a.fetch('href')}" }
+                ads = frame.link("/.*#{d}.*/").collect_similar
+                ads.map! { |a| {
+                    :href => a.fetch("href"),
+                    :text => a.fetch("text"),
+                    :link => a
+                }
+                }.select! { |a| !a[:href].include?('whythisad') }
 
-              adverts.select!{|a| !a.fetch('href').include?('whythisad')}
-              adverts.each { |a| @@logger.an_event.debug "adverts selected : #{a} => #{a.fetch('href')}" }
+                @@logger.an_event.debug "#{ads.size} adverts found for #{d} : "
+                ads.each { |a| @@logger.an_event.debug "#{a}" }
+                adverts += ads
+              end
 
               # trace tous les liens pour savoir ce qui se passe.
-              adverts2 = frame.link("/.*.*/").collect_similar
-              @@logger.an_event.debug "#{adverts2.size} adverts found"
-              adverts2.each { |l| @@logger.an_event.debug "adverts2 : #{l} => #{l.fetch('href')}" }
+              all_links = frame.link("/.*.*/").collect_similar
+              all_links.map! { |l| {
+                  :href => l.fetch("href"),
+                  :text => l.fetch("text"),
+                  :link => l
+              }
+              }
+              @@logger.an_event.debug "#{all_links.size} links found"
+              all_links.each { |l| @@logger.an_event.debug "#{l}" }
 
               adverts
             end
 
           }.compact.flatten
 
-          links.each { |l| @@logger.an_event.debug "link : #{{"href" => l.fetch("href"),
-                                                              "text" => l.fetch("text")}}" }
+          @@logger.an_event.debug "#{links.size} adverts found"
 
           raise "no advert link found" if links.empty?
 
@@ -80,7 +90,7 @@ module Visits
 
         end
 
-        link
+        link[:link]
 
       end
 
@@ -88,6 +98,7 @@ module Visits
         super.to_s
 
       end
+
     end
   end
 
