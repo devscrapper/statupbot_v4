@@ -17,6 +17,7 @@ test;windows;seven;Chrome;53.0.2785.116;D:\chrome64_53.0.2785.116\chrome.exe;fal
 test;windows;seven;Chrome;54.0.2840.71;D:\chrome64_54.0.2840.71\chrome.exe;false
 test;windows;seven;Chrome;55.0.2883.75;D:\chrome64_55.0.2883.75\chrome.exe;false
 test;windows;seven;Chrome;56.0.2924.87;D:\chrome64_56.0.2924.87\chrome.exe;false
+test;windows;seven;Chrome;57.0.29.87.110;D:\chrome64_57.0.29.87.110\chrome.exe;false
 test;windows;seven;Firefox;48.0.2;d:\firefox_48.0.2\firefox.exe;false
 test;windows;seven;Firefox;49.0.2;d:\firefox_49.0.2\firefox.exe;false
 test;windows;seven;Firefox;50.0.2;d:\firefox_50.0.2\firefox.exe;false
