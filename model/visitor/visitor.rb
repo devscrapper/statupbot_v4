@@ -392,7 +392,7 @@ module Visitors
             # les autres levent une exception dans le RESCUE donc ne passent pas par là. Elle seront captées par
             # les RESCUE qui englobele FOR
             @@logger.an_event.info @history.to_s
-            source_path, screenshot_path = take_screenshot(count_finished_actions + 1, action)
+            source_path, screenshot_path = take_screenshot(count_finished_actions, action)
 
             Thread.new(@visit.id,
                        script,
@@ -403,8 +403,8 @@ module Visitors
               Monitoring.page_browse(visit_id, script, source_path,screenshot_path, count_finished_actions)
 
             }.join
-            @@logger.an_event.info "visitor executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
-            count_finished_actions +=1
+            @@logger.an_event.info "visitor executed #{count_finished_actions}/#{script.size}(#{((count_finished_actions) * 100 /script.size).round(0)}%) actions."
+            count_finished_actions += 1
 
           end
 
