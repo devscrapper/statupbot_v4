@@ -412,7 +412,7 @@ module Visitors
               Monitoring.page_browse(visit_id, script, source_path, screenshot_path, count_finished_actions)
 
             }.join
-            @@logger.an_event.info "visitor executed #{count_finished_actions}/#{script.size}(#{((count_finished_actions) * 100 /script.size).round(0)}%) actions."
+            @@logger.an_event.info "visitor executed #{count_finished_actions + 1}/#{script.size}(#{((count_finished_actions + 1) * 100 /script.size).round(0)}%) actions."
             count_finished_actions += 1
 
           end
