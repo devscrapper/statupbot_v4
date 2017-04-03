@@ -346,9 +346,18 @@ module Visitors
               when VISITOR_NOT_READ_PAGE
                 # ajout dans le script d'action pour revenir à la page précédent pour refaire l'action qui a planté.
                 # ceci s'arretera quand il n'y aura plus de lien sur lesquel clickés ; lien choisi dans les 3 actions
-                script.insert(count_finished_actions + 1, ["c", action]).flatten!
-                @@logger.an_event.info "visitor go back to make action #{COMMANDS[action]} again"
-                @@logger.an_event.debug "script #{script}"
+                # Si le visitor ne lit pas la page suite à un click sur une publicité alors on ne retente pas pour éviter
+                # de faire de multiple click sur la même publicité afin d'éviter d'éveiller les soupcons google.
+                if action != "F"
+                  script.insert(count_finished_actions + 1, ["c", action]).flatten!
+                  @@logger.an_event.info "visitor go back to make action #{COMMANDS[action]} again"
+                  @@logger.an_event.debug "script #{script}"
+
+                else
+                  @@logger.an_event.error "visitor make action  <#{COMMANDS[action]}> : #{e.message}"
+                  raise e #stop la visite
+
+                end
 
               when VISITOR_NOT_CLICK_ON_RESULT,
                   VISITOR_NOT_CLICK_ON_LINK_ON_ADVERTISER,
@@ -400,7 +409,7 @@ module Visitors
                        screenshot_path,
                        count_finished_actions) { |visit_id, script, source_path, screenshot_path, count_finished_actions|
 
-              Monitoring.page_browse(visit_id, script, source_path,screenshot_path, count_finished_actions)
+              Monitoring.page_browse(visit_id, script, source_path, screenshot_path, count_finished_actions)
 
             }.join
             @@logger.an_event.info "visitor executed #{count_finished_actions}/#{script.size}(#{((count_finished_actions) * 100 /script.size).round(0)}%) actions."
