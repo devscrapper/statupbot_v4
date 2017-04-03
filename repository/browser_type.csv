@@ -32,11 +32,3 @@ test;windows;ten;Firefox;24.0;d:\firefox\firefox.exe;false
 test;windows;ten;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
 test;windows;ten;Safari;16.0;d:\safari\safari.exe;true
 test;windows;ten;Edge;none;;true
-test;windows;seven;Chrome;39.0.2139.3;D:\GoogleChromePortableBeta\38.0.2125.44\GoogleChromePortable.exe;false
-test;windows;seven;Chrome;36.0.1985.143;D:\GoogleChromePortable\36.0.1985.143\GoogleChromePortable.exe;false
-test;windows;seven;Chrome;37.0.2062.103;D:\GoogleChromePortable\37.0.2062.103\GoogleChromePortable.exe;false
-test;windows;seven;Chrome;37.0.2062.120;D:\GoogleChromePortable\37.0.2062.120\GoogleChromePortable.exe;false
-test;windows;seven;Chrome;23.0.1271.97;D:\GoogleChromePortable\37.0.2062.124\GoogleChromePortable.exe;false
-test;windows;seven;Firefox;24.0;d:\firefox\firefox.exe;false
-test;windows;seven;Firefox;19.0;d:\firefox\firefox.exe;false
-test;windows;seven;Opera;9.0;D:\Opera\39.0.2256.48\opera.exe;true
