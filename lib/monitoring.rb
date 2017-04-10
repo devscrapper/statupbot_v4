@@ -89,7 +89,8 @@ module Monitoring
 
       wait(60, true, 5) {
         response = RestClient.patch "http://#{@statupweb_server_ip}:#{@statupweb_server_port}/visits/#{visit_id}/browsed_page",
-                                    JSON.generate({:actions => actions}),
+                                    JSON.generate({:actions => actions,
+                                                   :index => count_finished_actions}),
                                     :content_type => :json,
                                     :accept => :json
 
