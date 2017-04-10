@@ -335,6 +335,14 @@ module Visitors
 
             case e.code
 
+              when VISITOR_NOT_CLICK_ON_ADVERT
+                # ajout dans le script d'actions une action de click sur un lien de la page courante pour afficher
+                # une nouvelle page pour essayer d'afficher un advert
+                act = "E"
+                script.insert(count_finished_actions + 1, [act, action]).flatten!
+                @@logger.an_event.info "visitor make action <#{[act, action]}> instead of #{COMMANDS[action]} again"
+                @@logger.an_event.debug "script #{script}"
+
               when VISITOR_NOT_CLICK_ON_REFERRAL
                 # le click sur le link du referral dans la page de results a échoué
                 # force l'accès au referral par un accès direct

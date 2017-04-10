@@ -264,7 +264,7 @@ module Visits
     # output : la duration suivante de la liste
     #----------------------------------------------------------------------------------------------------------------
     def next_duration
-      @durations.shift
+      @durations.empty? ? rand(20) :  @durations.shift
     end
 
     def to_s
