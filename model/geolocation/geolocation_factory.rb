@@ -128,10 +128,12 @@ module Geolocations
 
       end
     end
+
     def to_s
       @geolocations.join("\n")
 
     end
+
     private
 
     def clear
@@ -154,10 +156,10 @@ module Geolocations
       vol = now.hour
       date = now.strftime("%Y-%m-%d")
       @geolocations_file = Flow.new(File.join($dir_tmp || DIR_TMP),
-                                    "geolocations", 
-                                    $staging, 
-                                    date, 
-                                    vol, 
+                                    "geolocations",
+                                    $staging,
+                                    date,
+                                    vol,
                                     '.txt')
 
       begin
@@ -211,10 +213,27 @@ module Geolocations
         raise Errors::Error.new(NONE_GEOLOCATION) if @geolocations.size == 0
 
         Mutex.new.synchronize {
+          # on divise l'ensemble des geolocation en 2 parties egale à un élément pret ;)
+          s = @geolocations[0..((@geolocations.size / 5).to_i - 1)]
+          t = @geolocations - s
+          @@logger.an_event.debug "s : #{s}"
+          @@logger.an_event.debug "t : #{t}"
+
+          # la premiere partie est reorganisé aléatoirement
+          s = s.permutation(s.size).to_a.sample
+          @@logger.an_event.debug "s reorganise : #{s}"
+
+          # on reconstruit l'ensemble des geolocations
+          @geolocations = s + t
+          @@logger.an_event.debug "@geolocations : #{@geolocations}"
+
+          # on retire le premier element des geolocations
           geo = @geolocations.shift
+          @@logger.an_event.debug "geolocation : #{geo}"
+
           # on range la gelocation pour conserver une file tournante.
           @geolocations << geo
-          @@logger.an_event.debug "shift : #{geo}"
+          @@logger.an_event.debug "@geolocations : #{@geolocations}"
         }
         geo.available?
 
