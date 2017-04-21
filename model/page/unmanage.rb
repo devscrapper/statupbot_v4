@@ -84,7 +84,7 @@ module Pages
 
         links.each { |d|
           begin
-            l = Pages::Link.new(d["href"], @title, d["text"])
+            l = Pages::Link.new(d["href"], @title, d["text"], d["coords"], d["sizes"])
 
           rescue Exception => e
             @@logger.an_event.debug "link #{d["href"]} #{e.message}"

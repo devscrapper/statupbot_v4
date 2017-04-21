@@ -31,7 +31,9 @@ module Pages
     #----------------------------------------------------------------------------------------------------------------
     attr :uri, #URI object
          :uri_escape, #URI object
-         :window_tab
+         :window_tab,
+         :x, :y, # left/top du link
+         :width, :height #dimension du link
     attr_accessor :text # le texte du lien
     #----------------------------------------------------------------------------------------------------------------
     # class methods
@@ -60,14 +62,18 @@ module Pages
     #----------------------------------------------------------------------------------------------------------------
     #
     #----------------------------------------------------------------------------------------------------------------
-    def initialize(url, window_tab=EMPTY, text=EMPTY)
+    def initialize(url, window_tab=EMPTY, text=EMPTY, coords={x: -1, y: -1}, sizes= {height: -1, width: -1})
       @@logger ||= Logging::Log.new(self, :staging => $staging, :id_file => File.basename(__FILE__, ".rb"), :debugging => $debugging)
 
       raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "url"}) if url.nil?
 
       @window_tab = window_tab
       @text = text
-      #TODO ajouter les coordonnées et le size à lobjet link
+      @x = coords["x"].to_i
+      @y = coords["y"].to_i
+      @height = sizes["height"].to_i
+      @width = sizes["width"].to_i
+
       begin
         @uri = URI.parse(url)
       rescue Exception => e
@@ -114,6 +120,7 @@ module Pages
     def url_escape
       @uri_escape.to_s
     end
+
     #TODO ajouter les coordonnées et le size à lobjet link
     def to_s
       end_col1 = 24

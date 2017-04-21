@@ -116,27 +116,27 @@ Sahi.prototype.display_element = function (mode, value) {
     try {
         var element = null;
 
-        switch(mode) {
+        switch (mode) {
             case "css":
                 element = document.querySelector(value);
                 break;
-          /*  case n:
-                code block
-                break;
-            default:
-                code block
-                */
+            /*  case n:
+             code block
+             break;
+             default:
+             code block
+             */
         }
 
         if (!element) {
             throw "element not found";
         }
         else {
-           // trace.write("element found " + "<br>");
+            // trace.write("element found " + "<br>");
 
             element.scrollIntoView();
 
-           // trace.write("scrolled to element " + "<br>");
+            // trace.write("scrolled to element " + "<br>");
         }
     }
     catch (e) {
@@ -191,12 +191,12 @@ Sahi.prototype.position_element_by_css = function (css) {
     trace.write("position_element_by_css debut<br>");
     try {
         var element = document.querySelector(css);
-        var coords = {} ;
+        var coords = {};
         if (!element) {
             throw "element not found";
         }
         else {
-            coords = JSON.stringify(getPosition(element)) ;
+            coords = JSON.stringify(getPosition(element));
 
             trace.write("coords : " + coords + "<br>");
         }
@@ -207,7 +207,7 @@ Sahi.prototype.position_element_by_css = function (css) {
     }
     trace.write("position_element_by_css fin<br>");
 
-    return coords ;
+    return coords;
 }
 function screenshot(elt) {
     try {
@@ -297,7 +297,7 @@ Sahi.prototype.links = function () {
 };
 
 function links_in_window(w) {
-    //trace.write("links_in_window debut<br>")
+   // trace.write("links_in_window debut<br>")
     try {
         var res = new Array(),
             arr_lnks = null;
@@ -307,15 +307,16 @@ function links_in_window(w) {
                 for (var i = 0; i < arr_lnks.length; i++) {
                     if (is_selectable(arr_lnks[i], w.location)) {
 
-                        res.push({
+                        var new_link = {
                             href: arr_lnks[i].href,
                             target: arr_lnks[i].target,
                             text: encodeURI(arr_lnks[i].textContent || arr_lnks[i].text).replace("'", "&#44;"),
                             coords: getPosition(arr_lnks[i]),
-                            sizes: {width: element.style.height, width: element.style.height}
-                        });
+                            sizes: { height: arr_lnks[i].clientHeight, width: arr_lnks[i].clientWidth }
+                        };
+                        res.push(new_link);
 
-                        //trace.write(arr_lnks[i].href + "<br>");
+                        //trace.write(JSON.stringify(new_link) + "<br>");
                     }
                 }
                 for (var j = 0; j < w.frames.length; j++) {

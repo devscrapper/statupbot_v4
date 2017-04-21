@@ -88,7 +88,7 @@ module Pages
 
         links.each { |d|
           begin
-            l = Pages::Link.new(d["href"], @title, d["text"])
+            l = Pages::Link.new(d["href"], @title, d["text"], d["coords"], d["sizes"])
           rescue
           else
             @inside_hostname_links << l if l.uri.hostname.end_with?(host)
