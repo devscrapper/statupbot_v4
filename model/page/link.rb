@@ -67,7 +67,7 @@ module Pages
 
       @window_tab = window_tab
       @text = text
-
+      #TODO ajouter les coordonnées et le size à lobjet link
       begin
         @uri = URI.parse(url)
       rescue Exception => e
@@ -114,7 +114,7 @@ module Pages
     def url_escape
       @uri_escape.to_s
     end
-
+    #TODO ajouter les coordonnées et le size à lobjet link
     def to_s
       end_col1 = 24
       end_col2 = 39

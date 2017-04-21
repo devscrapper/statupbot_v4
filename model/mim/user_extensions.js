@@ -108,6 +108,43 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     alert(document.cookie);
 }
+
+/* rend visit un element au moyen de son class */
+Sahi.prototype.display_element = function (mode, value) {
+    //trace = window.open().document;
+    //trace.write("display_element debut<br>");
+    try {
+        var element = null;
+
+        switch(mode) {
+            case "css":
+                element = document.querySelector(value);
+                break;
+          /*  case n:
+                code block
+                break;
+            default:
+                code block
+                */
+        }
+
+        if (!element) {
+            throw "element not found";
+        }
+        else {
+           // trace.write("element found " + "<br>");
+
+            element.scrollIntoView();
+
+           // trace.write("scrolled to element " + "<br>");
+        }
+    }
+    catch (e) {
+        // trace.write("display_element Exception : " + e.message + "<br>");
+        throw ("ERROR => display_element => " + e);
+    }
+    // trace.write("display_element fin<br>");
+}
 Sahi.prototype.getCookie = function (cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
@@ -149,6 +186,29 @@ Sahi.prototype.screenshot_element_by_css = function (css) {
     }
 }
 
+Sahi.prototype.position_element_by_css = function (css) {
+    trace = window.open().document;
+    trace.write("position_element_by_css debut<br>");
+    try {
+        var element = document.querySelector(css);
+        var coords = {} ;
+        if (!element) {
+            throw "element not found";
+        }
+        else {
+            coords = JSON.stringify(getPosition(element)) ;
+
+            trace.write("coords : " + coords + "<br>");
+        }
+    }
+    catch (e) {
+        trace.write("position_element_by_css Exception : " + e.message + "<br>");
+        throw ("ERROR => position_element_by_css => " + e);
+    }
+    trace.write("position_element_by_css fin<br>");
+
+    return coords ;
+}
 function screenshot(elt) {
     try {
         html2canvas(elt, {
@@ -179,33 +239,33 @@ function screenshot(elt) {
             }
         });
 
-/*        html2canvas(elt).then(function (canvas) {
-                // html2canvas a fait le screenshot, il est dans le canvas
-                try {
-                    //encodage du screenshot en base 64, en chaine de caractère pour le retourner
-                    dataURL = canvas.toDataURL("image/png");
-                    dataURL = dataURL.replace(/^data:image\/(png|jpg);base64,/, "")
+        /*        html2canvas(elt).then(function (canvas) {
+         // html2canvas a fait le screenshot, il est dans le canvas
+         try {
+         //encodage du screenshot en base 64, en chaine de caractère pour le retourner
+         dataURL = canvas.toDataURL("image/png");
+         dataURL = dataURL.replace(/^data:image\/(png|jpg);base64,/, "")
 
-                    //stockage dans la page html, dans l'element 'screenshot_base64'
-                    //setCookie("screenshot", dataURL, 1) ;
-                    // save image as png
-                    if (typeof(Storage) !== "undefined") {
-                        // Code for localStorage/sessionStorage.
-                        localStorage.screenshot_base64 = "SCREENSHOT" + dataURL;
-                        delete dataURL;
+         //stockage dans la page html, dans l'element 'screenshot_base64'
+         //setCookie("screenshot", dataURL, 1) ;
+         // save image as png
+         if (typeof(Storage) !== "undefined") {
+         // Code for localStorage/sessionStorage.
+         localStorage.screenshot_base64 = "SCREENSHOT" + dataURL;
+         delete dataURL;
 
-                    } else {
-                        // Sorry! No Web Storage support..
-                        throw "no local storage";
-                    }
+         } else {
+         // Sorry! No Web Storage support..
+         throw "no local storage";
+         }
 
-                }
-                catch (e) {
-                    throw("ERROR => screenshot 1 => " + e);
-                }
-            }
-        )
-        ;*/
+         }
+         catch (e) {
+         throw("ERROR => screenshot 1 => " + e);
+         }
+         }
+         )
+         ;*/
     }
 
     catch (e) {
@@ -250,7 +310,9 @@ function links_in_window(w) {
                         res.push({
                             href: arr_lnks[i].href,
                             target: arr_lnks[i].target,
-                            text: encodeURI(arr_lnks[i].textContent || arr_lnks[i].text).replace("'", "&#44;")
+                            text: encodeURI(arr_lnks[i].textContent || arr_lnks[i].text).replace("'", "&#44;"),
+                            coords: getPosition(arr_lnks[i]),
+                            sizes: {width: element.style.height, width: element.style.height}
                         });
 
                         //trace.write(arr_lnks[i].href + "<br>");
@@ -298,5 +360,21 @@ function is_selectable(link, url_window) {
         (link.target == "_top" || link.target == "_parent" || link.target == "_self" || link.target == "") &&  //on exclue _blank et id car cela cree une nouvelle fenetre
         [".css", ".jsp", ".svg", ".gif", ".jpeg", ".jpg", ".png", ".pdf"].indexOf(extension) < 0 &&  //on exclue ces extension de fichier
         href.slice(-1) != "#"  //on exclue les href qui se terminent par un # car cela est utilisé pour des requetes ajax
+}
+function getPosition(element) {
+    var left = 0;
+    var top = 0;
+
+    /*On récupère l'élément*/
+    var e = element;
+    /* document.getElementById(element); */
+    /*Tant que l'on a un élément parent*/
+    while (e.offsetParent != undefined && e.offsetParent != null) {
+        /*On ajoute la position de l'élément parent*/
+        left += e.offsetLeft + (e.clientLeft != null ? e.clientLeft : 0);
+        top += e.offsetTop + (e.clientTop != null ? e.clientTop : 0);
+        e = e.offsetParent;
+    }
+    return {x: left, y: top};
 }
 __sahiDebug__("user_ext.js: end");

@@ -130,9 +130,16 @@ module Browsers
 
         links_arr.each { |d|
           if d["text"] != "undefined"
-            links << {"href" => d["href"], "text" => URI.unescape(d["text"].gsub(/&#44;/, "'"))} # if @driver.link(d["href"]).visible?
+            links << {"href" => d["href"],
+                      "text" => URI.unescape(d["text"].gsub(/&#44;/, "'")),
+                      "coords" => d["coords"],
+                      "sizes" => d["sizes"]
+            } # if @driver.link(d["href"]).visible?
           else
-            links << {"href" => d["href"], "text" => d["href"]}
+            links << {"href" => d["href"],
+                      "text" => d["href"],
+                      "coords" => d["coords"],
+                      "sizes" => d["sizes"]}
           end
         }
 
@@ -329,6 +336,24 @@ module Browsers
       end
     end
 
+    # rend visit un element par le visitor
+    # cet element est détermine au moyen de sa valeur de class. cet element pourrait êtrte identifié au moyen de son id, tag => impact user_extension
+    def display_element(element_by_css)
+      @@logger.an_event.debug "element_by_css : #{element_by_css}"
+
+      begin
+        raise Errors::Error.new(ARGUMENT_UNDEFINE, :values => {:variable => "element_by_css"}) if element_by_css.nil? or element_by_css == ""
+
+        @driver.display_element("css", element_by_css)
+
+      rescue Exception => e
+        @@logger.an_event.warn "display_element #{e.message}"
+
+      else
+        @@logger.an_event.debug "display_element"
+
+      end
+    end
 
     #----------------------------------------------------------------------------------------------------------------
     # display_start_page

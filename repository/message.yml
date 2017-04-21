@@ -92,6 +92,7 @@
 632:  "visitor see captcha from [type]"
 633:  "visitor not submit captcha"
 634:  "visitor see too many captcha"
+635:  "visitor see advert"
 700:  "argument [variable] not define"
 701:  "visit [id] not create"
 702:  "visit file [path] not found"

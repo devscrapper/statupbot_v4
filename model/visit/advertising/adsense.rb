@@ -8,6 +8,7 @@ module Visits
                  "www.googleadservices.com",
                  "googleads.g.doubleclick.net"]
 
+      BLOC_CLASS_NAME = "tr > td > ins.adsbygoogle"
       include Errors
 
       def initialize(advertiser)
@@ -93,6 +94,11 @@ module Visits
         link[:link]
 
       end
+
+      def bloc
+        BLOC_CLASS_NAME
+      end
+
 
       def to_s
         super.to_s

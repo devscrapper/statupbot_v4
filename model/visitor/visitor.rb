@@ -59,6 +59,7 @@ module Visitors
     VISITOR_SEE_CAPTCHA = 632
     VISITOR_NOT_SUBMIT_CAPTCHA = 633
     VISITOR_TOO_MANY_CAPTCHA = 634
+    VISITOR_NOT_SEE_ADVERT = 635
 
     #----------------------------------------------------------------------------------------------------------------
     # constants
@@ -539,6 +540,25 @@ module Visitors
     def cl_on_advert
 
       @@logger.an_event.debug "action #{__method__}"
+      #--------------------------------------------------------------------------------------------------------
+      # Focus advert
+      #--------------------------------------------------------------------------------------------------------
+      begin
+        # rendre visible le bloc d'advert de l'utilisateur afin que adsense est un action view positif
+        @browser.display_element(@visit.advertising.bloc)
+
+        #laisse afficher le bloc de publicité au moins une seconde pour qu'il soit pris en compte par action view
+        sleep 1
+
+      rescue Exception => e
+
+        @@logger.an_event.error "visitor see advert on website : #{e.message}"
+        raise Errors::Error.new(VISITOR_NOT_SEE_ADVERT, :error => e)
+
+      else
+        @@logger.an_event.info "visitor see advert on website."
+
+      end
       #--------------------------------------------------------------------------------------------------------
       # Chose link
       #--------------------------------------------------------------------------------------------------------

@@ -103,6 +103,10 @@ module Sahi
       url
     end
 
+    # rend visit un element au sein du navigateur
+    def display_element(mode, value)
+      fetch("_sahi.display_element(\"#{mode}\",\"#{value}\")")
+    end
 
     def domain(name)
       win = Browser.new(@browser_type, @browser_process_name, @proxy_host, @proxy_port)
@@ -129,6 +133,16 @@ module Sahi
       return check_nil(exec_command("getVariable", {"key" => key}))
     end
 
+    # non utilisé pour le moment 21/04/2017
+    def get_position_by_css(class_name)
+      coords = {}
+      wait(60, false, 5) {
+        coords = fetch("_sahi.position_element_by_css(\"#{class_name}\")")
+        !coords.nil? and coords != {}
+      }
+      raise "_sahi.position_element_by_css() return none coords of element #{class_name}" if coords == {} or coords.nil?
+      coords
+    end
 
     def history_size
       fetch("window.history.length")
