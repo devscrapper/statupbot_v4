@@ -1242,7 +1242,8 @@ module Browsers
 
       rescue Exception => e
         @@logger.an_event.error "browser found title : #{e.message}"
-        raise Errors::Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
+       # raise Errors::Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
+       "title not found"
 
       else
 
