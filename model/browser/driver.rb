@@ -478,6 +478,52 @@ module Sahi
 
     end
 
+    def read(sleeping_time, brw_height)
+      begin
+        # recuperation de la hauteur du body de la page courante
+        body_height = get_body_height
+        @@logger.an_event.debug "body height #{body_height}"
+
+        # calcul du nombre de page en fonction de la hauteur du browser
+        page_count = body_height.divmod(brw_height)[1] == 0 ?
+            body_height.divmod(brw_height)[0] :
+            body_height.divmod(brw_height)[0] + 1
+
+        if page_count == 1
+          sleep sleeping_time
+
+        else
+          # plusieurs pages
+          duration = (sleeping_time / page_count).to_i
+          page_count.times { |page|
+            sleep duration if $staging != "development"
+            from  = page * brw_height
+            to  = (r = (page + 1) * brw_height) > body_height ? body_height : r
+            if chrome? || safari? || opera?
+              fetch("_sahi.scroll_body(\"#{from}\", \"#{to}\", \"10\",\"document.body\")")
+
+            end
+            if ie? || firefox?
+              fetch("_sahi.scroll_body(\"#{from}\", \"#{to}\", \"1\",\"document.documentElement\")")
+
+            end
+
+          }
+
+
+        end
+
+      rescue Exception => e
+        @@logger.an_event.error "paging : #{e.message}"
+
+      else
+        @@logger.an_event.debug "paging"
+
+      ensure
+
+      end
+
+    end
 
     def take_screenshot_area(screenshot_flow, coord)
 

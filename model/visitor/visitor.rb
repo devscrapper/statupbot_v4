@@ -1535,6 +1535,8 @@ module Visitors
 
       @@logger.an_event.info "visitor begin reading <#{page.url}> during #{page.sleeping_time}s"
 
+      @browser.read(page.sleeping_time)
+
       sleep page.sleeping_time if $staging != "development"
 
       @@logger.an_event.debug "visitor finish reading on page <#{page.url}>"

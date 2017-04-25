@@ -209,6 +209,44 @@ Sahi.prototype.position_element_by_css = function (css) {
 
     return coords;
 }
+/*
+ scroll_body  : deplace le body
+
+ */
+Sahi.prototype.scroll_body = function (from, to, duration, element) {
+  //  trace = window.open().document;
+  //  trace.write("scroll_body debut<br>")
+    try {
+        var element =  eval(element);//document.documentElement;
+    //    trace.write("element : " + JSON.stringify(element) + "<br>");
+    //    trace.write("from : " + from + "<br>");
+    //    trace.write("to : " + to + "<br>");
+    //    trace.write("duration : " + duration + "<br>");
+        scrollToX(element, from, to, 0, 1 / duration, 20, easeOutCuaic);
+    }
+    catch (e) {
+      //  trace.write("scroll_body Exception : " + e.message + "<br>");
+        return e;
+    }
+    //trace.write("scroll_body fin<br>")
+};
+function scrollToX(element, x1, x2, t, v, step, operacion) {
+    if (t < 0 || t > 1 || v <= 0) return;
+    element.scrollTop = x1 - (x1 - x2) * operacion(t);
+    t += v * step;
+    setTimeout(function () {
+        scrollToX(element, x1, x2, t, v, step, operacion);
+    }, step);
+}
+
+function easeOutCuaic(t) {
+    t--;
+    return t * t * t + 1;
+}
+/*
+ FIN scroll_body
+ */
+
 function screenshot(elt) {
     try {
         html2canvas(elt, {
@@ -296,8 +334,9 @@ Sahi.prototype.links = function () {
     }
 };
 
+
 function links_in_window(w) {
-   // trace.write("links_in_window debut<br>")
+    // trace.write("links_in_window debut<br>")
     try {
         var res = new Array(),
             arr_lnks = null;
@@ -312,7 +351,7 @@ function links_in_window(w) {
                             target: arr_lnks[i].target,
                             text: encodeURI(arr_lnks[i].textContent || arr_lnks[i].text).replace("'", "&#44;"),
                             coords: getPosition(arr_lnks[i]),
-                            sizes: { height: arr_lnks[i].clientHeight, width: arr_lnks[i].clientWidth }
+                            sizes: {height: arr_lnks[i].clientHeight, width: arr_lnks[i].clientWidth}
                         };
                         res.push(new_link);
 

@@ -838,6 +838,26 @@ module Browsers
       end
     end
 
+    #----------------------------------------------------------------------------------------------------------------
+    # read
+    #----------------------------------------------------------------------------------------------------------------
+    # lire la page courant en paginant elegament si la hauteur de la page est superieure à la zone d'affichage du browser
+    #----------------------------------------------------------------------------------------------------------------
+    # input : sleepint_time
+    # output : RAS
+    #----------------------------------------------------------------------------------------------------------------
+    def read(sleeping_time)
+      begin
+        @driver.read(sleeping_time, @height.to_i)
+
+      rescue Exception => e
+        @@logger.an_event.error "browser read : #{e.message}"
+
+      else
+        @@logger.an_event.info "browser read"
+
+      end
+    end
 
     def running_by_pid?
 
@@ -1241,9 +1261,9 @@ module Browsers
         title ||= @driver.title
 
       rescue Exception => e
-        @@logger.an_event.error "browser found title : #{e.message}"
-       # raise Errors::Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
-       "title not found"
+        @@logger.an_event.warn "browser found title : #{e.message}"
+        # raise Errors::Error.new(BROWSER_NOT_FOUND_TITLE, :values => {:browser => name}, :error => e)
+        "title not found"
 
       else
 
