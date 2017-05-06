@@ -309,7 +309,7 @@ module Browsers
         link_element.focus
         @@logger.an_event.debug "focus on #{link_element}"
 
-        sleep 1
+        sleep 5
         # xy permet de cliquer sur un point aleatoire de la zone qui représente le link sur lequel il faut cliquer
         link_element.xy(rand(link.width), rand(link.height)).click
         #link_element.click

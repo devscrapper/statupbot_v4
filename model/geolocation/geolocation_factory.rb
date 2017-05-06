@@ -213,18 +213,8 @@ module Geolocations
         raise Errors::Error.new(NONE_GEOLOCATION) if @geolocations.size == 0
 
         Mutex.new.synchronize {
-          # on divise l'ensemble des geolocation en 2 parties egale à un élément pret ;)
-          s = @geolocations[0..((@geolocations.size / 5).to_i - 1)]
-          t = @geolocations - s
-          @@logger.an_event.debug "s : #{s}"
-          @@logger.an_event.debug "t : #{t}"
-
-          # la premiere partie est reorganisé aléatoirement
-          s = s.permutation(s.size).to_a.sample
-          @@logger.an_event.debug "s reorganise : #{s}"
-
-          # on reconstruit l'ensemble des geolocations
-          @geolocations = s + t
+          # on reorganise l'ensemble des geolocations
+          @geolocations.shuffle!
           @@logger.an_event.debug "@geolocations : #{@geolocations}"
 
           # on retire le premier element des geolocations
@@ -232,8 +222,17 @@ module Geolocations
           @@logger.an_event.debug "geolocation : #{geo}"
 
           # on range la gelocation pour conserver une file tournante.
-          @geolocations << geo
+          # 20170506 : on ne range plus dans la liste pour eviter que la geo soit reutilisée pouir eviter de se faire detecter pae google
+          # il y a 50 proxies dans la liste => peut pas faire plus de 50 visite par jour
+          # croorection associée à un telechargement quotidien des la liste de proxies et non plus toutes les heures
+          # pourquoi quotidient et pas mensuel car la liste change tous les mois ? car on ne connait pas le jour de
+          # changement de la liste.
+          # En conséquence, on ne peut garantir  que toutes les visit soient de geoloc differente, il faudrait
+          # pour cela recherger 1 fois par mois et ne pas recycle les ip.
+          #@geolocations << geo
           @@logger.an_event.debug "@geolocations : #{@geolocations}"
+
+          #
         }
         geo.available?
 

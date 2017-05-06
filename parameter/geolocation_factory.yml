@@ -3,9 +3,9 @@ development:
   :debugging:  true
 
 test:
-  :delay_periodic_load_geolocations: 60 #en minute
+  :delay_periodic_load_geolocations: 60 * 24 #en minute
   :debugging:  true
 
 production:
-  :delay_periodic_load_geolocations: 60 #en minute
+  :delay_periodic_load_geolocations: 60 * 24 #en minute
   :debugging:  false
