@@ -548,7 +548,7 @@ module Visitors
         @browser.display_element(@visit.advertising.bloc)
 
         #laisse afficher le bloc de publicité au moins une seconde pour qu'il soit pris en compte par action view
-        sleep 1
+        sleep 2
 
       rescue Exception => e
 
